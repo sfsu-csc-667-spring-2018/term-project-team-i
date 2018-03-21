@@ -1,4 +1,6 @@
-require("dotenv").config();
+if(process.env.NODE_ENV === 'development') {
+ require("dotenv").config();
+}
 
 const express = require('express');
 const path = require('path');
@@ -10,7 +12,6 @@ const bodyParser = require('body-parser');
 const index = require('./routes/index');
 const users = require('./routes/users');
 const tests = require('./routes/tests');
-
 
 const app = express();
 
