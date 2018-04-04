@@ -26,10 +26,6 @@ module.exports = {
                 email: {
                     type: Sequelize.STRING,
                     allowNull: true
-                },
-                sessionkey: {
-                    type: Sequelize.INTEGER,
-                    allowNull: true
                 }
             }
         );
