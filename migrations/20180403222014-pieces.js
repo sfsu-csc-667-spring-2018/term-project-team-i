@@ -23,15 +23,26 @@ module.exports = {
       }
     ).then(() => {
       return queryInterface.addConstraint(
-        'pieces', ['faction'],
+        'pieces', ['name'],
         {
           type: 'check',
-          name: 'faction_name_constraint',
+          name: 'name_constraint',
           where: {
-            faction: ['white', 'black']
+            name: ['pawn', 'rook', 'bishop', 'knight', 'queen', 'king']
           }
         }
       );
+    }).then(() => {
+        return queryInterface.addConstraint(
+            'pieces', ['faction'],
+            {
+                type: 'check',
+                name: 'faction_name_constraint',
+                where: {
+                    faction: ['white', 'black']
+                }
+            }
+        );
     });
 
     /*
