@@ -21,7 +21,18 @@ module.exports = {
             constraint: true
           }
       }
-    );
+    ).then(() => {
+      queryInterface.addConstraint(
+        'pieces', ['faction'],
+        {
+          type: 'check',
+          name: 'faction_name_constraint',
+          where: {
+            faction: ['white', 'black']
+          }
+        }
+      );
+    });
 
     /*
       Add altering commands here.
@@ -46,7 +57,6 @@ module.exports = {
     );
   },
   */
-
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('pieces');
     /*
