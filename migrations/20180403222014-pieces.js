@@ -22,7 +22,7 @@ module.exports = {
           }
       }
     ).then(() => {
-      queryInterface.addConstraint(
+      return queryInterface.addConstraint(
         'pieces', ['faction'],
         {
           type: 'check',

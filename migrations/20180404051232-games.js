@@ -5,7 +5,7 @@ module.exports = {
         return queryInterface.createTable(
             'games',
             {
-                gameid: {
+                id: {
                     type: Sequelize.INTEGER,
                     primaryKey: true,
                     autoIncrement: true
@@ -13,14 +13,15 @@ module.exports = {
                 active: {
                     type: Sequelize.STRING,
                     allowNull: false,
-                    constraint:true
+                    constraint: true
                 }
             }
-            ).then(()=>{queryInterface.addConstraint(
-                'games', ['active'],{
+        ).then(() => {
+            queryInterface.addConstraint(
+                'games', ['active'], {
                     type: 'check',
                     name: 'game_active_constraint',
-                    where:{
+                    where: {
                         active: ['idle', 'not_active', 'active']
                     }
                 }
