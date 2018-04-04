@@ -16,7 +16,16 @@ module.exports = {
                     constraint:true
                 }
             }
-        );
+            ).then(()=>{queryInterface.addConstraint(
+                'games', ['active'],{
+                    type: 'check',
+                    name: 'game_active_constraint',
+                    where:{
+                        active: ['idle', 'not_active', 'active']
+                    }
+                }
+            );
+        });
     },
 
     down: (queryInterface, Sequelize) => {
