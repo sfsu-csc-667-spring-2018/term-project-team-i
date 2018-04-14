@@ -14,6 +14,11 @@ module.exports = {
                     type: Sequelize.STRING,
                     allowNull: false,
                     constraint: true
+                },
+                turn: {
+                    type: Sequelize.STRING,
+                    allowNull: false,
+                    constraint: true
                 }
             }
         ).then(() => {
@@ -25,7 +30,17 @@ module.exports = {
                         active: ['idle', 'not_active', 'active']
                     }
                 }
-            );
+            )
+        }).then(() => {
+            return queryInterface.addConstraint(
+                'games', ['turn'], {
+                    type: 'check',
+                    name: 'game_turn_constraint',
+                    where: {
+                        turn: ['white', 'black']
+                    }
+                }
+            )
         });
     },
 
