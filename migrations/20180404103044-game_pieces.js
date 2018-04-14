@@ -14,15 +14,18 @@ module.exports = {
             {
                 gameid: {
                     type: Sequelize.INTEGER,
-                    primarykey: true
+                    unique: true,
+                    allowNull:false
                 },
                 userid: {
                     type: Sequelize.INTEGER,
-                    primarykey: true,
+                    unique: true,
+                    allowNull:false
                 },
                 pieceid: {
                     type: Sequelize.INTEGER,
-                    primarykey: true
+                    unique: true,
+                    allowNull:false
                 },
                 coordinate_x: {
                     type: Sequelize.STRING,
