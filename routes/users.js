@@ -2,15 +2,24 @@ const express = require("express");
 const router = express.Router();
 const db = require('../db');
 
-router.get("/", (request, response) => {
-    db.any(`INSERT INTO users ("username" , "name", "password", "email") VALUES ('username1', 'name', 'pass', 'email')`)
-        .then( () => db.any(`INSERT INTO users ("username" , "name", "password", "email") VALUES ('username2', 'name', 'pass', 'email')`))
-        .then( _ => db.any(`SELECT * FROM users`) )
-        .then( results => response.json( results ) )
-        .catch( error => {
-            console.log( error )
-            response.json({ error })
-        })
+router.get("/register", (request, response) => {
+   response.render("register", {title: 'Register'})
+});
+
+router.post("/register", (request, response) =>{
+   const username = request.body.username;
+
+});
+
+router.get("/login", (request, response) => {
+   response.render("login", {title: "Login"});
+});
+
+router.post("/login", (request, response) =>{
+
+});
+
+router.get("/logout", (request, response) => {
 });
 
 module.exports = router;
