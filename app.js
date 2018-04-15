@@ -12,7 +12,7 @@ const expressHb = require('express-handlebars')
 const expressValidator = require('express-validator');
 const session = require('express-session');
 const passport = require('passport');
-const localStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 const flash = require('connect-flash');
 
 
@@ -61,6 +61,14 @@ app.use(expressValidator({
     }
 }));
 
+app.use(flash())
+app.use((req, res, next) =>{
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    next();
+});
+
 app.use('/', index);
 app.use('/users', users);
 app.use('/tests', tests);
@@ -70,6 +78,14 @@ app.use((req, res, next) =>{
   const err = new Error('Not Found');
   err.status = 404;
   next(err);
+});
+
+app.use(flash());
+app.use( (req, res, next) => {
+   res.locals.success_msg = req.flash('success_msg');
+   res.locals.error_msg = req.flash('error_msg');
+   res.locals.error = req.flash('error');
+   next();
 });
 
 // error handler

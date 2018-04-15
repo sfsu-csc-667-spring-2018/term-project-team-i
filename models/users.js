@@ -1,32 +1,50 @@
 'use strict';
+const bcrypt  = require('bcryptjs');
 
 module.exports = (sequelize, DataTypes) => {
-    const users = sequelize.define(
+    const Users = sequelize.define(
         'users',
         {
-            id: {
-                type: Sequelize.INTEGER,
-                primaryKey: true,
-                autoIncrement: true
-            },
             username: {
-                type: Sequelize.STRING,
-                allowNull: false,
-                unique: true
+                type: DataTypes.STRING,
+                unique: true,
+                validate: {
+                    notNull: true,
+                    notEmpty: true
+                }
             },
             name: {
-                type: Sequelize.STRING,
-                allowNull: false
+                type: DataTypes.STRING,
+                validate: {
+                    notNull: true,
+                    notEmpty: true
+                }
             },
             password: {
-                type: Sequelize.STRING,
-                allowNull: false
+                type: DataTypes.STRING,
+                validate: {
+                    notNull: true,
+                    notEmpty: true
+                }
             },
             email: {
-                type: Sequelize.STRING,
-                allowNull: true
+                type: DataTypes.STRING,
+                validate: {
+                    notNull: true,
+                    notEmpty: true
+                }
             }
         }
     );
-    return users;
+    Users.createUser = ((newUser, callback) =>{
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(newUser.password, salt, (err, hash) => {
+                newUser.password = hash;
+                newUser.save(callback);
+            });
+        });
+    });
+
+    return Users;
 };
+
