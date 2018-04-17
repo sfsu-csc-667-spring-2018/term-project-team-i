@@ -12,7 +12,7 @@ module.exports = {
             },
             name: {
                 type:Sequelize.STRING,
-                unique: true,
+                unique: false,
                 allowNull: false
             },
             faction: {
