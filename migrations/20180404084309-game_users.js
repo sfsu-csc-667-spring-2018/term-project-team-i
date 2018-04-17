@@ -15,7 +15,7 @@ module.exports = {
                 },
                 opponentid: {
                     type: Sequelize.INTEGER,
-                    allowNull: false,
+                    allowNull: true,
                     unique: true
                 }
             }
