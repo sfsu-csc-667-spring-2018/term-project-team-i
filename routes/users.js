@@ -21,37 +21,19 @@ router.post("/register", (request, response) =>{
 
    request.checkBody('username', 'User name is required').notEmpty();
    request.checkBody('name', 'Name is required').notEmpty();
-   request.checkBody('email', 'Email required').notEmpty();
-   request.checkBody('email', 'Email is invalid').isEmail();
+   //request.checkBody('email', 'Email required').notEmpty();
+   //request.checkBody('email', 'Email is invalid').isEmail();
    request.checkBody('password', 'Password is required').notEmpty();
    request.checkBody('password2', 'Password does not match').equals(request.body.password);
 
 
    const errors = request.validationErrors();
+
    if(errors)
       response.render('register', {
          errors: errors
       });
-
    else {
-       /* //using models
-       const registerUser = new Users({
-           username: username,
-           name: name,
-           email: email,
-           password: password
-       });
-
-       Users.createUser(registerUser, (err, user) =>{
-           if(err) throw err;
-           console.log(user);
-       });
-
-       request.flash('success_msg', 'You are registered and con now login');
-       response.redirect('users/login');
-       */
-
-       // force it to work
         bcrypt.hash(password, 10, (err, hash) =>{
           if(err)
              console.log(err);
@@ -65,9 +47,7 @@ router.post("/register", (request, response) =>{
        request.flash('success_msg', 'You are registered and can now login');
        response.redirect('/users/login');
    }
-
 });
-
 router.get("/login", (request, response) => {
    response.render("login", {title: "Login"});
 });

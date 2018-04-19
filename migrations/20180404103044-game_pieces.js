@@ -37,7 +37,7 @@ module.exports = {
                     allowNull: false
                 }
             }).then(() => {
-                return queryInterface.addConstraint(
+            return queryInterface.addConstraint(
                 'game_pieces', ['userid'], {
                     type: 'foreign key',
                     name: 'game_pieces_userid_foreign_key',
