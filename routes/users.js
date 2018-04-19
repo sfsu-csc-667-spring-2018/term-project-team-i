@@ -21,8 +21,8 @@ router.post("/register", (request, response) =>{
 
    request.checkBody('username', 'User name is required').notEmpty();
    request.checkBody('name', 'Name is required').notEmpty();
-   request.checkBody('email', 'Email required').notEmpty();
-   request.checkBody('email', 'Email is invalid').isEmail();
+   //request.checkBody('email', 'Email required').notEmpty();
+   //request.checkBody('email', 'Email is invalid').isEmail();
    request.checkBody('password', 'Password is required').notEmpty();
    request.checkBody('password2', 'Password does not match').equals(request.body.password);
 
