@@ -97,6 +97,13 @@ module.exports = {
                     }
                 }
             )
+        }).then(() => {
+            return queryInterface.addConstraint(
+                'game_pieces', ['gameid', 'userid', 'pieceid'], {
+                    type: 'primary key',
+                    name: 'game_pieces_pkey'
+                }
+            )
         })
     },
     down: (queryInterface, Sequelize) => {

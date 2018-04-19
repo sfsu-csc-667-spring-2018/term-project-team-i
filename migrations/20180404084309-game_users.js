@@ -15,8 +15,7 @@ module.exports = {
                 },
                 opponentid: {
                     type: Sequelize.INTEGER,
-                    allowNull: true,
-                    unique: true
+                    allowNull: true
                 }
             }
         ).then(() => {
@@ -39,6 +38,20 @@ module.exports = {
                         name: 'game_users_gameid_foreign_key',
                         references: {
                             table: 'games',
+                            field: 'id'
+
+                        },
+                        onDelete: 'cascade',
+                        onUpdate: 'cascade'
+                    }
+                )
+            }).then(() => {
+                return queryInterface.addConstraint(
+                    'game_users', ['opponentid'], {
+                        type: 'foreign key',
+                        name: 'game_users_opponentid_foreign_key',
+                        references: {
+                            table: 'users',
                             field: 'id'
 
                         },
