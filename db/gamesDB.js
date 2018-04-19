@@ -10,10 +10,8 @@ class GamesDB {
         this.__createGame()
             .then(createGameResult => {
                 const gameId = createGameResult['id'];
-                console.log("The gameId is " + gameId);
                 this.__createGameUser(gameId, userId)
                     .then(() => {
-                        console.log(gameId + " and " + userId);
                         this.__createGamePieces(gameId, userId);
                     })
                     .catch (error => {
@@ -23,12 +21,6 @@ class GamesDB {
             .catch (error => {
                 console.log(error);
             });
-
-        /*
-        let gameId = this.__createGame();
-        this.__createGameUser(gameId. userId);
-        this.__createGamePieces(gameId, userId);
-        */
     }
     
     __createGame() {
@@ -39,20 +31,6 @@ class GamesDB {
                                 RETURNING id;`;
         
         return db.one(sqlCreateGame);
-        /*  
-        let sqlResult;
-
-        db.one(sqlCreateGame)
-            .then(sqlCreateGameResult => {
-                sqlResult = sqlCreateGameResult['id'];
-            })
-            .catch(error => {
-                console.log ("SQL - ERROR for + " + this.__createGame.name, error);
-                sqlResult = error;
-            });
-
-        return sqlResult;
-        */
     }
 
     __createGameUser(gameId, userId) {
@@ -62,18 +40,6 @@ class GamesDB {
                                     ($1, $2);`;
 
         return db.any(sqlCreateGameUser, [gameId, userId]);
-
-        /*
-        let sqlResult;
-
-        db.any(sqlCreateGameUser, [gameId, userId])
-            .catch(error => {
-                console.log('SQL - ERROR for '+this.__createGameUser.name, error);
-                sqlResult = error;
-            });
-
-        return sqlResult;
-        */
     }
 
     __createGamePieces(gameId, userId) {
@@ -111,15 +77,6 @@ class GamesDB {
                     .catch (error => {
                         console.log('SQL - ERROR for '+this.__createGamePieces.name, error);
                     });
-    
-                /*
-                // INSERT piece records for black
-                pieceId = this.__createChessPiece('pawn', 'black');
-                this.__createGamePiece(gameId, null, pieceId, positionAlpha, '7' ,true);
-    
-                pieceId = this.__createChessPiece(specialPieces[offset], 'black');
-                this.__createGamePiece(gameId, null, pieceId, positionAlpha, '8' ,true);
-                */
             }
         }
     }
@@ -132,20 +89,6 @@ class GamesDB {
                                         RETURNING id;`;
 
         return db.one(sqlCreateChessPiece, [name, faction]);
-        /*
-        let sqlResult;
-
-        db.one(sqlCreateChessPiece, [name, faction])
-            .then(sqlCreateChessPieceResult => {
-                sqlResult = newPieceId = sqlCreateChessPieceResult['id'];
-            })
-            .catch(error => {
-                console.log('SQL - ERROR for '+this.__createChessPiece.name, error);
-                sqlResult = error;
-            });
-
-        return sqlResult;
-        */
     }
 
     __createGamePiece(gameId, userId, pieceId, coordinate_x, coordinate_y, alive) {

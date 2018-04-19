@@ -2,21 +2,14 @@ const GamesDB = require('../db/gamesDB.js')
 const express = require("express");
 const router = express.Router();
 const db = require('../db');
+const gamesDB = new GamesDB();
 
 
 // Create new game room. req.body = {playerId: int}
 router.post('/', (req, res, next) =>{
-<<<<<<< HEAD
-    const gamesDB = new GamesDB();
     const playerId = req.body['playerId'];
 
     gamesDB.createGame(playerId);
-=======
-    const gameDB = new GamesDB();
-    const playerId = req.body['playerId'];
-
-    gameDB.createGame(playerId);
->>>>>>> e8220678cae5036339f901d02ff4d83d6dfa9d83
     
     // TODO: check if Player has logged in first, otherwise REDIRECT to login screen.
     // TODO: REDIRECT Player to /:gameId where id is the newGameId. This is effectively a Player join a game now.

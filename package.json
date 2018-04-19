@@ -11,14 +11,22 @@
     "postinstall": "sequelize db:migrate"
   },
   "dependencies": {
+    "bcryptjs": "*",
     "body-parser": "~1.18.2",
+    "connect-flash": "*",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "dotenv": "^5.0.1",
     "express": "~4.15.5",
+    "express-handlebars": "*",
+    "express-messages": "*",
+    "express-session": "*",
+    "express-validator": "*",
     "morgan": "~1.9.0",
+    "passport": "*",
+    "passport-http": "*",
+    "passport-local": "*",
     "pg-promise": "^8.2.2",
-    "pug": "2.0.0-beta11",
     "sequelize": "^4.36.1",
     "sequelize-cli": "^4.0.0",
     "serve-favicon": "~2.4.5"
