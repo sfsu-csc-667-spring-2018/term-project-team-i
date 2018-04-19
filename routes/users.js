@@ -28,30 +28,12 @@ router.post("/register", (request, response) =>{
 
 
    const errors = request.validationErrors();
+
    if(errors)
       response.render('register', {
          errors: errors
       });
-
    else {
-       /* //using models
-       const registerUser = new Users({
-           username: username,
-           name: name,
-           email: email,
-           password: password
-       });
-
-       Users.createUser(registerUser, (err, user) =>{
-           if(err) throw err;
-           console.log(user);
-       });
-
-       request.flash('success_msg', 'You are registered and con now login');
-       response.redirect('users/login');
-       */
-
-       // force it to work
         bcrypt.hash(password, 10, (err, hash) =>{
           if(err)
              console.log(err);
@@ -65,9 +47,7 @@ router.post("/register", (request, response) =>{
        request.flash('success_msg', 'You are registered and can now login');
        response.redirect('/users/login');
    }
-
 });
-
 router.get("/login", (request, response) => {
    response.render("login", {title: "Login"});
 });
