@@ -2,7 +2,7 @@
 <body class="text-center">
 {{#if errors}}
     {{#each errors}}
-        <div class="alert alert-danger"{{msg}}></div>
+        <div class="alert alert-danger">{{msg}}</div>
     {{/each}}
 {{/if}}
 <form class="form-signin" method="post" action="/users/register">

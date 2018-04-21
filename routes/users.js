@@ -37,17 +37,22 @@ router.post("/register", (request, response) =>{
         bcrypt.hash(password, 10, (err, hash) =>{
           if(err)
              console.log(err);
-          else registerUser({
-              username: username,
-              name: name,
-              email: email,
-              password: hash
-          });
+          else {
+              console.log(registerUser.checkUser({username:username}));
+
+              registerUser.registerUser({
+                  username: username,
+                  name: name,
+                  email: email,
+                  password: hash
+              });
+              request.flash('success_msg', 'You are registered and can now login');
+              response.redirect('/users/login');
+          }
        });
-       request.flash('success_msg', 'You are registered and can now login');
-       response.redirect('/users/login');
    }
 });
+
 router.get("/login", (request, response) => {
    response.render("login", {title: "Login"});
 });
