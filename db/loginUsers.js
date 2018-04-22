@@ -1,15 +1,40 @@
 const db = require('../db/index');
+const bcrypt = require('bcryptjs');
 
-const SELECT = `SELECT * FROM users WHERE username = $1`;
-
-const loginUser = (username, callback) => {
-    const VALUES = username;
-    db.one(SELECT, VALUES).then(data => {
-        return callback(data,null)
-    }).catch(error => {
-        callback(null, error);
-        console.log("invalid user ", error);
-    });
+const loginUsername = (findUsername, callback) => {
+    return db.one(`SELECT username FROM users WHERE username = ($1)`, findUsername)
+        .then(data => {
+            console.log(data);
+            return callback(null, data);
+        }).catch(error => {
+            console.log(error);
+            return callback(null, null);
+            }
+        );
+};
+const loginUserID = (findUserID, callback) => {
+    return db.one(`SELECT id FROM users WHERE username = ($1)`, findUserID)
+        .then(data => {
+            console.log(data);
+            return callback(null, data);
+        }).catch(error => {
+            console.log(error);
+            return callback(null, null);
+        })
 };
 
-module.exports = loginUser;
+const loginPassword = (checkUser) => {
+    return db.one(`SELECT password FROM users WHERE username = ($1)`, checkUser);
+    /*
+        .then(data => {
+            bcrypt.compare(password, data, (err, isMatch) =>{
+                console.log(isMatch);
+                return callback(null, isMatch);
+            });
+        }).catch(error => {
+            console.log(error);
+            return callback(null, null);
+        })*/
+};
+
+module.exports = {loginUsername, loginUserID, loginPassword};

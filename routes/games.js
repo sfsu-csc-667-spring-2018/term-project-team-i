@@ -4,7 +4,9 @@ const router = express.Router();
 const db = require('../db');
 const gamesDB = new GamesDB();
 
-
+router.get('/', (req, res, next) =>{
+   res.render('games');
+});
 // Create new game room. req.body = {playerId: int}
 router.post('/', (req, res, next) =>{
     const playerId = req.body['playerId'];
