@@ -1,0 +1,29 @@
+#chessboard {
+    margin-right: auto;
+}
+
+#chessboard .squareB{
+    width: 40px;
+    height: 40px;
+    background: #060809;
+}
+#chessboard .squareW{
+    width: 40px;
+    height: 40px;
+    background: #fff5dd;
+}
+#chessboard .border{
+    width: 10px;
+    height: 10px;
+    background: gray;
+    text-align: center;
+    color: white;
+    font-size: 10px;
+}
+
+#chessboard .piece{
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    margin-right: auto;
+}
