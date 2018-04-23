@@ -6,6 +6,26 @@
         <link rel="stylesheet" href="/stylesheets/style.css" />
         <link rel="stylesheet" href="/stylesheets/chessboard.css"/>
         <link rel="icon" href="/images/bKingIcon.ico" />
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            const ready = () => {
+                const socket = io();
+                
+                socket.emit('client-message', 'Hello Server');
+
+                socket.on('server-message', data => {
+                    console.log("Server responded with: " + data);
+                })
+            };
+
+            // Execute the enclosed after web page is finished loading.
+            if (document.readyState !== 'loading') {
+                ready();
+            } else {
+                document.addEventListener('DOMContentLoaded', ready);
+            }
+
+        </script>
 
     </head>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
