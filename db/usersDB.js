@@ -1,14 +1,24 @@
 const db = require('../db/index');
-const bcrypt = require('bcryptjs');
+
+const INSERT = `INSERT INTO users ("username", "name", "email", "password")
+                    VALUES ($1, $2, $3, $4)
+                    RETURNING "id", "username"`;
+const registerUser  = userObject => {
+    const VALUES = [userObject.username,
+        userObject.name,
+        userObject.email,
+        userObject.password];
+    return db.one(INSERT, VALUES);
+};
 
 const loginUsername = (findUsername, callback) => {
-    return db.one(`SELECT username FROM users WHERE username = ($1)`, findUsername)
+    return db.one(`SELECT username, id FROM users WHERE username = ($1)`, findUsername)
         .then(data => {
             console.log(data);
             return callback(null, data);
         }).catch(error => {
-            console.log(error);
-            return callback(null, null);
+                console.log(error);
+                return callback(null, null);
             }
         );
 };
@@ -37,4 +47,11 @@ const loginPassword = (checkUser) => {
         })*/
 };
 
-module.exports = {loginUsername, loginUserID, loginPassword};
+
+
+module.exports = {
+    registerUser,
+    loginUsername,
+    loginPassword,
+    loginUserID
+};
