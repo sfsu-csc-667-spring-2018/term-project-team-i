@@ -43,6 +43,26 @@ module.exports = {
                     }
                 }
             );
+        }).then(() => {
+
+            const names = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
+            const factions = ['white', 'black'];
+            const bulkInserts = [];
+
+            for (let fdx = 0; fdx < factions.length; fdx++) {
+                for (let ndx = 0; ndx < names.length; ndx++) {
+                    bulkInserts.push(
+                        {
+                            "name": names[ndx],
+                            "faction": factions[fdx]
+                        }
+                    )
+                }
+            }
+
+            return queryInterface.bulkInsert(
+                'pieces', bulkInserts
+            )
         });
     },
 
