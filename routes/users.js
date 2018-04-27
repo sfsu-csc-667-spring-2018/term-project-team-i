@@ -20,8 +20,6 @@ router.post("/register", (request, response) => {
 
     request.checkBody('username', 'User name is required').notEmpty();
     request.checkBody('name', 'Name is required').notEmpty();
-    //request.checkBody('email', 'Email required').notEmpty();
-    //request.checkBody('email', 'Email is invalid').isEmail();
     request.checkBody('password', 'Password is required').notEmpty();
     request.checkBody('password2', 'Password does not match').equals(request.body.password);
 
@@ -73,10 +71,10 @@ passport.use(new LocalStrategy(
                         if(err) throw err;
                         if(match){
                             console.log(hash.password)
-                            console.log("Password verified");
+                            console.log("password verified");
                             return done(null, user);
                         } else{
-                            console.log("Invalid pass");
+                            console.log("invalid pass");
                             return done(null, false, {message: 'Invalid Password'});
                         }
                     })
@@ -88,18 +86,17 @@ passport.use(new LocalStrategy(
     }));
 
 passport.serializeUser((user, done) => {
-    console.log("Users serialized");
+    console.log("reached serialize");
     //console.log("user = " + user.id);
         done(null, user.username);
 });
 
 passport.deserializeUser((id, done) => {
-    console.log("User deserialize");
+    console.log("reached deserialize");
     console.log("id =" + id);
     User.loginUserID(id, (err, user) =>{
         if(err){
-            console.log("deserialize err");
-            throw err;
+            console.log("serialize err");
         }
         console.log(id);
         done(err, user);

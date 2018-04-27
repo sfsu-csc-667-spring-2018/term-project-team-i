@@ -2,6 +2,7 @@ class Authenticate {
 
     constructor(){
     }
+
     ensureAuth(request, response, next) {
         if (request.isAuthenticated()) {
             console.log("Authenticated");
@@ -9,11 +10,8 @@ class Authenticate {
         } else {
             request.flash('error_msg', 'Not Logged in');
             response.redirect('users/login');
-
         }
     };
-
 }
-
 
 module.exports = Authenticate;
