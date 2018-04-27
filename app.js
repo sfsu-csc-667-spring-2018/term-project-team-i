@@ -73,7 +73,7 @@ app.use((req, res, next) =>{
 app.use('/', index);
 app.use('/users', users);
 app.use('/tests', tests);
-app.use('/games/', games);
+app.use('/games', games);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) =>{
