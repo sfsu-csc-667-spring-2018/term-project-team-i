@@ -18,11 +18,7 @@ class GamesDB {
                                     VALUES
                                     ($1, $2);`;
 
-        const sqlCreateChessPiece =   ` INSERT INTO pieces
-                                        (name, faction)
-                                        VALUES
-                                        ($1, $2)
-                                        RETURNING id;`;
+        const sqlGetPieceId = `SELECT id FROM pieces WHERE name=($1) AND faction=($2)`;
 
         const sqlCreateGamePiece = `INSERT INTO game_pieces
                                     (gameid, userid, pieceid, coordinate_x, coordinate_y, alive)
@@ -49,21 +45,21 @@ class GamesDB {
                                     const specialRowNum = armyDetails[armyDetailsIdx].specialRowNum;
 
                                     queries.push(
-                                                t1.one(sqlCreateChessPiece, ['pawn', faction])
-                                                    .then(newChessPiece => {
-                                                        const pieceId = newChessPiece['id'];
+                                        t1.one(sqlGetPieceId, ['pawn', faction])
+                                            .then(pieceRecord => {
+                                                const pieceId = pieceRecord['id'];
 
-                                                        return t1.any(sqlCreateGamePiece, [gameId, userId, pieceId, alphaRow, pawnRowNum, true])
-                                                    })
-                                                ,
-                                                t1.one(sqlCreateChessPiece, [specialPieces[offset], faction])
-                                                    .then(newChessPiece => {
-                                                        const pieceId = newChessPiece['id'];
+                                                return t1.any(sqlCreateGamePiece, [gameId, userId, pieceId, alphaRow, pawnRowNum, true])
+                                            })
+                                        ,
+                                        t1.one(sqlGetPieceId, [specialPieces[offset], faction])
+                                            .then(pieceRecord => {
+                                                const pieceId = pieceRecord['id'];
 
-                                                        return t1.any(sqlCreateGamePiece, [gameId, userId, pieceId, alphaRow, specialRowNum, true])
-                                                    })
-                                                );
-                                }
+                                                return t1.any(sqlCreateGamePiece, [gameId, userId, pieceId, alphaRow, specialRowNum, true])
+                                            })
+                                        );
+                                    }
                             }
 
                             return t1.batch(queries);
