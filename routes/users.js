@@ -2,11 +2,9 @@ const express = require("express");
 const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcryptjs');
-const registerUser = require("../db/registerUser");
-const login = require("../db/loginUsers");
+const User = require("../db/usersDB");
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const Users = require('../models/users');
 
 
 router.get("/register", (request, response) => {
@@ -22,8 +20,6 @@ router.post("/register", (request, response) => {
 
     request.checkBody('username', 'User name is required').notEmpty();
     request.checkBody('name', 'Name is required').notEmpty();
-    //request.checkBody('email', 'Email required').notEmpty();
-    //request.checkBody('email', 'Email is invalid').isEmail();
     request.checkBody('password', 'Password is required').notEmpty();
     request.checkBody('password2', 'Password does not match').equals(request.body.password);
 
@@ -41,7 +37,7 @@ router.post("/register", (request, response) => {
             else {
                 //console.log(registerUser.checkUser({username:username}));
 
-                registerUser.registerUser({
+                User.registerUser({
                     username: username,
                     name: name,
                     email: email,
@@ -60,43 +56,53 @@ router.post("/register", (request, response) => {
 });
 
 router.get("/login", (request, response) => {
-    response.render("login", {title: "Login"});
+    response.render("login");
 });
 
 passport.use(new LocalStrategy(
     (username, password, done) => {
-        login.loginUsername(username, (err, user) => {
+        User.loginUsername(username, (err, user) => {
             if (err) throw err;
-            if (user === null) return done(null, false, {message: 'Username does not exist'})
-        });
-        login.loginPassword(username)
-            .then(hash => {
-                console.log(hash);
-                console.log(password);
-                bcrypt.compare(password, hash)
-                    .then(_ => {
-                        return done(null, user);
+            if (user === null)
+                return done(null, false, {message: 'Username does not exist'});
+            User.loginPassword(username)
+                .then(hash => {
+                    bcrypt.compare(password, hash.password, (err, match) =>{
+                        if(err) throw err;
+                        if(match){
+                            console.log(hash.password)
+                            console.log("password verified");
+                            return done(null, user);
+                        } else{
+                            console.log("invalid pass");
+                            return done(null, false, {message: 'Invalid Password'});
+                        }
                     })
-                    .catch(_ => {
-                        return done(null, false, {message: 'Invalid Password'});
-                    });
-            }).catch(error=>{
-                console.log(error);
-        })
-
-        //else return done(null, false, {message: 'Invalid Password'});
-    }
-));
+                }).catch(error => {
+                    console.log(error);
+                });
+            }
+        )
+    }));
 
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+    console.log("reached serialize");
+    //console.log("user = " + user.id);
+        done(null, user.username);
 });
 
 passport.deserializeUser((id, done) => {
-    //login.loginUserID(id, (err, user) =>{
-    // done(err, user);
-    //});
+    console.log("reached deserialize");
+    console.log("id =" + id);
+    User.loginUserID(id, (err, user) =>{
+        if(err){
+            console.log("serialize err");
+        }
+        console.log(id);
+        done(err, user);
+    });
 });
+
 
 router.post("/login", passport.authenticate('local',
     {successRedirect: '/', failureRedirect: '/users/login', failureFlash: true}), (request, response) => {
@@ -105,8 +111,8 @@ router.post("/login", passport.authenticate('local',
 
 router.get("/logout", (request, response) => {
     request.logout();
-
     request.flash('success_msg', 'You are logged out');
+    response.redirect('/users/login');
 });
 
 module.exports = router;
