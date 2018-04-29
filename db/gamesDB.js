@@ -6,7 +6,14 @@ class GamesDB {
         
     }
 
-    createGame(userId) {
+    /**
+     * Creates the appropriate records within the database for a new game.
+     * @param {Number} userId - The host's ID to attach to the newly created game record.
+     * @param {Function} gameIdCallback - Callback function to return the ID of the newly created game record.
+     */
+    createGame(userId, gameIdCallback) {
+        const sqlSelectGame =   `SELECT id FROM games WHERE id=($1)`;
+
         const sqlCreateGame =  `INSERT INTO games 
                                 (active, turn) 
                                 VALUES 
@@ -35,6 +42,7 @@ class GamesDB {
                             const armyDetails   = [  {faction: "white", pawnRowNum: '2', specialRowNum: '1'},
                                                      {faction: "black", pawnRowNum: '7', specialRowNum: '8'}  ];
                             
+                            queries.push(t1.one(sqlSelectGame, gameId));
                             queries.push(t1.any(sqlCreateGameUser, [gameId, userId]));
                             
                             for (let armyDetailsIdx = 0; armyDetailsIdx < armyDetails.length; armyDetailsIdx++) {
@@ -63,7 +71,11 @@ class GamesDB {
                             }
 
                             return t1.batch(queries);
-                        });
+                        })
+                        .then((batchResults) => {
+                            const gameId = batchResults[0].id;  // gameId SELECT was first pushed into queries{}
+                            gameIdCallback(gameId);
+                        })
         })
         .catch(error => {
             console.log(error);
