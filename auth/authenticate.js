@@ -1,17 +1,13 @@
-class Authenticate {
 
-    constructor(){
+const ensureAuth = (request, response, next) =>{
+    if (request.isAuthenticated()) {
+        console.log("Authenticated");
+        return next();
+    } else {
+        request.flash('error_msg', 'Not Logged in');
+        response.redirect('users/login');
     }
+};
 
-    ensureAuth(request, response, next) {
-        if (request.isAuthenticated()) {
-            console.log("Authenticated");
-            return next();
-        } else {
-            request.flash('error_msg', 'Not Logged in');
-            response.redirect('users/login');
-        }
-    };
-}
 
-module.exports = Authenticate;
+module.exports = ensureAuth;

@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const Authenticate = require('../auth/authenticate.js');
-const auths = new Authenticate();
+const auths = require('../auth/authenticate.js');
 /* GET home page. */
-router.get('/',auths.ensureAuth, (request, response, next) =>{
+router.get('/',auths, (request, response, next) =>{
   response.render('index');
 });
 
