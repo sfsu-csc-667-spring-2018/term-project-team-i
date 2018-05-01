@@ -15,13 +15,15 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const flash = require('connect-flash');
 
-
 const index = require('./routes/index');
 const users = require('./routes/users');
 const tests = require('./routes/tests');
 const games = require('./routes/games');
 
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -36,14 +38,21 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 app.use(session({
     secret: 'secret',
+    name: 'secret_name',
     saveUninitialized: true,
     resave: true
 }));
-
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.session({
+    secret: 'secret',
+    name: 'secret_name',
+    proxy: true,
+    resave: true,
+    saveUninitialized: true
+}));
 
 app.use(expressValidator({
     errorFormatter: (param, msg, value) => {
@@ -82,13 +91,6 @@ app.use((req, res, next) =>{
   next(err);
 });
 
-app.use(flash());
-app.use( (req, res, next) => {
-   res.locals.success_msg = req.flash('success_msg');
-   res.locals.error_msg = req.flash('error_msg');
-   res.locals.error = req.flash('error');
-   next();
-});
 
 // error handler
 app.use((err, req, res, next) =>{

@@ -7,7 +7,7 @@
 const app = require('../app');
 const debug = require('debug')('jstestapp:server');
 const http = require('http');
-const socket = require('../socket/socket.js');
+const socket = require('../sockets/');
 
 /**
  * Get port from environment and store in Express.
