@@ -1,21 +1,35 @@
-const socketIo = require( 'socket.io' )
-const { USER_JOINED, MESSAGE_SEND } = require( '../src/constants/events' )
+const socketIo = require('socket.io');
 
-const init = ( app, server ) => {
-    const io = socketIo( server )
+let users = [];
+let connections = [];
 
-    app.set( 'io', io )
+const init = (app, server) =>{
+  const io = socketIo(server);
+  app.set('io', io);
 
-    io.on( 'connection', socket => {
-        console.log( 'client connected' )
+  app.use((request, response, next) =>{
+      response.io = io;
+      next();
+  })
 
-        socket.on( 'disconnect', data => {
-            console.log( 'client disconnected' )
-        })
+  //socket connect
+  io.on('connection', socket =>{
+      connections.push(socket);
+      console.log('Connected: %s, sockets connected', connections.length);
 
-        socket.on( USER_JOINED, data => io.emit( USER_JOINED, data ))
-        socket.on( MESSAGE_SEND, data => io.emit( MESSAGE_SEND, data ))
-    })
-}
+      //socket disconnect
+      socket.on('disconnect', data => {
+          connections.splice(connections.indexOf(socket), 1);
+          console.log('Disconnected: %s sockets connected', connections.length );
+      });
 
-module.exports = { init }
+      //messages
+      socket.on('send message', data =>{
+          io.sockets.emit('new message', {msg: data});
+      });
+
+      //Logged in user
+      //socket.on('user')
+  })};
+
+module.exports = {init};
