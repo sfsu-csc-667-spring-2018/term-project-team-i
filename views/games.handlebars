@@ -3,128 +3,32 @@
     <table id="chessboard">
         <tr>
             <td class="border"></td>
-            <td class="border">A</td>
-            <td class="border">B</td>
-            <td class="border">C</td>
-            <td class="border">D</td>
-            <td class="border">E</td>
-            <td class="border">F</td>
-            <td class="border">G</td>
-            <td class="border">H</td>
+                {{#chessboard_setupBorderAscii 65 1 7}}
+                    <td class="border">{{this}}</td>
+                {{/chessboard_setupBorderAscii}}
             <td class="border"></td>
         </tr>
+
+        {{#chessboard_setupBorderAscii 56 -1 7}}
         <tr>
-            <td class="border">8</td>
-            <td id="a8" class="squareB chessCell">
-                <img class="piece chessPiece" src="images/wKing.png">
-            </td>
-            <td id="b8" class="squareW chessCell"></td>
-            <td id="c8" class="squareB chessCell"></td>
-            <td id="d8" class="squareW chessCell"></td>
-            <td id="e8" class="squareB chessCell"></td>
-            <td id="f8" class="squareW chessCell"></td>
-            <td id="g8" class="squareB chessCell"></td>
-            <td id="h8" class="squareW chessCell"></td>
-            <td class="border">8</td>
+            <td class="border">{{this}}</td>
+            {{#chessboard_setupBorderAscii 97 1 7}}
+            <td id="{{this}}{{../this}}" class="{{chessboard_setupBlackOrWhiteClass 'squareB' 'squareW' this ../this }} chessCell"></td>
+            {{/chessboard_setupBorderAscii}}
+            <td class="border">{{this}}</td>
         </tr>
-        <tr>
-            <td class="border">7</td>
-            <td id="a7" class="squareW chessCell"></td>
-            <td id="b7" class="squareB chessCell"></td>
-            <td id="c7" class="squareW chessCell"></td>
-            <td id="d7" class="squareB chessCell"></td>
-            <td id="e7" class="squareW chessCell"></td>
-            <td id="f7" class="squareB chessCell"></td>
-            <td id="g7" class="squareW chessCell"></td>
-            <td id="h7" class="squareB chessCell"></td>
-            <td class="border">7</td>
-        </tr>
-        <tr>
-            <td class="border">6</td>
-            <td id="a6" class="squareB chessCell"></td>
-            <td id="b6" class="squareW chessCell"></td>
-            <td id="c6" class="squareB chessCell"></td>
-            <td id="d6" class="squareW chessCell"></td>
-            <td id="e6" class="squareB chessCell"></td>
-            <td id="f6" class="squareW chessCell"></td>
-            <td id="g6" class="squareB chessCell"></td>
-            <td id="h6" class="squareW chessCell"></td>
-            <td class="border">6</td>
-        </tr>
-        <tr>
-            <td class="border">5</td>
-            <td id="a5" class="squareW chessCell"></td>
-            <td id="b5" class="squareB chessCell"></td>
-            <td id="c5" class="squareW chessCell"></td>
-            <td id="d5" class="squareB chessCell"></td>
-            <td id="e5" class="squareW chessCell"></td>
-            <td id="f5" class="squareB chessCell"></td>
-            <td id="g5" class="squareW chessCell"></td>
-            <td id="h5" class="squareB chessCell"></td>
-            <td class="border">5</td>
-        </tr>
-        <tr>
-            <td class="border">4</td>
-            <td id="a4" class="squareB chessCell"></td>
-            <td id="b4" class="squareW chessCell"></td>
-            <td id="c4" class="squareB chessCell"></td>
-            <td id="d4" class="squareW chessCell"></td>
-            <td id="e4" class="squareB chessCell"></td>
-            <td id="f4" class="squareW chessCell"></td>
-            <td id="g4" class="squareB chessCell"></td>
-            <td id="h4" class="squareW chessCell"></td>
-            <td class="border">4</td>
-        </tr>
-        <tr>
-            <td class="border">3</td>
-            <td id="a3" class="squareW chessCell"></td>
-            <td id="b3" class="squareB chessCell"></td>
-            <td id="c3" class="squareW chessCell"></td>
-            <td id="d3" class="squareB chessCell"></td>
-            <td id="e3" class="squareW chessCell"></td>
-            <td id="f3" class="squareB chessCell"></td>
-            <td id="g3" class="squareW chessCell"></td>
-            <td id="h3" class="squareB chessCell"></td>
-            <td class="border">3</td>
-        </tr>
-        <tr>
-            <td class="border">2</td>
-            <td id="a2" class="squareB chessCell"></td>
-            <td id="b2" class="squareW chessCell"></td>
-            <td id="c2" class="squareB chessCell"></td>
-            <td id="d2" class="squareW chessCell"></td>
-            <td id="e2" class="squareB chessCell"></td>
-            <td id="f2" class="squareW chessCell"></td>
-            <td id="g2" class="squareB chessCell"></td>
-            <td id="h2" class="squareW chessCell"></td>
-            <td class="border">2</td>
-        </tr>
-        <tr>
-            <td class="border">1</td>
-            <td id="a1" class="squareW chessCell"></td>
-            <td id="b1" class="squareB chessCell"></td>
-            <td id="c1" class="squareW chessCell"></td>
-            <td id="d1" class="squareB chessCell"></td>
-            <td id="e1" class="squareW chessCell"></td>
-            <td id="f1" class="squareB chessCell"></td>
-            <td id="g1" class="squareW chessCell"></td>
-            <td id="h1" class="squareB chessCell"></td>
-            <td class="border">1</td>
-        </tr>
+        {{/chessboard_setupBorderAscii}}
+        
         <tr>
             <td class="border"></td>
-            <td class="border">A</td>
-            <td class="border">B</td>
-            <td class="border">C</td>
-            <td class="border">D</td>
-            <td class="border">E</td>
-            <td class="border">F</td>
-            <td class="border">G</td>
-            <td class="border">H</td>
+                {{#chessboard_setupBorderAscii 65 1 7}}
+                    <td class="border">{{this}}</td>
+                {{/chessboard_setupBorderAscii}}
             <td class="border"></td>
         </tr>
+
     </table>
     </body>
-    <script src="/js/chess/chessboard.js"></script>
+    <script src="/js/handlers/chessboard.js"></script>
     <script src="/js/games.js"></script>
 </html>
