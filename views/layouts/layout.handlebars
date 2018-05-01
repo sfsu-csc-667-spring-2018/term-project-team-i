@@ -11,10 +11,11 @@
             const ready = () => {
                 const socket = io();
                 
-                socket.emit('client-message', 'Hello Server');
+                socket.emit('client-message', {username: "Johnny", message: "My name is Johnny, I'm a client"});
 
                 socket.on('server-message', data => {
-                    console.log("Server responded with: " + data);
+                    console.log("Server responded with: ");
+                    console.log(data);
                 })
             };
 

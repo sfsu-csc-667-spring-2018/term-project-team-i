@@ -30,13 +30,14 @@ const init = ( app, server ) => {
      */
     io.on( 'connection', socket => {
         socket.on( 'disconnect', data => {
-            console.log( 'client disconnected' )
+            //console.log( 'SOCKET.IO SERVER: client disconnected' )
         });
 
-        socket.on('client-message', data => {
-            console.log("Client message: " + data);
-            socket.emit('server-message', 'Hello Client');
-        })
+        socket.on('client-message', (data) => {
+            //console.log("Client message: ");
+            //console.log(data);
+            socket.emit('server-message', {server: "ChessServerMaster", message: "Johnny go away"});
+        });
     });
   
 }

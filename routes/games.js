@@ -1,44 +1,21 @@
 const GamesDB = require('../db/gamesDB.js')
 const express = require("express");
-const router = express.Router();
 const db = require('../db');
+const router = express.Router();
 const gamesDB = new GamesDB();
+const activeGames = {};
 
-// TODO: this is a test route
-router.get('/', (req, res, next) =>{
-
-    const handlebarsData = {};
-
-    handlebarsData.helpers = {
-        // Add all helper functions here.
-        chessboard_setupBlackOrWhiteClass: (blackClass, whiteClass, cellAlpha, cellNumber) => {
-            const alphaNumber = cellAlpha.charCodeAt(0);
-            const numberNumber = cellNumber;
-            const isCellAlphaEven = (alphaNumber % 2 === 0);
-            const isCellNumberEven = (cellNumber % 2 === 0);
-
-            return ((isCellAlphaEven && isCellNumberEven) || (!isCellAlphaEven && !isCellNumberEven)) ? whiteClass : blackClass;
-        },
-
-        chessboard_setupBorderAscii: (base, increments, count, block) => {
-            let accumulate = '';
-            for (let idx = 0; idx <= count; idx++) {
-                accumulate += block.fn(String.fromCharCode(base));
-                base += increments;
-            }
-            return accumulate;
-        }
+const gamesRequestHandler = (req, res, next) => {
+    if (req.user === undefined || req.user.id === undefined) {
+        // TODO: this is a stop gap measure, route this appropriately.
+        res.end("Player ID undefined.");
+        return;
     }
 
-    res.render('games', handlebarsData);
-});
-
-// Create new game room. req.body = {playerId: int}
-router.post('/', (req, res, next) =>{
     const playerId = req.user.id;
-    const handlebarsData = {};
+    const renderData = {};
 
-    handlebarsData.helpers = {
+    renderData.helpers = {
         // Add all helper functions here.
         chessboard_setupBlackOrWhiteClass: (blackClass, whiteClass, cellAlpha, cellNumber) => {
             const alphaNumber = cellAlpha.charCodeAt(0);
@@ -60,17 +37,70 @@ router.post('/', (req, res, next) =>{
     }
 
     gamesDB.createGame(playerId, (gameId) => {
-        res.render('games/'+gameId, handlebarsData);
+        gamesDB.getGamePiecesFromGame(gameId, (gamePieceRecords) => {
+            renderData.gamePieceRecords = gamePieceRecords;
+            res.render('games', renderData);
+        });
+        //res.render('games/'+gameId, renderData);
     });
     
     // TODO: check if Player has logged in first, otherwise REDIRECT to login screen.
     // TODO: REDIRECT Player to /:gameId where id is the newGameId. This is effectively a Player join a game now.
     // TODO: replace this with official response later.
-});
+};
+
+// ********************
+//      Routes
+// ********************
+
+router.get('/', gamesRequestHandler);
+
+// Create new game room. req.body = {playerId: int}
+router.post('/', gamesRequestHandler);
 
 // Join a game room. req.params = {"gameId": int} req.body = {playerId: int}
 router.post('/:gameId', (req, res, next) => {
-    console.log("Reached games. The given id is : " + req.params.gameId);
+    
+    /*
+    1. Use the given gameId to pass off the information to an appropriate handler.
+    2. Get from database all the pieces that belongs to the game.
+    2. Process each record to place each piece in accordance to its location on the screen.
+    3. Send the rendered information to the user.
+    4. 
+    */
+    const handlebarsData = {};
+
+    handlebarsData.helpers = {
+        // Add all helper functions here.
+        chessboard_setupBlackOrWhiteClass: (blackClass, whiteClass, cellAlpha, cellNumber) => {
+            const alphaNumber = cellAlpha.charCodeAt(0);
+            const numberNumber = cellNumber;
+            const isCellAlphaEven = (alphaNumber % 2 === 0);
+            const isCellNumberEven = (cellNumber % 2 === 0);
+
+            return ((isCellAlphaEven && isCellNumberEven) || (!isCellAlphaEven && !isCellNumberEven)) ? whiteClass : blackClass;
+        },
+
+        chessboard_setupBorderAscii: (base, increments, count, block) => {
+            let accumulate = '';
+            for (let idx = 0; idx <= count; idx++) {
+                accumulate += block.fn(String.fromCharCode(base));
+                base += increments;
+            }
+            return accumulate;
+        }
+    }
+
+
+    gamesDB.getGamePiecesFromGame(req.params.gameId, (gamePieceRecords) => {
+        for (let row = 0; row < gamePieceRecords.length; row++) {
+            let gamePieceRecord = gamePieceRecords[row];
+            let coordinate_xy = gamePieceRecord.coordinate_x + gamePieceRecord.coordinate_y;
+
+            handlebarsData.coordinate_xy = coordinate_xy;
+        }
+    });
+
     /*
     Programming flow:
         -Check Player is logged in.
