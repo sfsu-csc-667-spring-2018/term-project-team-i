@@ -106,7 +106,7 @@ passport.deserializeUser((id, done) => {
 
 router.post("/login", passport.authenticate('local',
     {successRedirect: '/', failureRedirect: '/users/login', failureFlash: true}), (request, response) => {
-    response.redirect('/');
+    //response.redirect('/');
 });
 
 router.get("/logout", (request, response) => {

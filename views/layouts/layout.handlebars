@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="/stylesheets/style.css" />
         <link rel="stylesheet" href="/stylesheets/chessboard.css"/>
         <link rel="icon" href="/images/bKingIcon.ico" />
-
+        
     </head>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
         <a class="navbar-brand" href="/games">Create Game</a>
@@ -42,12 +42,9 @@
         {{#if error}}
             <div class = "alert alert-danger">{{error}}</div>
         {{/if}}
-        {{{body}}}
-        <script src='https://code.jquery.com/jquery-3.1.1.min.js' integrity='sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=' crossorigin='anonymous'></script>
-        <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js' integrity='sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa' crossorigin='anonymous'></script>
-        <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.5.3/jquery.timeago.min.js'></script>
-
+        <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <script src='/socket.io/socket.io.js'></script>
-        <script src='/js/bundle.js'></script>
+        {{{body}}}
     </body>
 </html>

@@ -1,28 +1,29 @@
 <html>
 <body>
-
-<h1>Basic Chat App</h1>
-<div id="chat-area">
-    <div class="row">
-        <div class="messages col-lg-6 well well-sm"></div>
-    </div>
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="input-group">
-                <input type="text" placeholder="Message..." class="form-control"/><span class="input-group-btn">
-          <button type="button" class="btn btn-default">Send</button></span>
+<div> Hello {{username}}</div>
+    <div id="container-chat"> Chat
+    <div class="chat">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="well">
+                    <h3>Online Users</h3>
+                    <ul class="list-group" id="users"></ul>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="chat" id="chat"></div>
+                <form id="messageForm">
+                    <div class="form-group">
+                        <label>Enter Message</label>
+                        <textarea class="form-control" id="message"></textarea>
+                        <br/>
+                        <input type="submit" class="btn btn-primary" value="Send Message" />
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
-
-<form id="initial-form" class="form-inline">
-    <div class="form-group">
-        <label for="who-are-you">Who are you?</label>
-        <input id="who-are-you" type="text" placeholder="Anonymous" class="form-control"/>
     </div>
-    <button type="submit" class="btn btn-primary">Start Chatting</button>
-</form>
-
+    <script src="/js/chat.js"></script>
 </body>
 </html>

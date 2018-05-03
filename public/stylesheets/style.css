@@ -11,11 +11,11 @@ body {
 }
 
 .form-signin {
-    width: 100%;
-    max-width: 330px;
-    padding: 15px;
-    margin: auto;
-}
+     width: 100%;
+     max-width: 330px;
+     padding: 15px;
+     margin: auto;
+ }
 .form-signin .checkbox {
     font-weight: 400;
 }
@@ -71,4 +71,19 @@ span.user {
     color: #369;
     padding-right: 8px;
     font-weight: bold;
+}
+
+
+#container-chat {
+    width: 400px;
+    height: 450px;
+    margin: 0 auto;
+    border: solid 1px #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+    float:right;
+}
+
+#container-chat .chat{
+
 }
