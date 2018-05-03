@@ -11,7 +11,7 @@ router.get('/',auths, (request, response, next) =>{
     .then(data=>{
         let obj = JSON.parse(JSON.stringify(data));
         //response.io.emit('userSocket', obj.username);
-        response.render('index', {username: obj.username});
+        response.render('index', {username: obj.username,layout: 'auth_layout.handlebars'});
     })
       .catch(error => {
         console.log(error);
@@ -19,16 +19,4 @@ router.get('/',auths, (request, response, next) =>{
       });
 });
 
-/*
-function ensureAuthenticated (request, response, next){
-  if(request.isAuthenticated()){
-      console.log("Authenticated");
-    return next();
-  } else{
-      request.flash('error_msg', 'Not Logged in');
-    response.redirect('users/login');
-
-  }
-}
-*/
 module.exports = router;
