@@ -87,7 +87,7 @@ class GamesDB {
      * @param {Number} gameId - The game ID to identify the all the records in the game_pieces table.
      * @param {Function} callbackFunction - The callback function to return the game_piece records to.
      */
-    getGamePiecesFromGame(gameId, callbackFunction) {
+    getAllGamePiecesFrom(gameId, callbackFunction) {
         const sqlGetFromGamePieces = `SELECT * FROM game_pieces WHERE gameid=($1)`;
 
         db.any(sqlGetFromGamePieces, [gameId])
@@ -96,16 +96,16 @@ class GamesDB {
             });
     }
 
-    /**
-     * Initialize records in the game_pieces table to their respective default coordinates.
-     * @param {Number} gameId 
-     */
-    initializeGamePieces(gameId) {
-        const sqlGetPiecesFrom = `SELECT * FROM game_pieces WHERE gameid=($1)`;
+    getAllPieces(callbackFunction) {
+        const sqlGetFromPieces = `SELECT * FROM pieces`;
 
-        db.tx(t => {
-
-        });
+        db.any(sqlGetFromPieces)
+            .then(pieceRecords => {
+                callbackFunction(pieceRecords);
+            })
+            .catch(error => {
+                console.log(error);
+            });
     }
 
 }
