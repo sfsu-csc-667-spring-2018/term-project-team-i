@@ -1,11 +1,12 @@
-const GamesDB = require('../db/gamesDB.js')
 const express = require("express");
-const db = require('../db');
+const GamesDB = require('../db/gamesDB.js')
+const gamesHbsHelpers = require('../routes/gamesControllers/gamesHbsHelpers.js')
 const router = express.Router();
 const gamesDB = new GamesDB();
 const activeGames = {};
 
-const gamesRequestHandler = (req, res, next) => {
+
+const gamesRequestFunction = (req, res, next) => {
     if (req.user === undefined || req.user.id === undefined) {
         // TODO: this is a stop gap measure, route this appropriately.
         res.end("Player ID undefined.");
@@ -15,31 +16,7 @@ const gamesRequestHandler = (req, res, next) => {
     const playerId = req.user.id;
     const renderData = {};
 
-    renderData.helpers = {
-        // Add all helper functions here.
-        chessboard_setupBlackOrWhiteClass: (blackClass, whiteClass, cellAlpha, cellNumber) => {
-            const alphaNumber = cellAlpha.charCodeAt(0);
-            const numberNumber = cellNumber;
-            const isCellAlphaEven = (alphaNumber % 2 === 0);
-            const isCellNumberEven = (cellNumber % 2 === 0);
-
-            return ((isCellAlphaEven && isCellNumberEven) || (!isCellAlphaEven && !isCellNumberEven)) ? whiteClass : blackClass;
-        },
-
-        chessboard_setupBorderAscii: (base, increments, count, block) => {
-            let accumulate = '';
-            for (let idx = 0; idx <= count; idx++) {
-                accumulate += block.fn(String.fromCharCode(base));
-                base += increments;
-            }
-            return accumulate;
-        },
-
-        chessboard_appendTwoStr: (str1, str2) => {
-            return String(str1) + String(str2);
-        }
-
-    }
+    renderData.helpers = gamesHbsHelpers;
 
     gamesDB.createGame(playerId, (gameId) => {
         gamesDB.getAllGamePiecesFrom(gameId, (gamePieceRecords) => {
@@ -73,6 +50,7 @@ const gamesRequestHandler = (req, res, next) => {
 
                 renderData.gamePieces = returnGamePieces;
                 res.render('games', renderData);
+
             })
         })
     });
@@ -86,10 +64,10 @@ const gamesRequestHandler = (req, res, next) => {
 //      Routes
 // ********************
 
-router.get('/', gamesRequestHandler);
+router.get('/', gamesRequestFunction);
 
 // Create new game room. req.body = {playerId: int}
-router.post('/', gamesRequestHandler);
+router.post('/', gamesRequestFunction);
 
 // Join a game room. req.params = {"gameId": int} req.body = {playerId: int}
 router.post('/:gameId', (req, res, next) => {
@@ -166,6 +144,7 @@ router.post('/:gameId/message', (req, res, next) => {
 // Moves a piece to position
 router.post('/:gameId/move-piece', (req, res, next) => {
     // {playerId: int, pieceId: int, coordinate_x: string, coordinate_y: string}
+    res.end("Got it: " + req.body);
 });
 
 router.post('/:gameId/forfeit', (req, res, next) => {

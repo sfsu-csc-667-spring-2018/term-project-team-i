@@ -8,6 +8,10 @@ class Chessboard {
     }
 
 
+    /**
+     * 
+     * @param {*} chessCellClassName 
+     */
     initCellListeners(chessCellClassName = 'chessCell') {
         const command = 'click';
         const chessCellElements = document.querySelectorAll("."+chessCellClassName);
@@ -45,7 +49,7 @@ class Chessboard {
         }
         
         if (hasSelectedItemId1 && hasSelectedItemId2) {
-            this.sendAjax('POST', this.selectedItemIds, '/move-piece');
+            this.sendAjax('POST', this.selectedItemIds, '/myinfo');
             // TODO: send playerId in Request body.
             this.selectedItemIds.cellId1 = null;
             this.selectedItemIds.cellId2 = null;
@@ -55,7 +59,7 @@ class Chessboard {
     sendAjax(httpVerb, httpJSONBody, restURIExtension) {
         const xml = new XMLHttpRequest();
         const url = window.location.href + restURIExtension;
-
+        console.log(url);
         xml.open(httpVerb, url, true);
         xml.setRequestHeader("Content-type", "application/json");
 
@@ -65,7 +69,7 @@ class Chessboard {
                 alert(xml.responseText);
             }
         }
-        
+        console.log(JSON.stringify(httpJSONBody));
         xml.send(JSON.stringify(httpJSONBody));
     }
 
