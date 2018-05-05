@@ -83,7 +83,7 @@ class GamesDB {
     }
 
     /**
-     * Retrieve the desired records from 
+     * Retrieve the desired records from the game_pieces table by the given game ID.
      * @param {Number} gameId - The game ID to identify the all the records in the game_pieces table.
      * @param {Function} callbackFunction - The callback function to return the game_piece records to.
      */

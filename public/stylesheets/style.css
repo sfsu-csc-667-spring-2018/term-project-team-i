@@ -40,6 +40,15 @@ body {
     border-top-right-radius: 0;
 }
 
+#btn_create_game {
+    background-color: Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden;
+    outline:none;
+}
+
 #chat-area {
     display: none;
 }

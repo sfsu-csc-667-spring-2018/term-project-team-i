@@ -1,77 +1,40 @@
 const express = require("express");
 const GamesDB = require('../db/gamesDB.js')
-const gamesHbsHelpers = require('../routes/gamesControllers/gamesHbsHelpers.js')
+const GamesController = require('../routes/gamesControllers/gamesController.js');
+const gamesHbsHelpers = require('../routes/gamesControllers/gamesHbsHelpers.js');
 const router = express.Router();
+const gamesController = new GamesController();
 const gamesDB = new GamesDB();
 const activeGames = {};
 
 
-const gamesRequestFunction = (req, res, next) => {
-    if (req.user === undefined || req.user.id === undefined) {
-        // TODO: this is a stop gap measure, route this appropriately.
-        res.end("Player ID undefined.");
-        return;
-    }
-
+// Create new game room. req.body = {playerId: int}
+router.post('/', (req, res, next) => {
+    // TODO: check if Player has an ID/exists via req.user.id
+    // TODO: check if Player has logged in first, otherwise REDIRECT to login screen.
+    // TODO: REDIRECT Player to /:gameId where id is the newGameId. This is effectively a Player join a game now.
+    // TODO: replace this with official response later.
+    
     const playerId = req.user.id;
+    gamesDB.createGame(playerId, (gameId) => {
+        res.redirect('/games/'+gameId);  
+    });
+});
+
+// Join a game room. req.params = {"gameId": int} req.body = {playerId: int}
+router.get('/:gameId', (req, res, next) => {
+    const gameId = req.params.gameId;
     const renderData = {};
 
     renderData.helpers = gamesHbsHelpers;
 
-    gamesDB.createGame(playerId, (gameId) => {
-        gamesDB.getAllGamePiecesFrom(gameId, (gamePieceRecords) => {
-            gamesDB.getAllPieces(pieceRecords => {
+    gamesDB.getAllGamePiecesFrom(gameId, (gamePieceRecords) => {
+        gamesDB.getAllPieces(pieceRecords => {
+            renderData.gamePieces = gamesController.getChessPiecesArray(gamePieceRecords, pieceRecords);
+            res.render('games', renderData);
+        });
+    })
 
-                const returnGamePieces = {};
-                const pieces = {};
-
-                // SUGGESTION: use a sql JOIN statement instead of aggregating pieces server side as an array after SELECT.
-                for (let jdx = 0; jdx < pieceRecords.length; jdx++) {
-                    pieces[pieceRecords[jdx].id] = {
-                        name: pieceRecords[jdx].name,
-                        faction: pieceRecords[jdx].faction
-                    };
-                }
-
-                // Sets the returning elements 
-                for (let idx = 0; idx < gamePieceRecords.length; idx++) {
-                    const gamePiece = gamePieceRecords[idx];
-                    const pieceid = gamePiece.pieceid;
-                    const coordinate_xy = gamePiece.coordinate_x + gamePiece.coordinate_y;
-                    const alive = gamePiece.alive;
-                    
-                    if (alive) {
-                        returnGamePieces[coordinate_xy] = {
-                            name: pieces[pieceid].name,
-                            faction: pieces[pieceid].faction
-                        };
-                    }
-                }
-
-                renderData.gamePieces = returnGamePieces;
-                res.render('games', renderData);
-
-            })
-        })
-    });
-    
-    // TODO: check if Player has logged in first, otherwise REDIRECT to login screen.
-    // TODO: REDIRECT Player to /:gameId where id is the newGameId. This is effectively a Player join a game now.
-    // TODO: replace this with official response later.
-};
-
-// ********************
-//      Routes
-// ********************
-
-router.get('/', gamesRequestFunction);
-
-// Create new game room. req.body = {playerId: int}
-router.post('/', gamesRequestFunction);
-
-// Join a game room. req.params = {"gameId": int} req.body = {playerId: int}
-router.post('/:gameId', (req, res, next) => {
-    
     /*
     1. Use the given gameId to pass off the information to an appropriate handler.
     2. Get from database all the pieces that belongs to the game.
@@ -79,38 +42,6 @@ router.post('/:gameId', (req, res, next) => {
     3. Send the rendered information to the user.
     4. 
     */
-    const handlebarsData = {};
-
-    handlebarsData.helpers = {
-        // Add all helper functions here.
-        chessboard_setupBlackOrWhiteClass: (blackClass, whiteClass, cellAlpha, cellNumber) => {
-            const alphaNumber = cellAlpha.charCodeAt(0);
-            const numberNumber = cellNumber;
-            const isCellAlphaEven = (alphaNumber % 2 === 0);
-            const isCellNumberEven = (cellNumber % 2 === 0);
-
-            return ((isCellAlphaEven && isCellNumberEven) || (!isCellAlphaEven && !isCellNumberEven)) ? whiteClass : blackClass;
-        },
-
-        chessboard_setupBorderAscii: (base, increments, count, block) => {
-            let accumulate = '';
-            for (let idx = 0; idx <= count; idx++) {
-                accumulate += block.fn(String.fromCharCode(base));
-                base += increments;
-            }
-            return accumulate;
-        }
-    }
-
-
-    gamesDB.getAllGamePiecesFrom(req.params.gameId, (gamePieceRecords) => {
-        for (let row = 0; row < gamePieceRecords.length; row++) {
-            let gamePieceRecord = gamePieceRecords[row];
-            let coordinate_xy = gamePieceRecord.coordinate_x + gamePieceRecord.coordinate_y;
-
-            handlebarsData.coordinate_xy = coordinate_xy;
-        }
-    });
 
     /*
     Programming flow:
