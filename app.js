@@ -21,9 +21,11 @@ const tests = require('./routes/tests');
 const games = require('./routes/games');
 
 const app = express();
+app.io = require('./sockets');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

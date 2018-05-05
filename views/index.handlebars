@@ -2,28 +2,26 @@
 <body>
 <div> Hello {{username}}</div>
     <div id="container-chat"> Chat
-    <div class="chat">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="well">
-                    <h3>Online Users</h3>
-                    <ul class="list-group" id="users"></ul>
-                </div>
-            </div>
-            <div class="col-md-8">
-                <div class="chat" id="chat"></div>
-                <form id="messageForm">
-                    <div class="form-group">
-                        <label>Enter Message</label>
-                        <textarea class="form-control" id="message"></textarea>
-                        <br/>
-                        <input type="submit" class="btn btn-primary" value="Send Message" />
-                    </div>
-                </form>
+        <div class="col-md-4">
+            <div class="well">
+                <h3>Online Users</h3>
+                <ul class="list-group" id="users"></ul>
             </div>
         </div>
+        <div class="chat-box">
+            <div class="chat" id="lobbyChat"></div>
+        </div>
+        <form class="send-message" id="lobbyMessageForm" method="post" action="/" >
+            <div class="form-group">
+                <label for="message"></label>
+                <input type="text" class="form-control" id="lobbyMessage"
+                       placeholder="Enter message" name="message" autocomplete="off">
+                <br/>
+                <button type="submit" class="btn btn-primary" value="Send Message">Send Message</button>
+            </div>
+        </form>
     </div>
-    </div>
+<p hidden id="lobbyUser">{{username}}</p>
     <script src="/js/chat.js"></script>
 </body>
 </html>
