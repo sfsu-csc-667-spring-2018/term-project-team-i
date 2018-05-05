@@ -76,7 +76,6 @@ span.user {
 
 #container-chat {
     width: 400px;
-    height: 450px;
     margin: 0 auto;
     border: solid 1px #ccc;
     border-radius: 5px;
@@ -84,6 +83,21 @@ span.user {
     float:right;
 }
 
-#container-chat .chat{
+#container-chat .chat-box{
+    overflow: auto;
+    direction: rtl;
+    height: 300px;
+}
 
+#container-chat .chat{
+    border-top: solid 1px #ccc;
+    border-bottom: solid 1px #ccc;
+    padding: 10px;
+    direction: rtl;
+}
+
+#container-chat .send-message{
+    width: 100%;
+    border: none;
+    padding: 5px;
 }
