@@ -3,7 +3,8 @@ const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const User = require("../db/usersDB");
-const passport = require('passport');
+const passport = require('../auth');
+//const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 
 
@@ -56,51 +57,6 @@ router.post("/register", (request, response) => {
 router.get("/login", (request, response) => {
     response.render("login",  {layout: 'layout.handlebars'});
 });
-
-passport.use(new LocalStrategy(
-    (username, password, done) => {
-        User.loginUsername(username, (err, user) => {
-                if (err) throw err;
-                if (user === null)
-                    return done(null, false, {message: 'Username does not exist'});
-                User.loginPassword(username)
-                    .then(hash => {
-                        bcrypt.compare(password, hash.password, (err, match) =>{
-                            if(err) throw err;
-                            if(match){
-                                console.log(hash.password)
-                                console.log("password verified");
-                                return done(null, user);
-                            } else{
-                                console.log("invalid pass");
-                                return done(null, false, {message: 'Invalid Password'});
-                            }
-                        })
-                    }).catch(error => {
-                    console.log(error);
-                });
-            }
-        )
-    }));
-
-passport.serializeUser((user, done) => {
-    console.log("reached serialize");
-    //console.log("user = " + user.id);
-    done(null, user.username);
-});
-
-passport.deserializeUser((id, done) => {
-    console.log("reached deserialize");
-    console.log("id =" + id);
-    User.loginUserID(id, (err, user) =>{
-        if(err){
-            console.log("serialize err");
-        }
-        console.log(id);
-        done(err, user);
-    });
-});
-
 
 router.post("/login", passport.authenticate('local',
     {successRedirect: '/', failureRedirect: '/users/login', failureFlash: true}));

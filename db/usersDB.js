@@ -36,23 +36,28 @@ const loginUserID = (findUserID, callback) => {
 
 const loginPassword = (checkUser) => {
     return db.one(`SELECT password FROM users WHERE username = ($1)`, checkUser);
-    /*
-        .then(data => {
-            bcrypt.compare(password, data, (err, isMatch) =>{
-                console.log(isMatch);
-                return callback(null, isMatch);
-            });
-        }).catch(error => {
-            console.log(error);
-            return callback(null, null);
-        })*/
 };
 
+const serialize =(user, done) => {
+    console.log("reached serialize");
+    //console.log("user = " + user.id);
+    done(null, user.id);
+};
+
+const deserialize = (id, done) => {
+    console.log("reached deserialize");
+    console.log("id =" + id);
+    db.one(`SELECT * FROM users WHERE id = ${id}`, {id})
+        .then(({id, username}) => done(null, {id, username}))
+        .catch(error => done(error));
+};
 
 
 module.exports = {
     registerUser,
     loginUsername,
     loginPassword,
-    loginUserID
+    loginUserID,
+    serialize,
+    deserialize
 };
