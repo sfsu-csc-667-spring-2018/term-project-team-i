@@ -1,66 +1,44 @@
-const GamesDB = require('../db/gamesDB.js')
 const express = require("express");
-const db = require('../db');
+const GamesDB = require('../db/gamesDB.js')
+const GamesController = require('../routes/gamesControllers/gamesController.js');
+const gamesHbsHelpers = require('../routes/gamesControllers/gamesHbsHelpers.js');
 const router = express.Router();
+const gamesController = new GamesController();
 const gamesDB = new GamesDB();
 const activeGames = {};
 
-const gamesRequestHandler = (req, res, next) => {
-    if (req.user === undefined || req.user.id === undefined) {
-        // TODO: this is a stop gap measure, route this appropriately.
-        res.end("Player ID undefined.");
-        return;
-    }
 
-    const playerId = req.user.id;
-    const renderData = {};
-
-    renderData.helpers = {
-        // Add all helper functions here.
-        chessboard_setupBlackOrWhiteClass: (blackClass, whiteClass, cellAlpha, cellNumber) => {
-            const alphaNumber = cellAlpha.charCodeAt(0);
-            const numberNumber = cellNumber;
-            const isCellAlphaEven = (alphaNumber % 2 === 0);
-            const isCellNumberEven = (cellNumber % 2 === 0);
-
-            return ((isCellAlphaEven && isCellNumberEven) || (!isCellAlphaEven && !isCellNumberEven)) ? whiteClass : blackClass;
-        },
-
-        chessboard_setupBorderAscii: (base, increments, count, block) => {
-            let accumulate = '';
-            for (let idx = 0; idx <= count; idx++) {
-                accumulate += block.fn(String.fromCharCode(base));
-                base += increments;
-            }
-            return accumulate;
-        }
-    }
-
-    gamesDB.createGame(playerId, (gameId) => {
-        gamesDB.getGamePiecesFromGame(gameId, (gamePieceRecords) => {
-            renderData.gamePieceRecords = gamePieceRecords;
-            res.render('games', renderData);
-        });
-        //res.render('games/'+gameId, renderData);
-    });
-    
+// Create new game room. req.body = {playerId: int}
+router.post('/', (req, res, next) => {
+    // TODO: check if Player has an ID/exists via req.user.id
     // TODO: check if Player has logged in first, otherwise REDIRECT to login screen.
     // TODO: REDIRECT Player to /:gameId where id is the newGameId. This is effectively a Player join a game now.
     // TODO: replace this with official response later.
-};
-
-// ********************
-//      Routes
-// ********************
-
-router.get('/', gamesRequestHandler);
-
-// Create new game room. req.body = {playerId: int}
-router.post('/', gamesRequestHandler);
+    
+    const playerId = req.user.id;
+    gamesDB.createNewGame(playerId, 'white', (gameId) => {
+        //res.end('/games/'+gameId);
+        res.redirect('/games/'+gameId);  
+    });
+});
 
 // Join a game room. req.params = {"gameId": int} req.body = {playerId: int}
-router.post('/:gameId', (req, res, next) => {
-    
+router.get('/:gameId', (req, res, next) => {
+    const gameId = req.params.gameId;
+    const renderData = {};
+
+    console.log("The game ID is: " + gameId);
+
+    renderData.helpers = gamesHbsHelpers;
+
+    gamesDB.getAllGamePiecesFrom(gameId, (gamePieceRecords) => {
+        gamesDB.getAllPieces(pieceRecords => {
+            renderData.gamePieces = gamesController.getChessPiecesArray(gamePieceRecords, pieceRecords);
+            renderData.gameId = gameId;
+            res.render('games',renderData);
+        });
+    })
+
     /*
     1. Use the given gameId to pass off the information to an appropriate handler.
     2. Get from database all the pieces that belongs to the game.
@@ -68,38 +46,6 @@ router.post('/:gameId', (req, res, next) => {
     3. Send the rendered information to the user.
     4. 
     */
-    const handlebarsData = {};
-
-    handlebarsData.helpers = {
-        // Add all helper functions here.
-        chessboard_setupBlackOrWhiteClass: (blackClass, whiteClass, cellAlpha, cellNumber) => {
-            const alphaNumber = cellAlpha.charCodeAt(0);
-            const numberNumber = cellNumber;
-            const isCellAlphaEven = (alphaNumber % 2 === 0);
-            const isCellNumberEven = (cellNumber % 2 === 0);
-
-            return ((isCellAlphaEven && isCellNumberEven) || (!isCellAlphaEven && !isCellNumberEven)) ? whiteClass : blackClass;
-        },
-
-        chessboard_setupBorderAscii: (base, increments, count, block) => {
-            let accumulate = '';
-            for (let idx = 0; idx <= count; idx++) {
-                accumulate += block.fn(String.fromCharCode(base));
-                base += increments;
-            }
-            return accumulate;
-        }
-    }
-
-
-    gamesDB.getGamePiecesFromGame(req.params.gameId, (gamePieceRecords) => {
-        for (let row = 0; row < gamePieceRecords.length; row++) {
-            let gamePieceRecord = gamePieceRecords[row];
-            let coordinate_xy = gamePieceRecord.coordinate_x + gamePieceRecord.coordinate_y;
-
-            handlebarsData.coordinate_xy = coordinate_xy;
-        }
-    });
 
     /*
     Programming flow:
@@ -127,12 +73,24 @@ router.post('/:gameId', (req, res, next) => {
 
 // Sends a message in the Game Room.
 router.post('/:gameId/message', (req, res, next) => {
+    const gameId = req.params.gameId;
+    console.log(gameId);
+
+    const message = req.body.gameMessage;
+    console.log('POSTED MESSAGE ' + message);
+    const user = req.user.username;
+    console.log(user);
+
+    //const indexRoute = request.app.get('io').of('/');
+    res.app.get('io').of('/games/' + gameId).emit('new game message',
+       {gameUser: user, gameMsg: message});
     // {playerId: int, message: string}
 });
 
 // Moves a piece to position
 router.post('/:gameId/move-piece', (req, res, next) => {
     // {playerId: int, pieceId: int, coordinate_x: string, coordinate_y: string}
+    res.end("TEST RESPONSE Got it: " + JSON.stringify(req.body));
 });
 
 router.post('/:gameId/forfeit', (req, res, next) => {

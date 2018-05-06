@@ -21,9 +21,11 @@ const tests = require('./routes/tests');
 const games = require('./routes/games');
 
 const app = express();
+app.io = require('./sockets');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -37,7 +39,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use('/:any', express.static(path.join(__dirname, 'public')));
 
 app.use(session({
     secret: 'secret',

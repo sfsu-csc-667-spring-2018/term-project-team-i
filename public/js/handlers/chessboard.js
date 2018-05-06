@@ -8,6 +8,10 @@ class Chessboard {
     }
 
 
+    /**
+     * 
+     * @param {*} chessCellClassName 
+     */
     initCellListeners(chessCellClassName = 'chessCell') {
         const command = 'click';
         const chessCellElements = document.querySelectorAll("."+chessCellClassName);
@@ -55,7 +59,7 @@ class Chessboard {
     sendAjax(httpVerb, httpJSONBody, restURIExtension) {
         const xml = new XMLHttpRequest();
         const url = window.location.href + restURIExtension;
-
+        console.log(url);
         xml.open(httpVerb, url, true);
         xml.setRequestHeader("Content-type", "application/json");
 
@@ -65,7 +69,7 @@ class Chessboard {
                 alert(xml.responseText);
             }
         }
-        
+        console.log(JSON.stringify(httpJSONBody));
         xml.send(JSON.stringify(httpJSONBody));
     }
 

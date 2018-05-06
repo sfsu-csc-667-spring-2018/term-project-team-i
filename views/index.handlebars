@@ -8,13 +8,12 @@
         h5 {
             text-align: center;
         }
+
         .col-sm-4 {
-            margin-top: 10%;
-            padding-left: 112px;
+            margin-top: 13%;
+
         }
-        .col-sm-5{
-            margin-left: 10px;
-        }
+
 
     </style>
 </head>
@@ -49,32 +48,31 @@
                 <hr>
                 <div class="chat">
                     <div class="row">
-                        <div class="col-sm-5">
+                        <div class="col-sm-1">
                             <div class="well">
                                 <ul class="list-group" id="users"></ul>
                             </div>
 
-
-                            <!-- display user input messages -->
-                            <div class="chat" id="chat">
-                            </div>
                         </div>
+                        <!-- display user input messages -->
+                        <div class="chat-box">
+                            <div class="chat" id="lobbyChat"></div>
+                        </div>
+
                     </div>
                 </div>
+                <!--Type messages and send footer-->
+                    <form class="send-message" id="LobbyMessageForm" method="post" action="/message">
+                        <div class="input-group">
+                            <input type="text" class="form-control input-sm chat_input" id="lobbyMessage"
+                                   placeholder="enter message here..." name="message" autocomplete="off"/>
+                            <button type="submit" class="btn btn-primary">Send</button>
+                        </div>
+                    </form>
             </div>
             <!-- End of chat & messages box-->
-
-            <!--Type messages and send footer-->
-            <div class="panel-footer">
-                <form id="messageForm">
-                    <div class="input-group">
-                        <input type="text" class="form-control input-sm chat_input" id="message"
-                               placeholder="Type your message here..."/>
-                        <button type="submit" class="btn btn-primary">Send</button>
-                    </div>
-                </form>
-            </div>
         </div>
+        <p hidden id="lobbyUser">{{username}}</p>
         <!-- End of chat-->
 
     </div>
@@ -83,5 +81,6 @@
 <!-- End of container class-->
 
 <script src="/js/chat.js"></script>
+
 </body>
 </html>

@@ -11,7 +11,7 @@ router.get('/',auths, (request, response, next) =>{
     .then(data=>{
         let obj = JSON.parse(JSON.stringify(data));
         //response.io.emit('userSocket', obj.username);
-        response.render('index', {username: obj.username});
+        response.render('index', {username: obj.username,layout: 'auth_layout.handlebars'});
     })
       .catch(error => {
         console.log(error);
@@ -19,16 +19,15 @@ router.get('/',auths, (request, response, next) =>{
       });
 });
 
-/*
-function ensureAuthenticated (request, response, next){
-  if(request.isAuthenticated()){
-      console.log("Authenticated");
-    return next();
-  } else{
-      request.flash('error_msg', 'Not Logged in');
-    response.redirect('users/login');
+router.post("/message", (request, response) =>{
+    const message = request.body.message;
+    console.log('POSTED MESSAGE ' + message);
+    const user = request.user.username;
+    console.log(user);
+    //const indexRoute = request.app.get('io').of('/');
+    response.app.get('io').of('/').emit('new lobby message',
+        {lobbyUser: user, lobbyMsg: message})
+});
 
-  }
-}
-*/
+
 module.exports = router;
