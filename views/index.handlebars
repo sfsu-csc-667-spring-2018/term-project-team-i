@@ -1,29 +1,87 @@
+<!DOCTYPE html>
 <html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<head>
+    <style>
+
+        h5 {
+            text-align: center;
+        }
+        .col-sm-4 {
+            margin-top: 10%;
+            padding-left: 112px;
+        }
+        .col-sm-5{
+            margin-left: 10px;
+        }
+
+    </style>
+</head>
+
 <body>
-<div> Hello {{username}}</div>
-    <div id="container-chat"> Chat
-    <div class="chat">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="well">
-                    <h3>Online Users</h3>
-                    <ul class="list-group" id="users"></ul>
+
+<!-- display buttons, chessboard, chatroom in row & column -->
+<!-- display body in container class-->
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- display "Join Game" buttons -->
+        <div class="col-sm-2">
+            <p>
+                <button type="button" class="btn btn-primary">Join Game <span class="sr-only">(current)</span></button>
+            </p>
+            <p>
+                <button type="button" class="btn btn-primary">Join Game <span class="sr-only">(current)</span></button>
+            </p>
+        </div>
+
+        <!-- display Welcome messages, chessboard -->
+        <div class="col-sm-6">
+            <h5> Hello <strong>{{username}}!</strong></h5>
+            <h5> Welcome to Chess Game!</h5>
+        </div>
+
+        <!-- display chat & messages box-->
+        <div class="col-sm-4">
+            <div id="container-chat"> Chat Room
+                <hr>
+                <div class="chat">
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <div class="well">
+                                <ul class="list-group" id="users"></ul>
+                            </div>
+
+
+                            <!-- display user input messages -->
+                            <div class="chat" id="chat">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-8">
-                <div class="chat" id="chat"></div>
+            <!-- End of chat & messages box-->
+
+            <!--Type messages and send footer-->
+            <div class="panel-footer">
                 <form id="messageForm">
-                    <div class="form-group">
-                        <label>Enter Message</label>
-                        <textarea class="form-control" id="message"></textarea>
-                        <br/>
-                        <input type="submit" class="btn btn-primary" value="Send Message" />
+                    <div class="input-group">
+                        <input type="text" class="form-control input-sm chat_input" id="message"
+                               placeholder="Type your message here..."/>
+                        <button type="submit" class="btn btn-primary">Send</button>
                     </div>
                 </form>
             </div>
         </div>
+        <!-- End of chat-->
+
     </div>
-    </div>
-    <script src="/js/chat.js"></script>
+    <!-- End of class ="row" -->
+</div>
+<!-- End of container class-->
+
+<script src="/js/chat.js"></script>
 </body>
 </html>
