@@ -16,7 +16,8 @@ router.post('/', (req, res, next) => {
     // TODO: replace this with official response later.
     
     const playerId = req.user.id;
-    gamesDB.createGame(playerId, (gameId) => {
+    gamesDB.createNewGame(playerId, 'white', (gameId) => {
+        //res.end('/games/'+gameId);
         res.redirect('/games/'+gameId);  
     });
 });
@@ -25,6 +26,8 @@ router.post('/', (req, res, next) => {
 router.get('/:gameId', (req, res, next) => {
     const gameId = req.params.gameId;
     const renderData = {};
+
+    console.log("The game ID is: " + gameId);
 
     renderData.helpers = gamesHbsHelpers;
 
@@ -75,7 +78,7 @@ router.post('/:gameId/message', (req, res, next) => {
 // Moves a piece to position
 router.post('/:gameId/move-piece', (req, res, next) => {
     // {playerId: int, pieceId: int, coordinate_x: string, coordinate_y: string}
-    res.end("Got it: " + req.body);
+    res.end("TEST RESPONSE Got it: " + JSON.stringify(req.body));
 });
 
 router.post('/:gameId/forfeit', (req, res, next) => {

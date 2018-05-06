@@ -49,7 +49,7 @@ class Chessboard {
         }
         
         if (hasSelectedItemId1 && hasSelectedItemId2) {
-            this.sendAjax('POST', this.selectedItemIds, '/myinfo');
+            this.sendAjax('POST', this.selectedItemIds, '/move-piece');
             // TODO: send playerId in Request body.
             this.selectedItemIds.cellId1 = null;
             this.selectedItemIds.cellId2 = null;

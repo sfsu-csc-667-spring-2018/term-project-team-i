@@ -6,13 +6,8 @@ class GamesDB {
         
     }
 
-    /**
-     * Creates the appropriate records within the database for a new game.
-     * @param {Number} userId - The host's ID to attach to the newly created game record.
-     * @param {Function} gameIdCallback - Callback function to return the ID of the newly created game record.
-     */
-    createGame(userId, gameIdCallback) {
-        const sqlSelectGame =   `SELECT id FROM games WHERE id=($1)`;
+    __dbCreateNewGameRecord(userId, gameIdCallback, dbx = db) {
+        const sqlGetUserRecord = `SELECT id FROM users WHERE id=($1);`;
 
         const sqlCreateGame =  `INSERT INTO games 
                                 (active, turn) 
@@ -20,67 +15,143 @@ class GamesDB {
                                 ('active', 'white') 
                                 RETURNING id;`;
 
+        if (isNaN(userId)) return false;
+
+        dbx.one(sqlGetUserRecord, [userId])
+            .then(userRecord => {
+                if (userRecord.id != userId) {
+                    if ((typeof gameIdCallback === 'function')) {
+                        gameIdCallback(-1);
+                    }
+                } else {
+                    dbx.one(sqlCreateGame)
+                        .then(newGameRecord => {
+                            if ((typeof gameIdCallback === 'function')) {
+                                gameIdCallback(newGameRecord.id);
+                            }
+                        })
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
+    __dbCreateNewGameUsersRecord(gameId, userId, gameIdCallback, dbx = db) {
         const sqlCreateGameUser = ` INSERT INTO game_users
                                     (gameid, userid)
                                     VALUES
                                     ($1, $2);`;
 
-        const sqlGetPieceId = `SELECT id FROM pieces WHERE name=($1) AND faction=($2)`;
+        dbx.none(sqlCreateGameUser, [gameId, userId])
+            .then(() => {
+                if ((typeof gameIdCallback) === 'function') {
+                    gameIdCallback(gameId);
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
 
-        const sqlCreateGamePiece = `INSERT INTO game_pieces
-                                    (gameid, userid, pieceid, coordinate_x, coordinate_y, alive)
-                                    VALUES
-                                    ($1, $2, $3, $4, $5, $6);`;
+    __dbCreateAllNewGamePiecesRecords(gameId, gameIdCallback, dbx = db) {
+        dbx.tx(t1 => {
+            const sqlGetPieceId = `SELECT id FROM pieces WHERE name=($1) AND faction=($2);`;
 
-        db.tx(t1 => {
-            return t1.one(sqlCreateGame)
-                        .then(newGameRecord => {
-                            const queries = [];
-                            const gameId  = newGameRecord['id'];
+            const sqlCreateGamePiece = `INSERT INTO game_pieces
+                                        (gameid, pieceid, coordinate_x, coordinate_y, alive)
+                                        VALUES
+                                        ($1, $2, $3, $4, $5);`;
 
-                            const specialPieces = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
-                            const armyDetails   = [  {faction: "white", pawnRowNum: '2', specialRowNum: '1'},
-                                                     {faction: "black", pawnRowNum: '7', specialRowNum: '8'}  ];
-                            
-                            queries.push(t1.one(sqlSelectGame, gameId));
-                            queries.push(t1.any(sqlCreateGameUser, [gameId, userId]));
-                            
-                            for (let armyDetailsIdx = 0; armyDetailsIdx < armyDetails.length; armyDetailsIdx++) {
-                                for (let offset = 0; offset < 8; offset++) {
-                                    const alphaRow      = String.fromCharCode(97 + offset);
-                                    const faction       = armyDetails[armyDetailsIdx].faction;
-                                    const pawnRowNum    = armyDetails[armyDetailsIdx].pawnRowNum;
-                                    const specialRowNum = armyDetails[armyDetailsIdx].specialRowNum;
+            const transactions = [];
 
-                                    queries.push(
-                                        t1.one(sqlGetPieceId, ['pawn', faction])
-                                            .then(pieceRecord => {
-                                                const pieceId = pieceRecord['id'];
+            const specialPieces = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+            const armyDetails   = [ {faction: "white", pawnRowNum: '2', specialRowNum: '1'},
+                                    {faction: "black", pawnRowNum: '7', specialRowNum: '8'}  ];
 
-                                                return t1.any(sqlCreateGamePiece, [gameId, userId, pieceId, alphaRow, pawnRowNum, true])
-                                            })
-                                        ,
-                                        t1.one(sqlGetPieceId, [specialPieces[offset], faction])
-                                            .then(pieceRecord => {
-                                                const pieceId = pieceRecord['id'];
+            for (let adx = 0; adx < armyDetails.length; adx++) {
+                for (let sdx = 0; sdx < specialPieces.length; sdx++) {
+                    const alphaRow      = String.fromCharCode(97 + sdx);
+                    const faction       = armyDetails[adx].faction;
+                    const pawnRowNum    = armyDetails[adx].pawnRowNum;
+                    const specialRowNum = armyDetails[adx].specialRowNum;
+    
+                    transactions.push(
+                        t1.one(sqlGetPieceId, ['pawn', faction])
+                            .then(pieceRecord => {
+                                const pieceId = pieceRecord['id'];
+                                return t1.any(sqlCreateGamePiece, [gameId, pieceId, alphaRow, pawnRowNum, true])
+                            })
+                        ,
+                        t1.one(sqlGetPieceId, [specialPieces[sdx], faction])
+                            .then(pieceRecord => {
+                                const pieceId = pieceRecord['id'];return t1.any(sqlCreateGamePiece, [gameId, pieceId, alphaRow, specialRowNum, true])
+                            })
+                        );
+                }
+            }
+            
+            return t1.batch(transactions);
+        })
+        .then(() => {
+            if ((typeof gameIdCallback) === 'function') {
+                gameIdCallback(gameId);
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
 
-                                                return t1.any(sqlCreateGamePiece, [gameId, userId, pieceId, alphaRow, specialRowNum, true])
-                                            })
-                                        );
-                                    }
-                            }
+    __dbSetUserGamePiecesRecords(gameId, userId, faction, gameIdCallback, dbx = db) {
+        const sqlGetPieceRecordsByFaction = `SELECT id FROM pieces WHERE faction=($1)`; 
 
-                            return t1.batch(queries);
-                        })
-                        .then((batchResults) => {
-                            const gameId = batchResults[0].id;  // gameId SELECT was first pushed into queries{}
-                            gameIdCallback(gameId);
-                        })
+        const sqlSetSqlGamePieces = `UPDATE game_pieces
+                                     SET userid=($1)
+                                     WHERE pieceid=($2) AND gameid=($3)`              
+
+        dbx.tx(t1 => {
+            const transactions = [];
+
+            transactions.push(
+                t1.any(sqlGetPieceRecordsByFaction, [faction])
+                    .then(pieceRecords => {
+                        for (let idx = 0; idx < pieceRecords.length; idx++) {
+                            const pieceRecord = pieceRecords[idx];
+                            const pieceId = pieceRecord.id;
+                            t1.none(sqlSetSqlGamePieces, [userId, pieceId, gameId])
+                        }
+                    })
+            )
+
+            return t1.batch(transactions);
+        })
+        .then(() => {
+            if ((typeof gameIdCallback === 'function')) {
+                gameIdCallback(gameId);
+            }
         })
         .catch(error => {
             console.log(error);
         })
     }
+
+    /**
+     * Creates the appropriate records within the database for a new game.
+     * @param {Number} userId - The host's ID to attach to the newly created game record.
+     * @param {Function} gameIdCallback - Callback function to return the ID of the newly created game record.
+     */
+    createNewGame(userId, faction, gameIdCallback) {
+        this.__dbCreateNewGameRecord(userId, (gameId => {
+            this.__dbCreateNewGameUsersRecord(gameId, userId, (gameId => {
+                this.__dbCreateAllNewGamePiecesRecords(gameId, (gameId) => {
+                    this.__dbSetUserGamePiecesRecords(gameId, userId, faction, gameIdCallback);
+                })
+            }))
+        }))
+                
+    }
+   
 
     /**
      * Retrieve the desired records from the game_pieces table by the given game ID.
