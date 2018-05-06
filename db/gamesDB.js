@@ -6,6 +6,12 @@ class GamesDB {
         
     }
 
+    // *****************************
+    //
+    //      Private Functions
+    //
+    // *****************************
+
     __dbCreateNewGameRecord(userId, gameIdCallback, dbx = db) {
         const sqlGetUserRecord = `SELECT id FROM users WHERE id=($1);`;
 
@@ -136,10 +142,17 @@ class GamesDB {
         })
     }
 
+    // *****************************
+    //
+    //      Public Functions
+    //
+    // *****************************
+
     /**
      * Creates the appropriate records within the database for a new game.
-     * @param {Number} userId - The host's ID to attach to the newly created game record.
-     * @param {Function} gameIdCallback - Callback function to return the ID of the newly created game record.
+     * @param {Number} userId The host's ID to attach to the newly created game record.
+     * @param {String} faction The faction of this user.
+     * @param {Function} gameIdCallback Callback function to return the ID of the newly created game record.
      */
     createNewGame(userId, faction, gameIdCallback) {
         this.__dbCreateNewGameRecord(userId, (gameId => {
@@ -148,15 +161,13 @@ class GamesDB {
                     this.__dbSetUserGamePiecesRecords(gameId, userId, faction, gameIdCallback);
                 })
             }))
-        }))
-                
+        }))    
     }
    
-
     /**
      * Retrieve the desired records from the game_pieces table by the given game ID.
-     * @param {Number} gameId - The game ID to identify the all the records in the game_pieces table.
-     * @param {Function} callbackFunction - The callback function to return the game_piece records to.
+     * @param {Number} gameId The game ID to identify the all the records in the game_pieces table.
+     * @param {Function} callbackFunction The callback function to return the game_piece records to.
      */
     getAllGamePiecesFrom(gameId, callbackFunction) {
         const sqlGetFromGamePieces = `SELECT * FROM game_pieces WHERE gameid=($1)`;
@@ -170,6 +181,10 @@ class GamesDB {
             });
     }
 
+    /**
+     * Retrieve all pieces table records from the database and return the records to the given callback function.
+     * @param {Function} callbackFunction The function to return all the pieces records to.
+     */
     getAllPieces(callbackFunction) {
         const sqlGetFromPieces = `SELECT * FROM pieces`;
 
