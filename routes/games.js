@@ -31,7 +31,8 @@ router.get('/:gameId', (req, res, next) => {
     gamesDB.getAllGamePiecesFrom(gameId, (gamePieceRecords) => {
         gamesDB.getAllPieces(pieceRecords => {
             renderData.gamePieces = gamesController.getChessPiecesArray(gamePieceRecords, pieceRecords);
-            res.render('games', renderData);
+            renderData.gameId = gameId;
+            res.render('games',renderData);
         });
     })
 
@@ -69,6 +70,17 @@ router.get('/:gameId', (req, res, next) => {
 
 // Sends a message in the Game Room.
 router.post('/:gameId/message', (req, res, next) => {
+    const gameId = req.params.gameId;
+    console.log(gameId);
+
+    const message = req.body.gameMessage;
+    console.log('POSTED MESSAGE ' + message);
+    const user = req.user.username;
+    console.log(user);
+
+    //const indexRoute = request.app.get('io').of('/');
+    res.app.get('io').of('/games/' + gameId).emit('new game message',
+       {gameUser: user, gameMsg: message});
     // {playerId: int, message: string}
 });
 
