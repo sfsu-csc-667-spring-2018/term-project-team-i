@@ -19,23 +19,14 @@ router.get('/',auths, (request, response, next) =>{
       });
 });
 
-router.post("/", (request, response) =>{
+router.post("/message", (request, response) =>{
     const message = request.body.message;
     console.log('POSTED MESSAGE ' + message);
-    //const user = request.user.id;
-    const indexRoute = response.app.get('io').of('/');
-    console.log(response.app.get('io').of('/'));
-    const socket = response.app.get('io');
-   // console.log(socket);
-    socket.on('send message', message =>{
-        console.log('Chat lobby msg: ' + message);
-        indexRoute.emit('new lobby message', {lobbyMsg: message});
-    })
-
-   // console.log(user);
-
-    //response.app.get('io').of('/').emit('new lobby message', {msg:message});
-    //response.sendStatus(200);
+    const user = request.user.username;
+    console.log(user);
+    //const indexRoute = request.app.get('io').of('/');
+    response.app.get('io').of('/').emit('new lobby message',
+        {lobbyUser: user, lobbyMsg: message})
 });
 
 

@@ -1,30 +1,29 @@
 $(document).ready(function(){
-    const socket = io.connect();
-    const $messageForm = $('#lobbyMessageForm');
-    const $message = $('#lobbyMessage');
-    const $chat = $('#lobbyChat');
-    const $user = document.getElementById("lobbyUser").textContent;
+    const socket = io('/');
+    //const $lobbyMessageForm = $('#lobbyMessageForm');
+    const $lobbyMessage = $('#lobbyMessage');
+    const $lobbyChat = $('#lobbyChat');
+    //const $user = document.getElementById("lobbyUser").textContent;
 
-    const gameSocket = io.connect('/games/:gameid');
-    const $gameMessageForm = $('#gameMessageForm');
-    const $gameMessage = $('#gameMessage')
-    const $gameChat = $('#gameChat');
-    const $gameUser = document.getElementById("gameUser").textContent;
+
 
     //lobby form
+    /*
     $messageForm.submit(event =>{
         event.preventDefault();
         console.log("user is " + $user);
         socket.emit('send message', {message:$message.val(), user: $user});
         $message.val('');
     });
-
-
+    */
+    //lobby message
     socket.on('new lobby message', data => {
-        $chat.prepend('<div class="chat">' + data.lobbyUser + ' : '+ data.lobbyMsg + '</div>');
+        $lobbyChat.prepend('<div class="chat">' + data.lobbyUser + ' : '+ data.lobbyMsg + '</div>');
+        $lobbyMessage.val('');
     });
 
     //game form
+    /*
     $gameMessageForm.submit(event =>{
         event.preventDefault();
         console.log("user is " + $gameUser);
@@ -38,4 +37,5 @@ $(document).ready(function(){
     //socket.on('new user', data=> {
     //  $users.append('<ul class="list-group">' + data.callback + '</ul>')
     //})
+    */
 });
