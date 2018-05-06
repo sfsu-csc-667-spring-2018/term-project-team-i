@@ -26,7 +26,7 @@ router.post("/message", (request, response) =>{
     console.log(user);
     //const indexRoute = request.app.get('io').of('/');
     response.app.get('io').of('/').emit('new lobby message',
-        {lobbyUser: user, lobbyMsg: message})
+        {lobbyUser: user, lobbyMsg: message});
 });
 
 
