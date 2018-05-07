@@ -19,14 +19,15 @@ class GamesController {
         // Sets the returning elements 
         for (let idx = 0; idx < gamePieceRecords.length; idx++) {
             const gamePiece = gamePieceRecords[idx];
-            const pieceid = gamePiece.pieceid;
+            const pieceId = gamePiece.pieceid;
             const coordinate_xy = gamePiece.coordinate_x + gamePiece.coordinate_y;
             const alive = gamePiece.alive;
             
             if (alive) {
                 returnGamePieces[coordinate_xy] = {
-                    name: pieces[pieceid].name,
-                    faction: pieces[pieceid].faction
+                    pieceId: pieceId,
+                    name: pieces[pieceId].name,
+                    faction: pieces[pieceId].faction
                 };
             }
         }

@@ -13,9 +13,9 @@
         <tr>
             <td class="border">{{this}}</td>
             {{#chessboard_setupBorderAscii 97 1 7}}
-            <td id="{{this}}{{../this}}" class="{{chessboard_setupBlackOrWhiteClass 'squareB' 'squareW' this ../this }} chessCell">
+            <td data-coordinate_x="{{this}}" data-coordinate_y="{{../this}}" class="{{chessboard_setupBlackOrWhiteClass 'squareB' 'squareW' this ../this }} chessCell">
                 {{#with (lookup @root.gamePieces (chessboard_appendTwoStr this ../this)) as |gamePiece|}}
-                    <img class="piece" src="images/{{gamePiece.faction}}{{gamePiece.name}}.png">
+                    <img data-piece_id="{{gamePiece.pieceId}}" data-piece_name="{{gamePiece.name}}" data-piece_faction="{{gamePiece.faction}}" class="piece" src="images/{{gamePiece.faction}}{{gamePiece.name}}.png">
                 {{/with}}
             </td>
             {{/chessboard_setupBorderAscii}}
