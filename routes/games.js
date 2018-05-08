@@ -39,7 +39,7 @@ router.get('/:gameId', auths, (req, res, next) => {
     });
     renderData.helpers = GamesHbsHelpers.getHelpers();
 
-    gamesDB.getAllGamePiecesFrom(gameId, (gamePieceRecords) => {
+    gamesDB.getAliveGamePiecesFrom(gameId, (gamePieceRecords) => {
         renderData.gamePieces = GamesHbsHelpers.combineToRenderChessPieces(gamePieceRecords);
         renderData.gameId = gameId;
         res.render('games',renderData);
@@ -99,12 +99,9 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
     const playerId = req.user.id;
     const gameId = req.params.gameId;
 
-
-    const selectedPieceInfo = {
-
-    };
-    const destinationInfo = {};
-
+    gamesDB.getAliveGamePiecesFrom(gameId, (gamePieceRecordsJOINED) => {
+        
+    });
 
 
     res.end("TEST RESPONSE Got it: " + JSON.stringify(req.body));

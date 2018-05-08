@@ -18,7 +18,7 @@ class GamesDB {
         const sqlCreateGame =  `INSERT INTO games 
                                 (active, turn) 
                                 VALUES 
-                                ('active', 'white') 
+                                ('idle', 'white') 
                                 RETURNING id;`;
 
         if (isNaN(userId)) return false;
@@ -186,12 +186,59 @@ class GamesDB {
             });
     }
    
+    /**
+     * Retrieve all the records from the pieces table.
+     * @param {Function} callbackFunction The function to return the retrieved pieces array data to.
+     * @param {*} dbx Optional database object for the use of transactions.
+     */
     getAllPieces(callbackFunction, dbx = db) {
         const sqlGetAllPieces = `SELECT * FROM pieces;`;
 
         dbx.any(sqlGetAllPieces)
             .then(pieceRecords => {
                 callbackFunction(pieceRecords);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    /**
+     * Set the active state for a specific game.
+     * @param {*} gameId The ID referring to a specific game.
+     * @param {*} activeState The active state to set a game to. The options are {'active' , 'idle', 'not_active'}
+     * @param {*} callbackFunction The callback function to call after execution; there is no data returned.
+     * @param {*} dbx Optional database object for the use of transactions. 
+     */
+    setGameActiveState(gameId, activeState, callbackFunction, dbx = db) {
+        const sqlSetGameState = `UPDATE games
+                                 SET active=($1)
+                                 WHERE id=($2);`;
+
+        dbx.any(sqlSetGameState, [activeState, gameId])
+            .then(() => {
+                callbackFunction();
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    /**
+     * Set the opponent of the specific game in the database.
+     * @param {*} gameId The ID of the game of which to modify the opponent ID value of.
+     * @param {*} opponentId The ID of the opponent for a the given game.
+     * @param {*} callbackFunction The callback function to call after execution; no data is given.
+     * @param {*} dbx Optional database object for the use of transactions.
+     */
+    setGameOpponent(gameId, opponentId, callbackFunction, dbx = db) {
+        const sqlSetOpponent = `UPDATE game_users
+                                SET opponentid=($1)
+                                WHERE gameid=(2);`;
+
+        dbx.any(sqlSetOpponent, [opponentId, gameId])
+            .then(() => {
+                callbackFunction();
             })
             .catch(error => {
                 console.log(error);
