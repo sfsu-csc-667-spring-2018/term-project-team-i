@@ -169,6 +169,7 @@ class GamesDB {
      * conditions are that the game_pieces must be alive and belong to a given game ID.
      * @param {Number} gameId The game ID to identify the all the records in the game_pieces table.
      * @param {Function} callbackFunction The callback function to return the game_piece records to.
+     * @param {Object} dbx The database object to query the tables from. This is optional in case of transaction usage.
      */
     getAliveGamePiecesFrom(gameId, callbackFunction, dbx = db) {
         const sqlGetJoinPieces =   `SELECT * FROM game_pieces 
