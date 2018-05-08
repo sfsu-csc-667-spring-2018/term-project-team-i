@@ -1,9 +1,7 @@
 const express = require("express");
 const GamesDB = require('../db/gamesDB.js')
-const GamesController = require('../routes/gamesControllers/gamesController.js');
-const gamesHbsHelpers = require('../routes/gamesControllers/gamesHbsHelpers.js');
+const GamesHbsHelpers = require('../routes/gamesControllers/gamesHbsHelpers.js');
 const router = express.Router();
-const gamesController = new GamesController();
 const gamesDB = new GamesDB();
 const auths = require('../auth/authenticate');
 const activeGames = {};
@@ -39,14 +37,12 @@ router.get('/:gameId', auths, (req, res, next) => {
             console.log('Game Disconnected: %s sockets connected', gameConnections.length);
         });
     });
-    renderData.helpers = gamesHbsHelpers;
+    renderData.helpers = GamesHbsHelpers.getHelpers();
 
     gamesDB.getAllGamePiecesFrom(gameId, (gamePieceRecords) => {
-        gamesDB.getAllPieces(pieceRecords => {
-            renderData.gamePieces = gamesController.getChessPiecesArray(gamePieceRecords, pieceRecords);
-            renderData.gameId = gameId;
-            res.render('games',renderData);
-        });
+        renderData.gamePieces = GamesHbsHelpers.combineToRenderChessPieces(gamePieceRecords);
+        renderData.gameId = gameId;
+        res.render('games',renderData);
     })
 
     /*
@@ -98,8 +94,19 @@ router.post('/:gameId/message', auths, (req, res, next) => {
 });
 
 // Moves a piece to position
-router.post('/:gameId/move-piece', (req, res, next) => {
-    // {playerId: int, pieceId: int, coordinate_x: string, coordinate_y: string}
+router.post('/:gameId/move-piece', auths, (req, res, next) => {
+    // {playerId: int, pieceid: int, coordinate_x: string, coordinate_y: string, destination_x, destination_y}
+    const playerId = req.user.id;
+    const gameId = req.params.gameId;
+
+
+    const selectedPieceInfo = {
+
+    };
+    const destinationInfo = {};
+
+
+
     res.end("TEST RESPONSE Got it: " + JSON.stringify(req.body));
 });
 

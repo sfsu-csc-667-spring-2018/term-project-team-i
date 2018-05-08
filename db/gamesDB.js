@@ -133,7 +133,7 @@ class GamesDB {
             return t1.batch(transactions);
         })
         .then(() => {
-            if ((typeof gameIdCallback === 'function')) {
+            if ((typeof gameIdCallback) === 'function') {
                 gameIdCallback(gameId);
             }
         })
@@ -163,39 +163,28 @@ class GamesDB {
             }))
         }))    
     }
-   
+
     /**
-     * Retrieve the desired records from the game_pieces table by the given game ID.
+     * Retrieve all game_pieces and pieces records by joining them together as a single array. The
+     * conditions are that the game_pieces must be alive and belong to a given game ID.
      * @param {Number} gameId The game ID to identify the all the records in the game_pieces table.
      * @param {Function} callbackFunction The callback function to return the game_piece records to.
      */
-    getAllGamePiecesFrom(gameId, callbackFunction) {
-        const sqlGetFromGamePieces = `SELECT * FROM game_pieces WHERE gameid=($1)`;
+    getAliveGamePiecesFrom(gameId, callbackFunction, dbx = db) {
+        const sqlGetJoinPieces =   `SELECT * FROM game_pieces 
+                                    FULL OUTER JOIN pieces 
+                                    ON game_pieces.pieceid=pieces.id
+                                    WHERE game_pieces.gameid=($1) AND game_pieces.alive=($2);`
 
-        db.any(sqlGetFromGamePieces, [gameId])
-            .then(gamePieceRecords => {
-                callbackFunction(gamePieceRecords);
+        dbx.any(sqlGetJoinPieces, [gameId, true])
+            .then(joinedPieceRecords => {
+                callbackFunction(joinedPieceRecords);
             })
             .catch(error => {
                 console.log(error);
             });
     }
-
-    /**
-     * Retrieve all pieces table records from the database and return the records to the given callback function.
-     * @param {Function} callbackFunction The function to return all the pieces records to.
-     */
-    getAllPieces(callbackFunction) {
-        const sqlGetFromPieces = `SELECT * FROM pieces`;
-
-        db.any(sqlGetFromPieces)
-            .then(pieceRecords => {
-                callbackFunction(pieceRecords);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }
+   
 
 }
 
