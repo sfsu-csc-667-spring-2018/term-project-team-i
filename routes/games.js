@@ -5,11 +5,12 @@ const gamesHbsHelpers = require('../routes/gamesControllers/gamesHbsHelpers.js')
 const router = express.Router();
 const gamesController = new GamesController();
 const gamesDB = new GamesDB();
+const auths = require('../auth/authenticate');
 const activeGames = {};
 
 
 // Create new game room. req.body = {playerId: int}
-router.post('/', (req, res, next) => {
+router.post('/', auths, (req, res, next) => {
     // TODO: check if Player has an ID/exists via req.user.id
     // TODO: check if Player has logged in first, otherwise REDIRECT to login screen.
     // TODO: REDIRECT Player to /:gameId where id is the newGameId. This is effectively a Player join a game now.
@@ -23,12 +24,21 @@ router.post('/', (req, res, next) => {
 });
 
 // Join a game room. req.params = {"gameId": int} req.body = {playerId: int}
-router.get('/:gameId', (req, res, next) => {
+router.get('/:gameId', auths, (req, res, next) => {
     const gameId = req.params.gameId;
     const renderData = {};
+    let gameConnections =[];
 
     console.log("The game ID is: " + gameId);
+    res.app.get('io').of('/games/' + gameId).on('connection',socket =>{
+        gameConnections.push(socket);
+        console.log('Connected to game: %s sockets connected', gameConnections.length);
 
+        socket.on('disconnect', () => {
+            gameConnections.splice(gameConnections.indexOf(socket), 1);
+            console.log('Game Disconnected: %s sockets connected', gameConnections.length);
+        });
+    });
     renderData.helpers = gamesHbsHelpers;
 
     gamesDB.getAllGamePiecesFrom(gameId, (gamePieceRecords) => {
@@ -72,7 +82,7 @@ router.get('/:gameId', (req, res, next) => {
 });
 
 // Sends a message in the Game Room.
-router.post('/:gameId/message', (req, res, next) => {
+router.post('/:gameId/message', auths, (req, res, next) => {
     const gameId = req.params.gameId;
     console.log(gameId);
 

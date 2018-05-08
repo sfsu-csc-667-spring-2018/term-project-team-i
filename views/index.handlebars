@@ -62,13 +62,13 @@
                     </div>
                 </div>
                 <!--Type messages and send footer-->
-                    <form class="send-message" id="LobbyMessageForm" method="post" action="/message">
-                        <div class="input-group">
-                            <input type="text" class="form-control input-sm chat_input" id="lobbyMessage"
-                                   placeholder="enter message here..." name="message" autocomplete="off"/>
-                            <button type="submit" class="btn btn-primary">Send</button>
-                        </div>
-                    </form>
+                <form class="send-message" id="LobbyMessageForm" method="post" action="/message">
+                    <div class="input-group">
+                        <input type="text" class="form-control input-sm chat_input" id="lobbyMessage"
+                               placeholder="enter message here..." name="message" autocomplete="off"/>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
             </div>
             <!-- End of chat & messages box-->
         </div>
@@ -76,11 +76,12 @@
         <!-- End of chat-->
 
     </div>
+
     <!-- End of class ="row" -->
 </div>
 <!-- End of container class-->
 
-<script src="/js/chat.js"></script>
+<script src="/js/indexSocket.js"></script>
 
 </body>
 </html>

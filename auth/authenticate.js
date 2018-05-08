@@ -5,7 +5,7 @@ const ensureAuth = (request, response, next) =>{
         return next();
     } else {
         request.flash('error_msg', 'Not Logged in');
-        response.redirect('users/login');
+        response.redirect('/users/login');
     }
 };
 
