@@ -3843,7 +3843,7 @@ input[type="button"].btn-block {
   padding: 10px 20px 10px 20px;
   margin-right: 5px;
   border: 1px solid whitesmoke;
-  border-radius: 5px;
+  border-radius: 0px;
   color: #ffffff;
 }
 

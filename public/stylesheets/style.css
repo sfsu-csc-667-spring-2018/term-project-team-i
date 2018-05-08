@@ -100,7 +100,9 @@ span.user {
 }
 
 #container-chat .chat{
-    border-bottom: solid 1px #ccc;
+    display: block;
+    margin-top: auto;
+    border-radius: 5px;
 }
 
 #container-chat .send-message{
