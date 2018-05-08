@@ -186,6 +186,17 @@ class GamesDB {
             });
     }
    
+    getAllPieces(callbackFunction, dbx = db) {
+        const sqlGetAllPieces = `SELECT * FROM pieces;`;
+
+        dbx.any(sqlGetAllPieces)
+            .then(pieceRecords => {
+                callbackFunction(pieceRecords);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
 
 }
 
