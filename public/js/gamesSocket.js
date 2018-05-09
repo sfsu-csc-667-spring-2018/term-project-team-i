@@ -10,5 +10,20 @@ $(document).ready(function(){
     gameSocket.on('new game message', data =>{
         $gameChat.prepend('<div class="chat" id="gameChat">' + data.gameUser + ': ' + data.gameMsg + '</div>' );
         $gameMessage.val('');
-    })
+    });
+
+    gameSocket.on('chessboard-refresh', data => {
+        $('.chessPiece').remove();  //Clear all previous chess pieces.
+        const updatedChessPieces = data.updatedChessPieces;
+
+        for (let idx = 0; idx < updatedChessPieces.length; idx++) {
+            const updatedChessPiece = updatedChessPieces[idx];
+
+            const chessPieceElement =   `<img data-piece_id="${updatedChessPiece.pieceid}" data-piece_name="${updatedChessPiece.name}"
+                                         data-piece_faction="${updatedChessPiece.faction}" class="chessPiece" 
+                                         src="images/${updatedChessPiece.faction+updatedChessPiece.name}.png">`;
+
+            $(`.chessCell[data-coordinate_x='${updatedChessPiece.coordinate_x}'][data-coordinate_y='${updatedChessPiece.coordinate_y}'`).append(chessPieceElement);
+        }
+    });
 });

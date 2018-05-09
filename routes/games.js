@@ -1,10 +1,13 @@
 const express = require("express");
-const GamesDB = require('../db/gamesDB.js')
-const GamesHbsHelpers = require('../routes/gamesControllers/gamesHbsHelpers.js');
+const handlebars = require('express-handlebars');
+const GamesDB = require('../db/gamesDB.js');
+const GamesHbsHelpers = require('../routes/gamesControllers/gamesRenderHelpers.js');
+const GameMoveValidator = require('../routes/gamesControllers/gameMoveValidator.js');
 const router = express.Router();
 const gamesDB = new GamesDB();
+const gameMoveValidator = new GameMoveValidator();
 const auths = require('../auth/authenticate');
-const activeGames = {};
+
 
 
 // Create new game room. req.body = {playerId: int}
@@ -37,10 +40,11 @@ router.get('/:gameId', auths, (req, res, next) => {
             console.log('Game Disconnected: %s sockets connected', gameConnections.length);
         });
     });
-    renderData.helpers = GamesHbsHelpers.getHelpers();
 
-    gamesDB.getAliveGamePiecesFrom(gameId, (gamePieceRecords) => {
-        renderData.gamePieces = GamesHbsHelpers.combineToRenderChessPieces(gamePieceRecords);
+    renderData.helpers = GamesHbsHelpers.getHandlebarHelpers();
+
+    gamesDB.getGamePiecesAlive(gameId, (gamePieceRecords) => {
+        renderData.gamePieces = GamesHbsHelpers.toPieceToCellMap(gamePieceRecords);
         renderData.gameId = gameId;
         res.render('games',renderData);
     })
@@ -96,15 +100,34 @@ router.post('/:gameId/message', auths, (req, res, next) => {
 // Moves a piece to position
 router.post('/:gameId/move-piece', auths, (req, res, next) => {
     // {playerId: int, pieceid: int, coordinate_x: string, coordinate_y: string, destination_x, destination_y}
+
     const playerId = req.user.id;
     const gameId = req.params.gameId;
+    const pieceId = req.body.pieceId;
+    const coordinate_x = req.body.coordinate_x;
+    const coordinate_y = req.body.coordinate_y;
+    const destination_x = req.body.destination_x;
+    const destination_y = req.body.destination_y;
+    
+    gamesDB.getGamePiecesAlive(gameId, (gamePieceRecordsJOINED) => {
+        const moveValidation = gameMoveValidator.validateMovement(gamePieceRecordsJOINED, playerId, destination_x, destination_y);
 
-    gamesDB.getAliveGamePiecesFrom(gameId, (gamePieceRecordsJOINED) => {
-        
+        if (moveValidation.result) {
+            gamesDB.getGameUsers(gameId, (gameUserRecord => {
+                gamesDB.setGamePieceCoordinates(gameId, playerId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, () => {
+                    gamesDB.getGamePiecesAlive(gameId, (gamePieceRecords => {
+                        res.statusCode = 204;
+                        res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieceRecords});
+                    }))
+                })
+            }))
+
+        } else {
+            console.log(moveValidation.message);
+        }
     });
-
-
-    res.end("TEST RESPONSE Got it: " + JSON.stringify(req.body));
+    
+    //res.end("TEST RESPONSE Got it: " + JSON.stringify(req.body));
 });
 
 router.post('/:gameId/forfeit', (req, res, next) => {

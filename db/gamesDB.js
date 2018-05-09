@@ -165,13 +165,48 @@ class GamesDB {
     }
 
     /**
+     * Retrieves the record of users of a given game ID from the game_users table.
+     * @param {Number} gameId The game ID to target the game user record.
+     * @param {Function} callbackFunction The callback function to pass the returned game_users record to.
+     * @param {Object} dbx Optional database object to use in case of transactions.
+     */
+    getGameUsers(gameId, callbackFunction, dbx = db) {
+        const sqlGetGameUsers = `SELECT * FROM game_users WHERE gameid=($1);`;
+
+        dbx.one(sqlGetGameUsers, [gameId])
+            .then(gameUserRecord => {
+                callbackFunction(gameUserRecord);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    /**
+     * Retrieve all the records from the pieces table.
+     * @param {Function} callbackFunction The function to return the retrieved pieces array data to.
+     * @param {*} dbx Optional database object for the use of transactions.
+     */
+    getPieces(callbackFunction, dbx = db) {
+        const sqlGetAllPieces = `SELECT * FROM pieces;`;
+
+        dbx.any(sqlGetAllPieces)
+            .then(pieceRecords => {
+                callbackFunction(pieceRecords);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    /**
      * Retrieve all game_pieces and pieces records by joining them together as a single array. The
      * conditions are that the game_pieces must be alive and belong to a given game ID.
      * @param {Number} gameId The game ID to identify the all the records in the game_pieces table.
      * @param {Function} callbackFunction The callback function to return the game_piece records to.
      * @param {Object} dbx The database object to query the tables from. This is optional in case of transaction usage.
      */
-    getAliveGamePiecesFrom(gameId, callbackFunction, dbx = db) {
+    getGamePiecesAlive(gameId, callbackFunction, dbx = db) {
         const sqlGetJoinPieces =   `SELECT * FROM game_pieces 
                                     FULL OUTER JOIN pieces 
                                     ON game_pieces.pieceid=pieces.id
@@ -185,18 +220,52 @@ class GamesDB {
                 console.log(error);
             });
     }
-   
-    /**
-     * Retrieve all the records from the pieces table.
-     * @param {Function} callbackFunction The function to return the retrieved pieces array data to.
-     * @param {*} dbx Optional database object for the use of transactions.
-     */
-    getAllPieces(callbackFunction, dbx = db) {
-        const sqlGetAllPieces = `SELECT * FROM pieces;`;
 
-        dbx.any(sqlGetAllPieces)
-            .then(pieceRecords => {
-                callbackFunction(pieceRecords);
+    /**
+     * Retrieves a single game piece record from the game_pieces table.
+     * @param {Number} gameId 
+     * @param {Number} userId 
+     * @param {Number} pieceId 
+     * @param {String} coordinate_x 
+     * @param {Number} coordiante_y 
+     * @param {Function} callbackFunction The callback function to return the return the one record to.
+     * @param {Object} dbx Optional database object for the use of transactions.
+     */
+    getGamePiece(gameId, userId, pieceId, coordinate_x, coordiante_y, callbackFunction, dbx = db) {
+        const sqlGetPiece = `SELECT * FROM game_pieces
+                             WHERE gameid=($1) AND userid=($2) AND pieceid=($3) AND coordinate_x=($4) AND coordinate_y=($5);`;
+
+        dbx.one(sqlGetPiece, [gameId, userId, pieceId, coordiante_x, coordiante_y])
+            .then(gamePieceRecord => {
+                callbackFunction(gamePieceRecord);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    setGamePieceCoordinates(gameId, userId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, callbackFunction, dbx = db) {
+        const sqlSetPieceCoordinates = `UPDATE game_pieces
+                                        SET coordinate_x=($1), coordinate_y=($2)
+                                        WHERE gameid=($3) AND userid=($4) AND pieceid=($5) AND coordinate_x=($6) AND coordinate_y=($7);`;
+
+        dbx.none(sqlSetPieceCoordinates, [destination_x, destination_y, gameId, userId, pieceId, coordinate_x, coordinate_y])
+            .then(() => {
+                callbackFunction();
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    setGamePieceToDead(gameId, userId, pieceId, coordinate_x, coordinate_y, callbackFunction, dbx = db) {
+        const sqlSetGamePieceDead = `UPDATE game_pieces
+                                     SET coordinate_x=NULL, coordinate_y=NULL, alive=false
+                                     WHERE gameid=($1) AND userid=($2) AND pieceid=($3) AND coordinate_x=($4) AND coordinate_y=($5);`;
+                                    
+        dbx.none(sqlSetGamePieceDead, [gameId, userId, pieceId, coordinate_x, coordinate_y])
+            .then(() => {
+                callbackFunction();
             })
             .catch(error => {
                 console.log(error);
@@ -226,12 +295,12 @@ class GamesDB {
 
     /**
      * Set the opponent of the specific game in the database.
-     * @param {*} gameId The ID of the game of which to modify the opponent ID value of.
-     * @param {*} opponentId The ID of the opponent for a the given game.
-     * @param {*} callbackFunction The callback function to call after execution; no data is given.
+     * @param {Number} gameId The ID of the game of which to modify the opponent ID value of.
+     * @param {Number} opponentId The ID of the opponent for a the given game.
+     * @param {Function} callbackFunction The callback function to call after execution; no data is given.
      * @param {*} dbx Optional database object for the use of transactions.
      */
-    setGameOpponent(gameId, opponentId, callbackFunction, dbx = db) {
+    setGameUsersOpponent(gameId, opponentId, callbackFunction, dbx = db) {
         const sqlSetOpponent = `UPDATE game_users
                                 SET opponentid=($1)
                                 WHERE gameid=(2);`;
@@ -244,6 +313,7 @@ class GamesDB {
                 console.log(error);
             })
     }
+
 
 }
 

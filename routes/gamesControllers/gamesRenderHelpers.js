@@ -5,7 +5,7 @@ class GamesHbsHelpers {
      * @param {*} gamePieceRecordsJOINED 
      * @param {*} pieceRecords 
      */
-    static combineToRenderChessPieces (gamePieceRecordsJOINED = []) {
+    static toPieceToCellMap (gamePieceRecordsJOINED = []) {
         const returnGamePieces = {};
 
         // Sets the returning elements 
@@ -29,7 +29,7 @@ class GamesHbsHelpers {
         return returnGamePieces;
     }
 
-    static getHelpers() {
+    static getHandlebarHelpers() {
 
         const helpers = {
             chessboard_setupBlackOrWhiteClass: (blackClass, whiteClass, cellAlpha, cellNumber) => {
