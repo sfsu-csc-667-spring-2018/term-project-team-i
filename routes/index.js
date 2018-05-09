@@ -7,16 +7,19 @@ const db = require('../db/index');
 router.get('/',auths, (request, response, next) =>{
   let getID =request.user.id;
 
-  db.one(`SELECT username FROM users WHERE id = ${getID}`)
-    .then(data=>{
-        let obj = JSON.parse(JSON.stringify(data));
-        //response.io.emit('userSocket', obj.username);
-        response.render('index', {username: obj.username,layout: 'auth_layout.handlebars'});
-    })
-      .catch(error => {
-        console.log(error);
-          response.render('index');
-      });
+  db.tx(t =>{
+      const user = t.one(`SELECT username FROM users WHERE id = ${getID}`);
+      const games = t.any(`SELECT id FROM games WHERE active = 'active'`);
+      return t.batch([user, games]);
+  }).then( data =>{
+      console.log("reached data"  + JSON.stringify(data));
+      let obj = JSON.parse(JSON.stringify(data[0]));
+      let game = JSON.parse(JSON.stringify(data[1]));
+      response.render('index', {username: obj.username, game: game,layout: 'auth_layout.handlebars'});
+  }).catch(error => {
+      console.log(error);
+      response.render('index');
+  });
 });
 
 router.post("/message", (request, response) =>{
