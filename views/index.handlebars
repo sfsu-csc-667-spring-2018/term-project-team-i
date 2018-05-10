@@ -1,6 +1,25 @@
 <html>
 <body>
 <div> Hello {{username}}</div>
+<div id="container-game-list"> Games
+    <div class="games-list">
+        {{#each rejoin}}
+            <form method="get" action="/games/{{id}}">
+                <div class="list">Game #{{id}}
+                    <input type="submit" value="Rejoin Game"/>
+                </div>
+            </form>
+        {{/each}}
+        {{#each game}}
+            <form method="get" action="/games/{{id}}">
+                <div class="list">Game #{{id}}
+                    <input type="submit" value="Join Game"/>
+                </div>
+            </form>
+        {{/each}}
+        <div class="list" id="gamesList"></div>
+    </div>
+</div>
     <div id="container-chat"> Chat
         <div class="col-md-4">
             <div class="well">
