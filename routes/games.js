@@ -116,8 +116,9 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
             gamesDB.getGameUsers(gameId, (gameUserRecord => {
                 gamesDB.setGamePieceCoordinates(gameId, playerId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, () => {
                     gamesDB.getGamePiecesAlive(gameId, (gamePieceRecords => {
-                        res.statusCode = 204;
+                        res.statusCode = 200;
                         res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieceRecords});
+                        res.end("Move completed");
                     }))
                 })
             }))
