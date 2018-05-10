@@ -4,7 +4,7 @@ module.exports = (id, response) =>{
     db.tx(t =>{
         const user = t.one(`SELECT username FROM users WHERE id = ${id}`);
         const games = t.any(`SELECT id FROM games WHERE active = 'idle'`);
-        const rejoin = t.any(`select id from games Join game_users ON gameid = id WHERE active = 'active' 
+        const rejoin = t.any(`SELECT id FROM games JOIN game_users ON gameid = id WHERE active = 'active' 
               AND (userid = ${id} OR opponentid = ${id})`);
         return t.batch([user, games, rejoin]);
     }).then( data =>{
