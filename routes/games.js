@@ -4,6 +4,7 @@ const GamesHbsHelpers = require('../routes/gamesControllers/gamesHbsHelpers.js')
 const router = express.Router();
 const gamesDB = new GamesDB();
 const auths = require('../auth/authenticate');
+const gameAuth = require('../auth/gameAuth');
 const activeGames = {};
 
 
@@ -23,34 +24,44 @@ router.post('/', auths, (req, res, next) => {
 
 // Join a game room. req.params = {"gameId": int} req.body = {playerId: int}
 router.get('/:gameId', auths, (req, res, next) => {
+    const userid = req.user.id;
     const gameId = req.params.gameId;
     const renderData = {};
     let gameConnections =[];
 
-    console.log("The game ID is: " + gameId);
-    res.app.get('io').of('/games/' + gameId).on('connection',socket =>{
-        gameConnections.push(socket);
-        console.log('Connected to game: %s sockets connected', gameConnections.length);
+    gameAuth(userid, gameId,
+    () => {
+        //success handler
+        res.app.get('io').of('/games/' + gameId).on('connection',socket =>{
+            gameConnections.push(socket);
+            console.log('Connected to game: %s sockets connected', gameConnections.length);
 
-        socket.on('disconnect', () => {
-            gameConnections.splice(gameConnections.indexOf(socket), 1);
-            console.log('Game Disconnected: %s sockets connected', gameConnections.length);
+            socket.on('disconnect', () => {
+                gameConnections.splice(gameConnections.indexOf(socket), 1);
+                console.log('Game Disconnected: %s sockets connected', gameConnections.length);
+            });
         });
-    });
-    renderData.helpers = GamesHbsHelpers.getHelpers();
 
-    gamesDB.getAliveGamePiecesFrom(gameId, (gamePieceRecords) => {
-        renderData.gamePieces = GamesHbsHelpers.combineToRenderChessPieces(gamePieceRecords);
-        renderData.gameId = gameId;
-        res.render('games',renderData);
-    })
+        renderData.helpers = GamesHbsHelpers.getHelpers();
+
+        gamesDB.getAliveGamePiecesFrom(gameId, (gamePieceRecords) => {
+            renderData.gamePieces = GamesHbsHelpers.combineToRenderChessPieces(gamePieceRecords);
+            renderData.gameId = gameId;
+            res.render('games',renderData);
+        })
+    },
+    () => {
+        //failure handler
+        req.flash('error_msg', 'You are not allowed in this game');
+        res.redirect('/');
+    });
 
     /*
     1. Use the given gameId to pass off the information to an appropriate handler.
     2. Get from database all the pieces that belongs to the game.
     2. Process each record to place each piece in accordance to its location on the screen.
     3. Send the rendered information to the user.
-    4. 
+    4.
     */
 
     /*
@@ -58,7 +69,7 @@ router.get('/:gameId', auths, (req, res, next) => {
         -Check Player is logged in.
             If Player is logged in:
                 -SELECT * FROM game_users WHERE gameid='gameId' // AND (userid='playerId' OR opponentid='playerId');
-                
+
                     If successful and the record is found (promise) then
                         If ['userid'] == 'playerId'
                             -Player is white (and assumed as original host).
@@ -74,7 +85,6 @@ router.get('/:gameId', auths, (req, res, next) => {
             Else
                 -Redirect to Sign In page.
     */
-    
 });
 
 // Sends a message in the Game Room.
