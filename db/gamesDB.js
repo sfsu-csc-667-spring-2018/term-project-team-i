@@ -249,21 +249,56 @@ class GamesDB {
                                         SET coordinate_x=($1), coordinate_y=($2)
                                         WHERE gameid=($3) AND userid=($4) AND pieceid=($5) AND coordinate_x=($6) AND coordinate_y=($7);`;
 
-        dbx.none(sqlSetPieceCoordinates, [destination_x, destination_y, gameId, userId, pieceId, coordinate_x, coordinate_y])
-            .then(() => {
-                callbackFunction();
-            })
-            .catch(error => {
-                console.log(error);
-            })
+        const sqlGetPieceAtCoordinates =    `SELECT * FROM game_pieces 
+                                             WHERE gameid=($1) AND coordinate_x=($2) AND coordinate_y=($3);`;
+
+        
+        const sql
+        dbx.tx(t1 => {
+            //1. Get any opposing piece at destination
+            //2. If opposing piece at destination then set it to dead.
+            //3. Set given piece to destination coordinates.
+            //4. 
+            const transactions = [];
+            
+            transactions.push(
+                t1.any(sqlGetPieceAtCoordinates, [gameId, destination_x, destination_y])
+                    .then(gamePiecesAtDestination => {
+                        if (gamePiecesAtDestination.length > 0) {
+                            this.setGamePieceToDead(gameId, destination_x, destination_y, () => {}, t1)
+                            .catch(error => {
+                                console.log(error);
+                            })
+                        }
+                    })
+                    .then(() => {
+                        t1.none(sqlSetPieceCoordinates, [destination_x, destination_y, gameId, userId, pieceId, coordinate_x, coordinate_y])
+                            .catch(error => {
+                                console.log(error);
+                            })
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+            )
+
+            return t1.batch(transactions);
+        })
+        .then(() => {
+            callbackFunction();
+        })
+        .catch(error => {
+            console.log(error);
+        })
     }
 
-    setGamePieceToDead(gameId, userId, pieceId, coordinate_x, coordinate_y, callbackFunction, dbx = db) {
+    setGamePieceToDead(gameId, coordinate_x, coordinate_y, callbackFunction, dbx = db) {
         const sqlSetGamePieceDead = `UPDATE game_pieces
                                      SET coordinate_x=NULL, coordinate_y=NULL, alive=false
-                                     WHERE gameid=($1) AND userid=($2) AND pieceid=($3) AND coordinate_x=($4) AND coordinate_y=($5);`;
-                                    
-        dbx.none(sqlSetGamePieceDead, [gameId, userId, pieceId, coordinate_x, coordinate_y])
+                                     WHERE gameid=($1) AND coordinate_x=($2) AND coordinate_y=($3);`;
+                 
+        
+        dbx.none(sqlSetGamePieceDead, [gameId, coordinate_x, coordinate_y])
             .then(() => {
                 callbackFunction();
             })
