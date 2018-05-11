@@ -253,7 +253,6 @@ class GamesDB {
                                              WHERE gameid=($1) AND coordinate_x=($2) AND coordinate_y=($3);`;
 
         
-        const sql
         dbx.tx(t1 => {
             //1. Get any opposing piece at destination
             //2. If opposing piece at destination then set it to dead.
@@ -265,10 +264,7 @@ class GamesDB {
                 t1.any(sqlGetPieceAtCoordinates, [gameId, destination_x, destination_y])
                     .then(gamePiecesAtDestination => {
                         if (gamePiecesAtDestination.length > 0) {
-                            this.setGamePieceToDead(gameId, destination_x, destination_y, () => {}, t1)
-                            .catch(error => {
-                                console.log(error);
-                            })
+                            this.setGamePieceToDead(gameId, destination_x, destination_y, () => {}, t1);
                         }
                     })
                     .then(() => {

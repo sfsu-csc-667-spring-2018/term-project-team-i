@@ -20,6 +20,11 @@ class Chessboard {
         return chessCellElement.querySelector("."+this.classChessPiece);
     }
 
+    clearSelection() {
+        this.selectedCells.cellElement1 = null;
+        this.selectedCells.cellElement2 = null;
+    }
+
     /**
      * 
      * @param {*} chessCellClassName 
@@ -45,10 +50,10 @@ class Chessboard {
      * @param {HTMLElement} cellElement 
      */
     addCellSelectedElement(cellElement) {
-        if (this.selectedCells.cellElement1 === cellElement) return;
-    
-        if (!(this.selectedCells.cellElement1 !== null) && this.__getSelectedChessPiece(cellElement)) {
-            this.selectedCells.cellElement1 = cellElement;
+        if (this.selectedCells.cellElement1 === null) {
+            if (this.__getSelectedChessPiece(cellElement)) {
+                this.selectedCells.cellElement1 = cellElement;
+            }
         } else {
             this.selectedCells.cellElement2 = cellElement;
         }
@@ -71,8 +76,7 @@ class Chessboard {
             }
 
             this.sendAjax('POST', movementData, this.movepieceRoute);
-            this.selectedCells.cellElement1 = null;
-            this.selectedCells.cellElement2 = null;
+            this.clearSelection();
         }
     }
 
@@ -84,8 +88,9 @@ class Chessboard {
         xml.setRequestHeader("Content-type", "application/json");
 
         xml.onreadystatechange = () => {
-            if (xml.readyState == 4 && xml.status >= 200 && xml.status <= 300) {
-                //TODO: require dictionary/mapping to determine course of action depending on received response.
+            if (xml.readyState == 4) {
+                // Using to handle response.
+                this.clearSelection();
                 console.log(xml.responseText);
             }
         }
