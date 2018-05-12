@@ -244,26 +244,65 @@ class GamesDB {
             })
     }
 
-    setGamePieceCoordinates(gameId, userId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, callbackFunction, dbx = db) {
+    /**
+     * Moves a piece from the given x-y coordinates to the destination x-y coordinates. Note that if an existing piece
+     * exists at the destination then it will be automatically be set to dead (via null x-y coordinates and alive=false).
+     * @param {*} gameId The game ID of which to find the piece in.
+     * @param {*} pieceId The piece ID of the piece to move.
+     * @param {*} coordinate_x The x coordinate of the piece to move.
+     * @param {*} coordinate_y Tge y cooridinate of the piece to move.
+     * @param {*} destination_x The x destination coordinate of the piece to move to.
+     * @param {*} destination_y The y destination coordinate of the piece to move to.
+     * @param {*} callbackFunction The callback function to executate after this current function execution (no data is returned).
+     * @param {*} dbx Optional database object to use in case of transactions.
+     */
+    setGamePieceCoordinates(gameId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, callbackFunction, dbx = db) {
         const sqlSetPieceCoordinates = `UPDATE game_pieces
                                         SET coordinate_x=($1), coordinate_y=($2)
-                                        WHERE gameid=($3) AND userid=($4) AND pieceid=($5) AND coordinate_x=($6) AND coordinate_y=($7);`;
+                                        WHERE gameid=($3) AND pieceid=($4) AND coordinate_x=($5) AND coordinate_y=($6);`;
 
-        dbx.none(sqlSetPieceCoordinates, [destination_x, destination_y, gameId, userId, pieceId, coordinate_x, coordinate_y])
-            .then(() => {
-                callbackFunction();
-            })
-            .catch(error => {
-                console.log(error);
-            })
+        const sqlGetPieceAtCoordinates =    `SELECT * FROM game_pieces 
+                                             WHERE gameid=($1) AND coordinate_x=($2) AND coordinate_y=($3);`;
+
+        
+        dbx.tx(t1 => {
+            const transactions = [];
+            
+            transactions.push(
+                t1.any(sqlGetPieceAtCoordinates, [gameId, destination_x, destination_y])
+                    .then(gamePiecesAtDestination => {
+                        if (gamePiecesAtDestination.length > 0 && gamePiecesAtDestination[0]['pieceid'] !== pieceId) {
+                            this.setGamePieceToDead(gameId, destination_x, destination_y, () => {}, t1);
+                        }
+                    })
+                    .then(() => {
+                        t1.none(sqlSetPieceCoordinates, [destination_x, destination_y, gameId, pieceId, coordinate_x, coordinate_y])
+                            .catch(error => {
+                                console.log(error);
+                            })
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+            )
+
+            return t1.batch(transactions);
+        })
+        .then(() => {
+            callbackFunction();
+        })
+        .catch(error => {
+            console.log(error);
+        })
     }
 
-    setGamePieceToDead(gameId, userId, pieceId, coordinate_x, coordinate_y, callbackFunction, dbx = db) {
+    setGamePieceToDead(gameId, coordinate_x, coordinate_y, callbackFunction, dbx = db) {
         const sqlSetGamePieceDead = `UPDATE game_pieces
                                      SET coordinate_x=NULL, coordinate_y=NULL, alive=false
-                                     WHERE gameid=($1) AND userid=($2) AND pieceid=($3) AND coordinate_x=($4) AND coordinate_y=($5);`;
-                                    
-        dbx.none(sqlSetGamePieceDead, [gameId, userId, pieceId, coordinate_x, coordinate_y])
+                                     WHERE gameid=($1) AND coordinate_x=($2) AND coordinate_y=($3);`;
+                 
+        
+        dbx.none(sqlSetGamePieceDead, [gameId, coordinate_x, coordinate_y])
             .then(() => {
                 callbackFunction();
             })
