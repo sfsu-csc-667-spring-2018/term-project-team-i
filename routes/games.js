@@ -117,26 +117,83 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
     const coordinate_y = req.body.coordinate_y;
     const destination_x = req.body.destination_x;
     const destination_y = req.body.destination_y;
-    
+
     gamesDB.getGamePiecesAlive(gameId, (gamePieceRecordsJOINED) => {
         const moveValidation = gameMoveValidator.validateMovement(gamePieceRecordsJOINED, playerId, destination_x, destination_y);
 
         if (moveValidation.result) {
-            gamesDB.getGameUsers(gameId, (gameUserRecord => {
-                gamesDB.setGamePieceCoordinates(gameId, playerId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, () => {
-                    gamesDB.getGamePiecesAlive(gameId, (gamePieceRecords => {
+            gamesDB.getGameUsers(gameId, (gameUserRecord) => {
+                gamesDB.setGamePieceCoordinates(gameId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, () => {
+                    gamesDB.getGamePiecesAlive(gameId, (gamePieceRecords) => {
                         res.statusCode = 200;
                         res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieceRecords});
                         res.end("Move completed");
-                    }))
-                })
-            }))
-
+                    });
+                });
+            });
         } else {
             console.log(moveValidation.message);
         }
     });
-    
+
+    /*
+    new Promise((resolve, reject) => {
+        gamesDB.getGamePiecesAlive(gameId, (gamePieceRecordsJOINED) => {
+            resolve(gamePieceRecordsJOINED);
+        });
+    })
+    .then((gamePieceRecordsJOINED) => {
+        console.log("GAME RECORDS RECEIVED");
+        const promise = new Promise((resolve, reject) => {
+            const moveValidation = gameMoveValidator.validateMovement(gamePieceRecordsJOINED, playerId, destination_x, destination_y);
+
+            if (moveValidation.result) {
+                resolve();
+            } else {
+                reject(moveValidation.message);
+            }
+        });
+
+        return promise;
+    })
+    .then(() => {
+        // Check for valid user.
+        const promise = new Promise((resolve, reject) => {
+            gamesDB.getGameUsers(gameId, (gameRecord => {
+                resolve(gameRecord);
+            }));
+        })
+
+        return promise;
+    })
+    .then((gameRecord) => {
+        const promise = new Promise((resolve, reject) => {
+            gamesDB.setGamePieceCoordinates(gameId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, () => {
+                resolve();
+            });
+        })
+        
+        return promise;
+    })
+    .then(() => {
+        const promise = new Promise((resolve, reject) => {
+            gamesDB.getGamePiecesAlive(gameId, (gamePieceRecords => {
+                resolve(gamePieceRecords);
+            }))
+        })
+        
+        return promise;
+    })
+    .then((gamePieceRecords) => {
+        res.statusCode = 200;
+        res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieceRecords});
+        res.end("Move completed!");
+    })
+    .catch(error => {
+        res.statusCode = 400;
+        res.send(error);
+    });
+    */
     //res.end("TEST RESPONSE Got it: " + JSON.stringify(req.body));
 });
 
