@@ -50,6 +50,8 @@ class Chessboard {
      * @param {HTMLElement} cellElement 
      */
     addCellSelectedElement(cellElement) {
+        if (this.selectedCells.cellElement1 === cellElement) return;
+
         if (this.selectedCells.cellElement1 === null) {
             if (this.__getSelectedChessPiece(cellElement)) {
                 this.selectedCells.cellElement1 = cellElement;
@@ -90,12 +92,12 @@ class Chessboard {
         xml.onreadystatechange = () => {
             if (xml.readyState == 4) {
                 // Using to handle response.
-                this.clearSelection();
                 console.log(xml.responseText);
             }
         }
 
         xml.send(JSON.stringify(httpJSONBody));
+        this.clearSelection();
     }
 
     // TODO: moveTo(cellId1, cellId2).
