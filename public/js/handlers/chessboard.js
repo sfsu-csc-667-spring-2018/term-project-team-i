@@ -7,7 +7,7 @@ class Chessboard {
         };
 
         this.classChessCell = "chessCell";
-        this.classChessPiece = "piece";
+        this.classChessPiece = "chessPiece";
         this.movepieceRoute = '/move-piece';
     }
 
@@ -63,7 +63,7 @@ class Chessboard {
             const chessPieceElement = this.__getSelectedChessPiece(this.selectedCells.cellElement1);
 
             const movementData = {
-                pieceid: chessPieceElement.dataset.piece_id,
+                pieceId: chessPieceElement.dataset.piece_id,
                 coordinate_x: this.selectedCells.cellElement1.dataset.coordinate_x,
                 coordinate_y: this.selectedCells.cellElement1.dataset.coordinate_y,
                 destination_x: this.selectedCells.cellElement2.dataset.coordinate_x,
@@ -84,9 +84,9 @@ class Chessboard {
         xml.setRequestHeader("Content-type", "application/json");
 
         xml.onreadystatechange = () => {
-            if (xml.readyState == 4 && xml.status == 200) {
+            if (xml.readyState == 4 && xml.status >= 200 && xml.status <= 300) {
                 //TODO: require dictionary/mapping to determine course of action depending on received response.
-                alert(xml.responseText);
+                console.log(xml.responseText);
             }
         }
 

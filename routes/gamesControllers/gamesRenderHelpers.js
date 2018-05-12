@@ -1,11 +1,14 @@
-class GamesHbsHelpers {
+class GamesRenderHelpers {
     
     /**
+     * Return an object where the cell's x-coordinate and y-coordinate are used as
+     * the keys and the JOINED game_pieces+pieces record are the value.
      * 
-     * @param {*} gamePieceRecordsJOINED 
-     * @param {*} pieceRecords 
+     * @example {"a4": [pieceId: '4', name: 'bishop', faction: 'white']}
+     * @param {Array} gamePieceRecordsJOINED The array retrieved from the database 
+     * that is a JOIN-ing of game_pieces and pieces table.
      */
-    static combineToRenderChessPieces (gamePieceRecordsJOINED = []) {
+    static toCellGamePieceObject (gamePieceRecordsJOINED = []) {
         const returnGamePieces = {};
 
         // Sets the returning elements 
@@ -29,7 +32,7 @@ class GamesHbsHelpers {
         return returnGamePieces;
     }
 
-    static getHelpers() {
+    static getHandlebarHelpers() {
 
         const helpers = {
             chessboard_setupBlackOrWhiteClass: (blackClass, whiteClass, cellAlpha, cellNumber) => {
@@ -59,4 +62,4 @@ class GamesHbsHelpers {
     }
 }
 
-module.exports = GamesHbsHelpers;
+module.exports = GamesRenderHelpers;
