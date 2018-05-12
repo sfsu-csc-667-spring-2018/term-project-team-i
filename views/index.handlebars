@@ -33,12 +33,32 @@
             <p>
                 <button type="button" class="btn btn-primary">Join Game <span class="sr-only">(current)</span></button>
             </p>
+
         </div>
 
         <!-- display Welcome messages, chessboard -->
         <div class="col-sm-6">
             <h5> Hello <strong>{{username}}!</strong></h5>
             <h5> Welcome to Chess Game!</h5>
+            <div id="container-game-list"> Games
+                <div class="games-list">
+                    {{#each rejoin}}
+                        <form method="get" action="/games/{{id}}">
+                            <div class="list">Game #{{id}}
+                                <input type="submit" value="Rejoin Game"/>
+                            </div>
+                        </form>
+                    {{/each}}
+                    {{#each game}}
+                        <form method="get" action="/games/{{id}}">
+                            <div class="list">Game #{{id}}
+                                <input type="submit" value="Join Game"/>
+                            </div>
+                        </form>
+                    {{/each}}
+                    <div class="list" id="gamesList"></div>
+                </div>
+            </div>
         </div>
 
         <!-- display chat & messages box-->

@@ -1,75 +1,95 @@
 class Chessboard {
 
     constructor () {
-        this.selectedItemIds = {
-            cellId1: null,
-            cellId2: null
+        this.selectedCells = {
+            cellElement1: null,
+            cellElement2: null
         };
+
+        this.classChessCell = "chessCell";
+        this.classChessPiece = "chessPiece";
+        this.movepieceRoute = '/move-piece';
     }
 
+    /**
+     * Determines if the givene element possesses a chess piece element.
+     * It will return the chess piece element if true, but the boolean false otherwise.
+     * @param {HTMLElement} chessCellElement The parent element to find the child under.
+     */
+    __getSelectedChessPiece(chessCellElement) {
+        return chessCellElement.querySelector("."+this.classChessPiece);
+    }
 
     /**
      * 
      * @param {*} chessCellClassName 
      */
-    initCellListeners(chessCellClassName = 'chessCell') {
+    addSelectionListenersTo(classChessCell = this.classChessCell) {
         const command = 'click';
-        const chessCellElements = document.querySelectorAll("."+chessCellClassName);
+        const chessCellElements = document.querySelectorAll("."+classChessCell);
 
         //1. Set 'onclick' event for every class of 'chessCell' HTMLElement.
         for (let cceIdx = 0; cceIdx < chessCellElements.length; cceIdx++) {
-            const chessCell = chessCellElements[cceIdx];
+            const chessCellElement = chessCellElements[cceIdx];
 
-            chessCell.addEventListener(command, () => {
-                this.addUserSelection(chessCell);
+            chessCellElement.addEventListener(command, () => {
+                this.addCellSelectedElement(chessCellElement);
+                this.sendCellSelectedElements();
             });
         }
     }
 
-    /*
-    // SUGGESTION: Implement piece listeners to be more specific instead of cells.
-    initPieceListeners(chessPieceClassName = 'chessPiece') {
-        const command = 'click';
-        //TODO: focus on cells only for now. The Server can handle the validation.
-    }
-    */
-
-    addUserSelection(chessCell) {
-        if (this.selectedItemIds.cellId1 === chessCell.id) return;
-        
-        let hasSelectedItemId1 = (this.selectedItemIds.cellId1 !== null);
-        let hasSelectedItemId2 = (this.selectedItemIds.cellId2 !== null);
-
-        //SUGGESTION: Need to determine if appropriate piece is selected, not just any random cell.
-        if (!hasSelectedItemId1) {
-            this.selectedItemIds.cellId1 = chessCell.id;
+    /**
+     * Add the clicked element to the local selection if the element hasn't been clicked on before.
+     * If it's the first element ever clicked then it must posses 
+     * @param {HTMLElement} cellElement 
+     */
+    addCellSelectedElement(cellElement) {
+        if (this.selectedCells.cellElement1 === cellElement) return;
+    
+        if (!(this.selectedCells.cellElement1 !== null) && this.__getSelectedChessPiece(cellElement)) {
+            this.selectedCells.cellElement1 = cellElement;
         } else {
-            this.selectedItemIds.cellId2 = chessCell.id;
-            hasSelectedItemId2 = true;
+            this.selectedCells.cellElement2 = cellElement;
         }
+    }
+
+    sendCellSelectedElements() {
         
-        if (hasSelectedItemId1 && hasSelectedItemId2) {
-            this.sendAjax('POST', this.selectedItemIds, '/move-piece');
-            // TODO: send playerId in Request body.
-            this.selectedItemIds.cellId1 = null;
-            this.selectedItemIds.cellId2 = null;
+        let hasSelectedElement1 = (this.selectedCells.cellElement1 !== null);
+        let hasSelectedElement2 = (this.selectedCells.cellElement2 !== null);
+
+        if (hasSelectedElement1 && hasSelectedElement2) {
+            const chessPieceElement = this.__getSelectedChessPiece(this.selectedCells.cellElement1);
+
+            const movementData = {
+                pieceId: chessPieceElement.dataset.piece_id,
+                coordinate_x: this.selectedCells.cellElement1.dataset.coordinate_x,
+                coordinate_y: this.selectedCells.cellElement1.dataset.coordinate_y,
+                destination_x: this.selectedCells.cellElement2.dataset.coordinate_x,
+                destination_y: this.selectedCells.cellElement2.dataset.coordinate_y
+            }
+
+            this.sendAjax('POST', movementData, this.movepieceRoute);
+            this.selectedCells.cellElement1 = null;
+            this.selectedCells.cellElement2 = null;
         }
     }
 
     sendAjax(httpVerb, httpJSONBody, restURIExtension) {
         const xml = new XMLHttpRequest();
         const url = window.location.href + restURIExtension;
-        console.log(url);
+        
         xml.open(httpVerb, url, true);
         xml.setRequestHeader("Content-type", "application/json");
 
         xml.onreadystatechange = () => {
-            if (xml.readyState == 4 && xml.status == 200) {
+            if (xml.readyState == 4 && xml.status >= 200 && xml.status <= 300) {
                 //TODO: require dictionary/mapping to determine course of action depending on received response.
-                alert(xml.responseText);
+                console.log(xml.responseText);
             }
         }
-        console.log(JSON.stringify(httpJSONBody));
+
         xml.send(JSON.stringify(httpJSONBody));
     }
 

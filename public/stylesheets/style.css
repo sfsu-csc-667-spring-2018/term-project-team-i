@@ -111,3 +111,24 @@ span.user {
     padding: 5px;
 }
 
+#container-game-list {
+    width: 600px;
+    margin: 0 auto;
+    border: solid 1px #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+    float:left;
+}
+
+#container-game-list .games-list{
+    overflow: auto;
+    direction: rtl;
+    height: 400px;
+}
+
+#container-game-list .list{
+    border-top: solid 1px #ccc;
+    border-bottom: solid 1px #ccc;
+    padding: 10px;
+    direction: rtl;
+}

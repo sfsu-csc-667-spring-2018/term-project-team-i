@@ -1,22 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const auths = require('../auth/authenticate.js');
-const db = require('../db/index');
+const lobby = require('../db/lobbyDB');
 
 /* GET home page. */
 router.get('/',auths, (request, response, next) =>{
-  let getID =request.user.id;
-
-  db.one(`SELECT username FROM users WHERE id = ${getID}`)
-    .then(data=>{
-        let obj = JSON.parse(JSON.stringify(data));
-        //response.io.emit('userSocket', obj.username);
-        response.render('index', {username: obj.username,layout: 'auth_layout.handlebars'});
-    })
-      .catch(error => {
-        console.log(error);
-          response.render('index');
-      });
+  lobby(request.user.id, response);
 });
 
 router.post("/message", (request, response) =>{
