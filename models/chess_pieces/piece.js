@@ -16,14 +16,8 @@ class Piece {
         this.alive = gamePieceRecord.alive;
     }
     
-    moveToPosition(newCoordinateX, newCoordinateY) {
+    moveToPosition(newCoordinateX, newCoordinateY, otherConditions) {
         throw new Error(this.moveToPosition.name + " is abstract and must be implemented.");
-        /*
-        TODO: Implement this in subclasses.
-            1. Check if new positions are valid coordinates.
-            2. Check if new positions can be moved into by this Piece type.
-            3. Move piece to position and update.
-        */
     }
 
 }
