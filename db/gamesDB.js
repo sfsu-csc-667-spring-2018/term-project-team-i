@@ -165,6 +165,27 @@ class GamesDB {
     }
 
     /**
+     * Retrieves the joining of games and game_users table from the given game Id.
+     * @param {*} gameId The game ID to join the games and game_users table on.
+     * @param {*} callbackFunction The callback function to pass the retrieved game data to.
+     * @param {*} dbx Optional database object for the cases of transactions.
+     */
+    getGameData(gameId, callbackFunction, dbx = db) {
+        const sqlGetGameData = `SELECT * FROM games
+                                FULL OUTER JOIN game_users
+                                ON games.id=game_users.gamesid
+                                WHERE games.id=($1);`
+
+        dbx.any(sqlGetGameData, [gameId])
+            .then(gameDataRecords => {
+                callbackFunction(gameDataRecords);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    /**
      * Retrieves the record of users of a given game ID from the game_users table.
      * @param {Number} gameId The game ID to target the game user record.
      * @param {Function} callbackFunction The callback function to pass the returned game_users record to.
