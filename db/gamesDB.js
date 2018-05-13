@@ -266,6 +266,51 @@ class GamesDB {
     }
 
     /**
+     * Update the game_users table with the opponent if and only if it does not have an opponent already.
+     * @param {*} playerId The player ID to attempt to set as the opponent of the given game.
+     * @param {*} gameId The ID to identify the record in the game_users table.
+     * @param {*} successCallback The successful callback to execute after setting the Player 
+     * as the opponent or if the player is already the host or opponent of the given game.
+     * @param {*} failureCallback The failure callback to execute if the Player cannot be set as the
+     * opponent or perhaps the database failed outright.
+     */
+    setGameOpponent(playerId, gameId, successCallback, failureCallback) {
+        const sqlSelectGameUsers    = `SELECT * FROM game_users WHERE gameid = ${gameId};`;
+        const sqlUpdateGameOpponent = `UPDATE game_users SET opponentid = ($1) WHERE gameid = ($2);`;
+        const sqlUpdateGameActive   = `UPDATE games SET active = 'active' WHERE id = ($1);`;
+    
+        db.one(sqlSelectGameUsers)
+            .then(gameUserRecord => {
+                const hostId = gameUserRecord.userid;
+                const opponentId = gameUserRecord.opponentid;
+
+                if (playerId == hostId || playerId == opponentId) {
+                    successCallback();
+                } else if (playerId != hostId && opponentId == null ) {
+
+                    // Set playerId as the game opponent;
+                    db.none(sqlUpdateGameOpponent, [playerId, gameId])
+                        .then(() => {
+                            db.none(sqlUpdateGameActive, [gameId])
+                                .then(() => {
+                                    successCallback(); //set opponent for game
+                                })
+                        })
+                        .catch(error => {
+                            console.log(error);
+                            failureCallback();
+                        });
+
+                } else {
+                    failureCallback();
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
      * Moves a piece from the given x-y coordinates to the destination x-y coordinates. Note that if an existing piece
      * exists at the destination then it will be automatically be set to dead (via null x-y coordinates and alive=false).
      * @param {*} gameId The game ID of which to find the piece in.
