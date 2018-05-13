@@ -56,4 +56,11 @@
     <script src="/js/handlers/chessboard.js"></script>
     <script src="/js/games.js"></script>
     <script src="/js/gamesSocket.js"></script>
+    <script>
+        let url = window.location.toString();
+        if (url.indexOf("?") > 0) {
+            let clearUrl = url.substring(0, url.indexOf("?"));
+            window.history.replaceState({}, document.title, clearUrl);
+        }
+    </script>
 </html>
