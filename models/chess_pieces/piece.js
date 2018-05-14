@@ -28,6 +28,23 @@ class Piece {
         throw new Error(this.isValidMovement.name + " is abstract and must be implemented.");
     }
 
+    /**
+     * converts string x coordinates to numbers - 1 for indexes
+     * @param {String} coordinateX
+     * @returns {number}
+     */
+    coordinateXConversion(coordinateX){
+        return coordinateX.charCodeAt(0) - 97; //a = 0, b = 1 ...
+    }
+
+    /**
+     * converts string y coordinates to numbers - 1 for indexes
+     * @param {String} coordinateY
+     * @returns {number}
+     */
+    coordinateYConversion(coordinateY){
+        return Number(coordinateY) - 1;
+    }
 }
 
 module.exports = Piece;
