@@ -1,4 +1,6 @@
 const Game = require('../models/game.js');
+const GamesDB = require('../db/gamesDB.js');
+const gamesDB = new GamesDB();
 
 class GameManager {
 
@@ -7,33 +9,61 @@ class GameManager {
     }
 
     /**
-     * Add the given game into a map for quick referencing.
-     * @param {Object} gameData A games and game_users database record combined
-     * to create a game object representing this active game.
-     * @param {*} gamePiecesRecords The game_pieces records of a game.
+     * Creates a new game record and accompanying piece records.
+     * @param {*} playerId The player ID to set as host to during game record creation.
+     * @param {*} faction The faction of the player.
+     * @param {*} callbackFunction The callback to return the game ID of the newly created records.
      */
-    addGameInstance(gameId, gameData, gamePiecesRecords) {
-        const gameInstance;
-        const gameId = gameId;
-        
-        if (this.activeGames.get(gameId)){
-            gameInstance = this.activeGames.get(gameId);
-        } else {
-            gameInstance = new Game(gameData, gamePiecesRecords)
-            this.activeGames.set(gameId, gameInstance);
-        }
-
-        return gameInstance;
+    createGameInstance(playerId, faction, callbackFunction) {
+        gamesDB.createNewGame(playerId, faction, (gameId) => {
+            callbackFunction(gameId);
+        });
     }
 
+    /**
+     * Get the game instance referenced by the given game ID in the internal map. If an instance referenced
+     * by this game ID has not been instantiated then it will retrieve the appropriate records from
+     * the database and a Game instance will then be made.
+     * @param {Number} gameId The game ID of the game instance to find.
+     * @callback callbackFunction - A function to pass the Game instance to.
+     */
+    getGameInstance(gameId, callbackFunction) {
+        let gameInstance = this.activeGames.get(gameId);
+
+        const promise = new Promise((resolve, reject) => {
+            if (gameInstance) {
+                resolve(gameInstance);
+            } else {
+                gamesDB.getGameData(gameId, (gameData) => {
+                    gamesDB.getGamePiecesAlive(gameId, (gamePiecesRecords) => {
+                        gameInstance = new Game(gameData, gamePiecesRecords);
+                        this.activeGames.set(gameId, gameInstance);
+                        resolve(gameInstance);
+                    });
+                });
+            }
+        })
+        .then((gameInstance) => {
+            callbackFunction(gameInstance);
+        });
+    }
+
+    /**
+     * Removes the Game instance from the internal map. Note that this does
+     * not delete the game data in the database, but only removes the Game instance
+     * that is in use.
+     * @param {Number} gameId The Game instance to remove / de-reference.
+     * @return {Boolean} A boolean determining if a game instance was removed or not.
+     */
     removeGameInstance(gameId) {
         return this.activeGames.delete(gameId);
     }
-
-    getGameInstance(gameId) {
-        return this.activeGames.get(gameId);
-    }
     
+    /**
+     * Checks if the given game ID is currently within the internal map.
+     * @param {*} gameId The game ID to identify if a Game instance is being referenced.
+     * @return {Boolean} true or false.
+     */
     hasGameInstance(gameId) {
         return this.activeGames.has(gameId);
     }

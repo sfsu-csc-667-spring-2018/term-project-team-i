@@ -169,14 +169,16 @@ class GamesDB {
      * @param {*} gameId The game ID to join the games and game_users table on.
      * @param {*} callbackFunction The callback function to pass the retrieved game data to.
      * @param {*} dbx Optional database object for the cases of transactions.
+     * @returns The return will be given to the callback function; it will be an {@type {Object}} whose properties
+     * mirrors those of the games and game_users column names.
      */
     getGameData(gameId, callbackFunction, dbx = db) {
         const sqlGetGameData = `SELECT * FROM games
                                 FULL OUTER JOIN game_users
-                                ON games.id=game_users.gamesid
+                                ON games.id=game_users.gameid
                                 WHERE games.id=($1);`
 
-        dbx.any(sqlGetGameData, [gameId])
+        dbx.one(sqlGetGameData, [gameId])
             .then(gameDataRecords => {
                 callbackFunction(gameDataRecords);
             })
@@ -313,14 +315,14 @@ class GamesDB {
     /**
      * Moves a piece from the given x-y coordinates to the destination x-y coordinates. Note that if an existing piece
      * exists at the destination then it will be automatically be set to dead (via null x-y coordinates and alive=false).
-     * @param {*} gameId The game ID of which to find the piece in.
-     * @param {*} pieceId The piece ID of the piece to move.
-     * @param {*} coordinate_x The x coordinate of the piece to move.
-     * @param {*} coordinate_y Tge y cooridinate of the piece to move.
-     * @param {*} destination_x The x destination coordinate of the piece to move to.
-     * @param {*} destination_y The y destination coordinate of the piece to move to.
-     * @param {*} callbackFunction The callback function to executate after this current function execution (no data is returned).
-     * @param {*} dbx Optional database object to use in case of transactions.
+     * @param {Number} gameId The game ID of which to find the piece in.
+     * @param {Number} pieceId The piece ID of the piece to move.
+     * @param {String} coordinate_x The x coordinate of the piece to move.
+     * @param {String} coordinate_y Tge y cooridinate of the piece to move.
+     * @param {String} destination_x The x destination coordinate of the piece to move to.
+     * @param {String} destination_y The y destination coordinate of the piece to move to.
+     * @param {Function} callbackFunction The callback function to executate after this current function execution (no data is returned).
+     * @param {Object} dbx Optional database object to use in case of transactions.
      */
     setGamePieceCoordinates(gameId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, callbackFunction, dbx = db) {
         const sqlSetPieceCoordinates = `UPDATE game_pieces
