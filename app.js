@@ -29,7 +29,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.engine('handlebars', expressHb({defaultLayout: 'layout'}));
+app.engine('handlebars', expressHb({defaultLayout: 'auth_layout.handlebars'}));
 app.set('view engine', 'handlebars');
 
 // uncomment after placing your favicon in /public

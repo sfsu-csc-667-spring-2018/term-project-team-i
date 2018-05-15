@@ -165,6 +165,29 @@ class GamesDB {
     }
 
     /**
+     * Retrieves the joining of games and game_users table from the given game Id.
+     * @param {Number} gameId The game ID to join the games and game_users table on.
+     * @param {Function} callbackFunction The callback function to pass the retrieved game data to.
+     * @param {Object} dbx Optional database object for the cases of transactions.
+     * @returns The return will be given to the callback function; it will be an whose properties
+     * mirrors those of the games and game_users column names.
+     */
+    getGameData(gameId, callbackFunction, dbx = db) {
+        const sqlGetGameData = `SELECT * FROM games
+                                FULL OUTER JOIN game_users
+                                ON games.id=game_users.gameid
+                                WHERE games.id=($1);`
+
+        dbx.any(sqlGetGameData, [gameId])
+            .then(gameDataRecords => {
+                callbackFunction(gameDataRecords);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    /**
      * Retrieves the record of users of a given game ID from the game_users table.
      * @param {Number} gameId The game ID to target the game user record.
      * @param {Function} callbackFunction The callback function to pass the returned game_users record to.
@@ -244,26 +267,110 @@ class GamesDB {
             })
     }
 
-    setGamePieceCoordinates(gameId, userId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, callbackFunction, dbx = db) {
-        const sqlSetPieceCoordinates = `UPDATE game_pieces
-                                        SET coordinate_x=($1), coordinate_y=($2)
-                                        WHERE gameid=($3) AND userid=($4) AND pieceid=($5) AND coordinate_x=($6) AND coordinate_y=($7);`;
+    /**
+     * Update the game_users table with the opponent if and only if it does not have an opponent already.
+     * @param {*} playerId The player ID to attempt to set as the opponent of the given game.
+     * @param {*} gameId The ID to identify the record in the game_users table.
+     * @param {*} successCallback The successful callback to execute after setting the Player 
+     * as the opponent or if the player is already the host or opponent of the given game.
+     * @param {*} failureCallback The failure callback to execute if the Player cannot be set as the
+     * opponent or perhaps the database failed outright.
+     */
+    setGameOpponent(playerId, gameId, successCallback, failureCallback) {
+        const sqlSelectGameUsers    = `SELECT * FROM game_users WHERE gameid = ${gameId};`;
+        const sqlUpdateGameOpponent = `UPDATE game_users SET opponentid = ($1) WHERE gameid = ($2);`;
+        const sqlUpdateGameActive   = `UPDATE games SET active = 'active' WHERE id = ($1);`;
+    
+        db.one(sqlSelectGameUsers)
+            .then(gameUserRecord => {
+                const hostId = gameUserRecord.userid;
+                const opponentId = gameUserRecord.opponentid;
 
-        dbx.none(sqlSetPieceCoordinates, [destination_x, destination_y, gameId, userId, pieceId, coordinate_x, coordinate_y])
-            .then(() => {
-                callbackFunction();
+                if (playerId == hostId || playerId == opponentId) {
+                    successCallback();
+                } else if (playerId != hostId && opponentId == null ) {
+
+                    // Set playerId as the game opponent;
+                    db.none(sqlUpdateGameOpponent, [playerId, gameId])
+                        .then(() => {
+                            db.none(sqlUpdateGameActive, [gameId])
+                                .then(() => {
+                                    successCallback(); //set opponent for game
+                                })
+                        })
+                        .catch(error => {
+                            console.log(error);
+                            failureCallback();
+                        });
+
+                } else {
+                    failureCallback();
+                }
             })
             .catch(error => {
                 console.log(error);
-            })
+            });
     }
 
-    setGamePieceToDead(gameId, userId, pieceId, coordinate_x, coordinate_y, callbackFunction, dbx = db) {
+    /**
+     * Moves a piece from the given x-y coordinates to the destination x-y coordinates. Note that if an existing piece
+     * exists at the destination then it will be automatically be set to dead (via null x-y coordinates and alive=false).
+     * @param {Number} gameId The game ID of which to find the piece in.
+     * @param {Number} pieceId The piece ID of the piece to move.
+     * @param {String} coordinate_x The x coordinate of the piece to move.
+     * @param {String} coordinate_y Tge y cooridinate of the piece to move.
+     * @param {String} destination_x The x destination coordinate of the piece to move to.
+     * @param {String} destination_y The y destination coordinate of the piece to move to.
+     * @param {Function} callbackFunction The callback function to executate after this current function execution (no data is returned).
+     * @param {Object} dbx Optional database object to use in case of transactions.
+     */
+    setGamePieceCoordinates(gameId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, callbackFunction, dbx = db) {
+        const sqlSetPieceCoordinates = `UPDATE game_pieces
+                                        SET coordinate_x=($1), coordinate_y=($2)
+                                        WHERE gameid=($3) AND pieceid=($4) AND coordinate_x=($5) AND coordinate_y=($6);`;
+
+        const sqlGetPieceAtCoordinates =    `SELECT * FROM game_pieces 
+                                             WHERE gameid=($1) AND coordinate_x=($2) AND coordinate_y=($3);`;
+
+        
+        dbx.tx(t1 => {
+            const transactions = [];
+            
+            transactions.push(
+                t1.any(sqlGetPieceAtCoordinates, [gameId, destination_x, destination_y])
+                    .then(gamePiecesAtDestination => {
+                        if (gamePiecesAtDestination.length > 0 && gamePiecesAtDestination[0]['pieceid'] !== pieceId) {
+                            this.setGamePieceToDead(gameId, destination_x, destination_y, () => {}, t1);
+                        }
+                    })
+                    .then(() => {
+                        t1.none(sqlSetPieceCoordinates, [destination_x, destination_y, gameId, pieceId, coordinate_x, coordinate_y])
+                            .catch(error => {
+                                console.log(error);
+                            })
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+            )
+
+            return t1.batch(transactions);
+        })
+        .then(() => {
+            callbackFunction();
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    }
+
+    setGamePieceToDead(gameId, coordinate_x, coordinate_y, callbackFunction, dbx = db) {
         const sqlSetGamePieceDead = `UPDATE game_pieces
                                      SET coordinate_x=NULL, coordinate_y=NULL, alive=false
-                                     WHERE gameid=($1) AND userid=($2) AND pieceid=($3) AND coordinate_x=($4) AND coordinate_y=($5);`;
-                                    
-        dbx.none(sqlSetGamePieceDead, [gameId, userId, pieceId, coordinate_x, coordinate_y])
+                                     WHERE gameid=($1) AND coordinate_x=($2) AND coordinate_y=($3);`;
+                 
+        
+        dbx.none(sqlSetGamePieceDead, [gameId, coordinate_x, coordinate_y])
             .then(() => {
                 callbackFunction();
             })
