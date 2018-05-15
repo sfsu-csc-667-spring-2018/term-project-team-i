@@ -33,7 +33,7 @@ class Piece {
      * @param {String} coordinateX
      * @returns {number}
      */
-    coordinateXConversion(coordinateX){
+    static coordinateXConversion(coordinateX){
         return coordinateX.charCodeAt(0) - 97; //a = 0, b = 1 ...
     }
 
@@ -42,7 +42,7 @@ class Piece {
      * @param {String} coordinateY
      * @returns {number}
      */
-    coordinateYConversion(coordinateY){
+    static coordinateYConversion(coordinateY){
         return Number(coordinateY) - 1;
     }
 }

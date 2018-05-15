@@ -23,7 +23,7 @@ class GameManager {
     /**
      * Get the game instance referenced by the given game ID in the internal map. If an instance referenced
      * by this game ID has not been instantiated then it will retrieve the appropriate records from
-     * the database and a Game instance will then be made.
+     * the database and a Game instance will then be made and returned.
      * @param {Number} gameId The game ID of the game instance to find.
      * @callback callbackFunction - A function to pass the Game instance to.
      */
@@ -51,7 +51,7 @@ class GameManager {
     /**
      * Removes the Game instance from the internal map. Note that this does
      * not delete the game data in the database, but only removes the Game instance
-     * that is in use.
+     * that is referenced within the internap map.
      * @param {Number} gameId The Game instance to remove / de-reference.
      * @return {Boolean} A boolean determining if a game instance was removed or not.
      */
