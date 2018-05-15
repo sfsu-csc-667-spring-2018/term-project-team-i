@@ -8,11 +8,13 @@
         h5 {
             text-align: center;
         }
+
         .col-4 {
             position: fixed;
             right: 0;
             bottom: 0;
         }
+
 
     </style>
 </head>
@@ -27,36 +29,38 @@
 
         <!-- display "Join Game" buttons -->
         <div class="col-sm-2">
-            <p>
-                <button type="button" class="btn btn-primary">Join Game <span class="sr-only">(current)</span></button>
-            </p>
-            <p>
-                <button type="button" class="btn btn-primary">Join Game <span class="sr-only">(current)</span></button>
-            </p>
+
 
         </div>
 
         <!-- display Welcome messages, chessboard -->
         <div class="col-sm-6">
             <h5> Hello <strong>{{username}}!</strong></h5>
-            <h5> Welcome to Chess Game!</h5>
-            <div id="container-game-list"> Games
-                <div class="games-list">
-                    {{#each rejoin}}
-                        <form method="get" action="/games/{{id}}">
-                            <div class="list">Game #{{id}}
-                                <input type="submit" value="Rejoin Game"/>
-                            </div>
-                        </form>
-                    {{/each}}
-                    {{#each game}}
-                        <form method="get" action="/games/{{id}}">
-                            <div class="list">Game #{{id}}
-                                <input type="submit" value="Join Game"/>
-                            </div>
-                        </form>
-                    {{/each}}
-                    <div class="list" id="gamesList"></div>
+            <h5> Welcome to Chess Game!</h5><br><br>
+            <div id="container-game-list" style="text-align: center"> Games
+                <hr>
+                <div class="row" style="margin-left: 100px">
+                    <div class="games-list">
+                        {{#each rejoin}}
+                            <form method="get" action="/games/{{id}}">
+                                <div class="list">Game #{{id}}
+                                    <input type="submit" class="btn btn-info" value="Rejoin"/>
+                                </div>
+                            </form>
+                        {{/each}}
+                    </div>
+                    <div class="row" style="margin-left: 50px">
+                        <div class="games-list">
+                            {{#each game}}
+                                <form method="get" action="/games/{{id}}">
+                                    <div class="list">Game #{{id}}
+                                        <input type="submit" class="btn btn-primary" value="Join"/>
+                                    </div>
+                                </form>
+                            {{/each}}
+                            <div class="list" id="gamesList"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
