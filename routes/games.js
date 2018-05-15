@@ -35,14 +35,16 @@ router.get('/:gameId', auths, (req, res, next) => {
         const gameHostId = gameInstance.hostId;
         const gameOpponentId = gameInstance.opponentId;
 
-        const funcSuccess = () => {
-
-            // Game room Socket protocols
+        const funcSocketProtocols = (res, gameId) => {
             res.app.get('io').of('/games/' + gameId).on('connection',socket =>{
                 socket.on('disconnect', () => {
                     console.log("Player left + " + playerId);
                 });
             });
+        }
+
+        const funcSuccess = () => {
+            funcSocketProtocols(res, gameId);
 
             renderData.helpers = GamesHbsHelpers.getHandlebarHelpers();
             renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.gamePiecesRecords);
@@ -60,8 +62,7 @@ router.get('/:gameId', auths, (req, res, next) => {
         if (gameHostId == playerId || gameOpponentId == playerId) {
             funcSuccess();
         } else if (gameHostId != playerId && gameOpponentId == null) {
-            gameInstance.setOpponentID(playerId);
-            funcSuccess();
+            gameInstance.setOpponentID(playerId, funcSuccess, funcFailure);
         } else {
             funcFailure();
         }
