@@ -1,5 +1,12 @@
 const GamesDB = require('../db/gamesDB.js');
 const Piece = require('../models/chess_pieces/piece.js');
+const Pawn = require('../models/chess_pieces/pawn.js');
+const Rook = require('../models/chess_pieces/rook.js');
+const Bishop = require('../models/chess_pieces/bishop.js');
+const Knight = require('../models/chess_pieces/knight.js');
+const Queen = require('../models/chess_pieces/queen.js');
+const King = require('../models/chess_pieces/king.js');
+
 const gamesDB = new GamesDB();
 
 class Game {
@@ -19,34 +26,82 @@ class Game {
         this.opponentId = gameData.opponentid;
         this.turn = gameData.turn;
         this.gamePiecesRecords = gamePiecesRecords;
-        this.chessboard = this.__setupChessboard();
-        this.gamePieces = this.__setupPiecesObjects(gamePiecesRecords);
-        
+        this.gamePieces = this.__setupGamePieces(gamePiecesRecords);
+        this.chessboard = this.__setupChessboard(this.gamePieces);
     }
 
-    __setupChessboard(dimension = 8) {
+    /**
+     * Set up an array of Pieces.
+     * @param {Array} gamePiecesRecords Array of objects where each object represents a record that
+     * was joined between game and game_users table of a certain game.
+     */
+    __setupGamePieces(gamePiecesRecords) {
+        const gamePieces = [];
+
+        for (let idx = 0; idx < gamePiecesRecords.length; idx++ ) {
+            const gamePieceRecord = gamePiecesRecords[idx];
+            const gamePieceName = gamePieceRecord.name;
+            /** @type {Piece} */
+            let gamePieceObject = undefined;
+            
+            if (gamePieceName == 'pawn') {
+                gamePieceObject = new Pawn(gamePieceRecord);
+            } else if (gamePieceName == 'rook') {
+                gamePieceObject = new Rook(gamePieceRecord);
+            } else if (gamePieceName == 'knight') {
+                gamePieceObject = new Knight(gamePieceRecord);
+            } else if (gamePieceName == 'bishop') {
+                gamePieceObject = new Bishop(gamePieceRecord);
+            } else if (gamePieceName == 'queen') {
+                gamePieceObject = new Queen(gamePieceRecord);
+            } else if (gamePieceName == 'king') {
+                gamePieceObject = new King(gamePieceRecord);
+            } else {
+                throw new TypeError(`Error: cannot instantiate ${gamePieceName}`);
+            }
+
+            gamePieces.push(gamePieceObject);
+        }
+
+        return gamePieces;
+    }
+
+    /**
+     * Set up the chessboard with Pieces at their respective cell locations.
+     * @param {Array} gamePieces Array of Piece objects.
+     * @param {Number} dimension Optional dimension size of height and width of this chessboard.
+     */
+    __setupChessboard(gamePieces, dimension = 8) {
         const chessboard = [];
 
         for (let idx = 0; idx < dimension; idx++ ) {
-            chessboard[i] = [];
+            chessboard[idx] = [];
+        }
+
+        if (gamePieces) {
+            for (let idx = 0; idx < gamePieces.length; idx++ ) {
+                /** @type {Piece} */
+                const piece = gamePieces[idx];
+                const cbx = Piece.coordinateXConversion(piece.coordinate_x);
+                const cby = Piece.coordinateYConversion(piece.coordinate_y);
+
+                chessboard[cbx][cby] = piece;
+            }
         }
 
         return chessboard;
     }
 
-    /**
-     * Set up internal chessboard that have pieces.
-     * @param {Array} gamePiecesRecords 
-     */
-    __setupPiecesObjects(gamePiecesRecords) {
-        for (let idx = 0; idx < gamePiecesRecords.length; idx++ ) {
-            const piece = new Piece(gamePiecesRecords[idx]);
-            //TODO: merge branch-razmikh to acquire coordinate convert to chessboard positions.
-        }
-    }
+    __getGamePiece(convertedX, convertedY) {
+        for (let idx = 0; this.gamePieces.length; idx++) {
+            const gamePiece = this.gamePieces[idx];
+            const x = gamePiece.coordinate_x;
+            const y = gamePiece.coordinate_y;
 
-    __isOutOfBounds(destination_x, destination_y) {
-        
+            if (x == convertedX && y == convertedY) {
+                return gamePiece;
+            }
+        }
     }
 
     /**
@@ -73,27 +128,43 @@ class Game {
 
         // Check if move is valid
         /*
-            1. Is move out of bounds? Instant reject if so.
+            1. Is move out of bounds? Instant reject if so. 
             2. Is move even possible by the selected piece?
-            3. Is there an intercepting piece disallowing the movement then?
-            4. Is there an ally piece at the destination?
+                3. Is there an intercepting piece disallowing the movement then?
+                4. Is there an ally piece at the destination?
             5. Is this current player's king in check?
             6.      Yes: does this new move avoids the capture?
             7. Move the piece to destination... 
         */
-        
-        
-        /*
-        let x = coordinate_x.charCodeAt(0) - 'a'.charCodeAt(0);
-        let y = Number(coordinate_y) - 1;
-        let piece = this.chessboard[x][y];
+        const result = {result: false, message: ""};
+        const cbx = Piece.coordinateXConversion(coordinate_x);
+        const cby = Piece.coordinateYConversion(coordinate_y);
+        const dbx = Piece.coordinateXConversion(destination_x);
+        const dby = Piece.coordinateYConversion(destination_y);
+        const piece = this.__getGamePiece(cbx, cby);
 
-        if (piece){
-            if (!this.__isOutOfBounds(destination_x, destination_y)) {
-                //if (piece.isValidMovement(destination_x, destination_y, chessboard))
-            }
+        if (dbx >= 8 || dby >= 8) {
+            result.result = false;
+            result.message = `Positions {${destination_x}, ${destination_y}} are out of bounds!`;
+            return result;
         }
-        */
+
+        if (!piece) {
+            result.result = false;
+            result.message = `Selected piece does not exist at positions {${coordinate_x}, ${coordinate_y}}!`;
+            return result;
+        }
+
+        if (!piece.isValidMovement(dbx, dby, this.chessboard)) {
+            result.result = false;
+            result.message = `Invalid movement to {${destination_x}, ${destination_y}}!`;
+            return result;
+        }
+
+        // Pseudo code.
+        // TODO: Checks if king is currently checked now, if the newly made move will save it, or is the King itself.
+        if (!this.__isPlayerInKingCheck(playerId, pieceId ));
+        
     }
 
 }
