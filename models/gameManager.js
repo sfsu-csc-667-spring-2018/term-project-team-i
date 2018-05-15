@@ -25,27 +25,38 @@ class GameManager {
      * by this game ID has not been instantiated then it will retrieve the appropriate records from
      * the database and a Game instance will then be made and returned.
      * @param {Number} gameId The game ID of the game instance to find.
-     * @callback callbackFunction - A function to pass the Game instance to.
+     * @param {Function} successCallback A function to pass the Game instance to.
+     * @param {Function} failureCallback A function to call in the case of missing game data.
      */
-    getGameInstance(gameId, callbackFunction) {
+    getGameInstance(gameId, successCallback, failureCallback) {
         let gameInstance = this.activeGames.get(gameId);
 
         const promise = new Promise((resolve, reject) => {
             if (gameInstance) {
                 resolve(gameInstance);
             } else {
-                gamesDB.getGameData(gameId, (gameData) => {
-                    gamesDB.getGamePiecesAlive(gameId, (gamePiecesRecords) => {
-                        gameInstance = new Game(gameData, gamePiecesRecords);
-                        this.activeGames.set(gameId, gameInstance);
-                        resolve(gameInstance);
-                    });
+                gamesDB.getGameData(gameId, (gameDataRecords) => {
+                    if (gameDataRecords.length != 0)
+                    {
+                        const gameData = gameDataRecords[0];
+
+                        gamesDB.getGamePiecesAlive(gameId, (gamePiecesRecords) => {
+                            gameInstance = new Game(gameData, gamePiecesRecords);
+                            this.activeGames.set(gameId, gameInstance);
+                            resolve(gameInstance);
+                        });
+                    } else {
+                        reject(`No game record of ID: ${gameId}!`);
+                    }
                 });
             }
         })
         .then((gameInstance) => {
-            callbackFunction(gameInstance);
-        });
+            successCallback(gameInstance);
+        })
+        .catch((error) => {
+            failureCallback(error);
+        })
     }
 
     /**

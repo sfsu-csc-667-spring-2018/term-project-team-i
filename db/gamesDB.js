@@ -166,10 +166,10 @@ class GamesDB {
 
     /**
      * Retrieves the joining of games and game_users table from the given game Id.
-     * @param {*} gameId The game ID to join the games and game_users table on.
-     * @param {*} callbackFunction The callback function to pass the retrieved game data to.
-     * @param {*} dbx Optional database object for the cases of transactions.
-     * @returns The return will be given to the callback function; it will be an {@type {Object}} whose properties
+     * @param {Number} gameId The game ID to join the games and game_users table on.
+     * @param {Function} callbackFunction The callback function to pass the retrieved game data to.
+     * @param {Object} dbx Optional database object for the cases of transactions.
+     * @returns The return will be given to the callback function; it will be an whose properties
      * mirrors those of the games and game_users column names.
      */
     getGameData(gameId, callbackFunction, dbx = db) {
@@ -178,7 +178,7 @@ class GamesDB {
                                 ON games.id=game_users.gameid
                                 WHERE games.id=($1);`
 
-        dbx.one(sqlGetGameData, [gameId])
+        dbx.any(sqlGetGameData, [gameId])
             .then(gameDataRecords => {
                 callbackFunction(gameDataRecords);
             })

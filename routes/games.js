@@ -29,44 +29,49 @@ router.get('/:gameId', auths, (req, res, next) => {
     const gameId = req.params.gameId;
     const renderData = {};
 
-    gameManager.getGameInstance(gameId, (returnedGameInstance) => {
-        /** @type {Game} */
-        const gameInstance = returnedGameInstance;
-        const gameHostId = gameInstance.hostId;
-        const gameOpponentId = gameInstance.opponentId;
+    gameManager.getGameInstance(gameId, 
+        (returnedGameInstance) => {
+            /** @type {Game} */
+            const gameInstance = returnedGameInstance;
+            const gameHostId = gameInstance.hostId;
+            const gameOpponentId = gameInstance.opponentId;
 
-        const funcSocketProtocols = (res, gameId) => {
-            res.app.get('io').of('/games/' + gameId).on('connection',socket =>{
-                socket.on('disconnect', () => {
-                    console.log("Player left + " + playerId);
+            const funcSocketProtocols = (res, gameId) => {
+                res.app.get('io').of('/games/' + gameId).on('connection',socket =>{
+                    socket.on('disconnect', () => {
+                        console.log("Player left + " + playerId);
+                    });
                 });
-            });
-        }
+            }
 
-        const funcSuccess = () => {
-            funcSocketProtocols(res, gameId);
+            const funcSuccess = () => {
+                funcSocketProtocols(res, gameId);
 
-            renderData.helpers = GamesHbsHelpers.getHandlebarHelpers();
-            renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.gamePiecesRecords);
-            renderData.gameId = gameId;
+                renderData.helpers = GamesHbsHelpers.getHandlebarHelpers();
+                renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.gamePiecesRecords);
+                renderData.gameId = gameId;
 
-            res.render('games',renderData);
-        }
+                res.render('games',renderData);
+            }
 
-        const funcFailure = () => {
-            req.flash('error_msg', 'You are not allowed in this game');
+            const funcFailure = () => {
+                req.flash('error_msg', 'You are not allowed in this game');
+                res.redirect('/');
+            }
+
+
+            if (gameHostId == playerId || gameOpponentId == playerId) {
+                funcSuccess();
+            } else if (gameHostId != playerId && gameOpponentId == null) {
+                gameInstance.setOpponentID(playerId, funcSuccess, funcFailure);
+            } else {
+                funcFailure();
+            }
+        },
+        (failureError) => {
+            req.flash('error_msg', "Cannot access game!");
             res.redirect('/');
-        }
-
-
-        if (gameHostId == playerId || gameOpponentId == playerId) {
-            funcSuccess();
-        } else if (gameHostId != playerId && gameOpponentId == null) {
-            gameInstance.setOpponentID(playerId, funcSuccess, funcFailure);
-        } else {
-            funcFailure();
-        }
-    });
+        });
 
 });
 
@@ -97,6 +102,12 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
     const coordinate_y = req.body.coordinate_y;
     const destination_x = req.body.destination_x;
     const destination_y = req.body.destination_y;
+
+    /*
+    Steps to success
+    1. Convert to use gameManager.
+    2. 
+    */
 
     gamesDB.getGamePiecesAlive(gameId, (gamePieceRecordsJOINED) => {
         const moveValidation = gameMoveValidator.validateMovement(gamePieceRecordsJOINED, playerId, destination_x, destination_y);
