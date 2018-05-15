@@ -1,6 +1,6 @@
-const Piece = require('./piece.js');
+const Piece = require('../chess_pieces/piece.js');
 
-class Pawn {
+class Pawn extends Piece {
 
     constructor (gamePieceRecord) {
         super(gamePieceRecord);
@@ -11,7 +11,7 @@ class Pawn {
     }
 
     __isInitialMove() {
-        const isInitialMove = false;
+        let isInitialMove = false;
 
         if (this.faction === 'white') {
             isInitialMove = (this.coordinate_y === '2');
@@ -32,7 +32,7 @@ class Pawn {
      * @param {Object} otherConditions Optional parameters for potential fringe cases.
      * @returns {boolean} A boolean result indicate if the movement was valid.
      */
-    __isValidMovement(newCoordinateX, newCoordinateY, directionContraint, allGamePieces = [][], otherConditions) {
+    __isValidMovement(newCoordinateX, newCoordinateY, directionContraint, allGamePieces = [], otherConditions) {
         const arr = [];
         
         const isValid = false;
@@ -45,7 +45,6 @@ class Pawn {
         // Check if pawn is moving in appropriate direction (in context of black or white faction)
         if (isCorrectDirection && isMovingWithinLimit) {
             // Check if piece exists
-            const possi
         }
 
     }
@@ -74,6 +73,7 @@ class Pawn {
 
         return result;
     }
-
     
 }
+
+module.exports = Pawn;
