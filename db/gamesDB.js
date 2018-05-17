@@ -229,11 +229,11 @@ class GamesDB {
      * @param {Function} callbackFunction The callback function to return the game_piece records to.
      * @param {Object} dbx The database object to query the tables from. This is optional in case of transaction usage.
      */
-    getGamePiecesAlive(gameId, callbackFunction, dbx = db) {
+    getGamePieces(gameId, callbackFunction, dbx = db) {
         const sqlGetJoinPieces =   `SELECT * FROM game_pieces 
                                     FULL OUTER JOIN pieces 
                                     ON game_pieces.pieceid=pieces.id
-                                    WHERE game_pieces.gameid=($1) AND game_pieces.alive=($2);`
+                                    WHERE game_pieces.gameid=($1);`; // AND game_pieces.alive=($2);`
 
         dbx.any(sqlGetJoinPieces, [gameId, true])
             .then(joinedPieceRecords => {
