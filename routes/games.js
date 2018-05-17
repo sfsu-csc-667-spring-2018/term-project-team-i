@@ -48,6 +48,8 @@ router.get('/:gameId', auths, (req, res, next) => {
                 funcSocketProtocols(res, gameId);
 
                 renderData.helpers = GamesHbsHelpers.getHandlebarHelpers();
+                // TODO: remove gameInstance.gamePiecesRecords; use gameInstance.chessboard instead.
+                //      It's up to you but in move-pieces, the chessboard must be sent back to Client ina  specific way.
                 renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.gamePiecesRecords);
                 renderData.gameId = gameId;
 
@@ -98,10 +100,10 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
     const playerId = req.user.id;
     const gameId = req.params.gameId;
     const pieceId = req.body.pieceId;
-    const coordinate_x = req.body.coordinate_x;
-    const coordinate_y = req.body.coordinate_y;
-    const destination_x = req.body.destination_x;
-    const destination_y = req.body.destination_y;
+    const raw_coordinate_x = req.body.coordinate_x;
+    const raw_coordinate_y = req.body.coordinate_y;
+    const raw_destination_x = req.body.destination_x;
+    const raw_destination_y = req.body.destination_y;
 
     /*
     Steps to success
@@ -109,12 +111,24 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
     2. 
     */
 
+    gameManager.getGameInstance(gameId, 
+        (gameInstance) => {
+            /** @type {Game} */
+            const game = gameInstance;
+
+            game.movePieceToPosition(pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y);
+            
+        },
+        (failureCB) => {
+
+        });
+
     gamesDB.getGamePiecesAlive(gameId, (gamePieceRecordsJOINED) => {
-        const moveValidation = gameMoveValidator.validateMovement(gamePieceRecordsJOINED, playerId, destination_x, destination_y);
+        const moveValidation = gameMoveValidator.validateMovement(gamePieceRecordsJOINED, playerId, raw_destination_x, raw_destination_y);
 
         if (moveValidation.result) {
             gamesDB.getGameUsers(gameId, (gameUserRecord) => {
-                gamesDB.setGamePieceCoordinates(gameId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, () => {
+                gamesDB.setGamePieceCoordinates(gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {
                     gamesDB.getGamePiecesAlive(gameId, (gamePieceRecords) => {
                         res.statusCode = 200;
                         res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieceRecords});

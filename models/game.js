@@ -27,6 +27,10 @@ class Game {
         this.turn = gameData.turn;
         this.gamePiecesRecords = gamePiecesRecords;
         this.gamePieces = this.__setupGamePieces(gamePiecesRecords);
+        /** 
+         * The chessboard is a [x][y] array of numerical indices reflecting 
+         * the ascii 'a'-'h' and '1'-'8' respectively. 
+         */
         this.chessboard = this.__setupChessboard(this.gamePieces);
     }
 
@@ -82,8 +86,8 @@ class Game {
             for (let idx = 0; idx < gamePieces.length; idx++ ) {
                 /** @type {Piece} */
                 const piece = gamePieces[idx];
-                const cbx = Piece.coordinateXConversion(piece.coordinate_x);
-                const cby = Piece.coordinateYConversion(piece.coordinate_y);
+                const cbx = Piece.coordinateXConversion(piece.raw_coordinate_x);
+                const cby = Piece.coordinateYConversion(piece.raw_coordinate_y);
 
                 chessboard[cbx][cby] = piece;
             }
@@ -92,16 +96,29 @@ class Game {
         return chessboard;
     }
 
-    __getGamePiece(convertedX, convertedY) {
+    __getGamePieceByCoordinates(convertedX, convertedY) {
         for (let idx = 0; this.gamePieces.length; idx++) {
             const gamePiece = this.gamePieces[idx];
-            const x = gamePiece.coordinate_x;
-            const y = gamePiece.coordinate_y;
+            const x = gamePiece.raw_coordinate_x;
+            const y = gamePiece.raw_coordinate_y;
 
             if (x == convertedX && y == convertedY) {
                 return gamePiece;
             }
         }
+    }
+
+    /**
+     * 
+     * @param {Piece} piece 
+     * @param {String} raw_coordinate_x 
+     * @param {String} raw_coordinate_y 
+     * @param {String} raw_destination_x 
+     * @param {String} raw_destination_y 
+     * @param {Array} chessboard 
+     */
+    __updatePiecePosition(piece, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) {
+        const cur_x = piece 
     }
 
     /**
@@ -123,7 +140,20 @@ class Game {
         });
     }
 
-    movePieceToPosition(pieceId, coordinate_x, coordinate_y, destination_x, destination_y, optionalData) {
+    /**
+     * Determines if the Piece of the given piece ID can be moved to the destination position.
+     * @param {Number} pieceId The piece ID to identify the type of Piece to move.
+     * @param {String} raw_coordinate_x The raw x-coordinate passed in from the player 
+     * that is used to identify the selected Piece's through its x-coordinate.
+     * @param {String} raw_coordinate_y The raw y-coordinate passed in from the player
+     * that is used to identify the selected Piece's through its y-coordinate.
+     * @param {String} raw_destination_x The raw x-coordinate destination passed in from the player
+     * that is used to determine if the selected Piece can move to it.
+     * @param {String} raw_destination_y The raw y-coordinate destination passed in from the player
+     * that is used to determine if the selected Piece can move to it.
+     * @param {Object} optionalData Optional data to be used if needed.
+     */
+    movePieceToPosition(pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
         //pieceId, coordinate_x, coordinate_y, newX, newY)
 
         // Check if move is valid
@@ -136,35 +166,40 @@ class Game {
             6.      Yes: does this new move avoids the capture?
             7. Move the piece to destination... 
         */
-        const result = {result: false, message: ""};
-        const cbx = Piece.coordinateXConversion(coordinate_x);
-        const cby = Piece.coordinateYConversion(coordinate_y);
-        const dbx = Piece.coordinateXConversion(destination_x);
-        const dby = Piece.coordinateYConversion(destination_y);
-        const piece = this.__getGamePiece(cbx, cby);
+        const result = {result: false, message: "Cannot process move request at this time!"};
+        const cbx = Piece.coordinateXConversion(raw_coordinate_x);
+        const cby = Piece.coordinateYConversion(raw_coordinate_y);
+        const dbx = Piece.coordinateXConversion(raw_destination_x);
+        const dby = Piece.coordinateYConversion(raw_destination_y);
+        const piece = this.__getGamePieceByCoordinates(cbx, cby);
 
-        if (dbx >= 8 || dby >= 8) {
+        const isOriginInBounds = (cbx >= 0 && cbx <= 7) && (cby >= 0 && cby <= 7);
+        const isDestinationInBounds = (dbx >= 0 && dbx <= 7) && (dby >= 0 && dby <= 7);
+
+        if (!isOriginInBounds) {
             result.result = false;
-            result.message = `Positions {${destination_x}, ${destination_y}} are out of bounds!`;
-            return result;
+            result.message = `Given piece coordinates {${cbx}, ${cby}} are not within bounds!`;
+        } else if (!isDestinationInBounds) {
+            result.result = false;
+            result.message = `Positions {${raw_destination_x}, ${raw_destination_y}} are out of bounds!`;
+        } else if (!piece) {
+            result.result = false;
+            result.message = `Selected piece does not exist at positions {${raw_coordinate_x}, ${raw_coordinate_y}}!`;
+        } else if (!piece.isValidMovement(dbx, dby, this.chessboard)) {
+            result.result = false;
+            result.message = `Invalid movement to {${raw_destination_x}, ${raw_destination_y}}!`;
+        } else {
+            result = true;
+            result.message = "";
+
+            gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
+            this.chessboard[piece.raw_coordinate_x][piece.raw_coordinate_y] = undefined;
+            this.chessboard[raw_destination_x][raw_destination_y] = piece;
+            piece.raw_coordinate_x = raw_destination_x;
+            piece.raw_coordinate_y = raw_destination_y;
         }
 
-        if (!piece) {
-            result.result = false;
-            result.message = `Selected piece does not exist at positions {${coordinate_x}, ${coordinate_y}}!`;
-            return result;
-        }
-
-        if (!piece.isValidMovement(dbx, dby, this.chessboard)) {
-            result.result = false;
-            result.message = `Invalid movement to {${destination_x}, ${destination_y}}!`;
-            return result;
-        }
-
-        // Pseudo code.
-        // TODO: Checks if king is currently checked now, if the newly made move will save it, or is the King itself.
-        if (!this.__isPlayerInKingCheck(playerId, pieceId ));
-        
+        return result;
     }
 
 }
