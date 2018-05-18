@@ -26,12 +26,15 @@ class Game {
         this.opponentId = gameData.opponentid;
         this.turn = gameData.turn;
         this.gamePiecesRecords = gamePiecesRecords;
-        this.gamePieces = this.__setupGamePieces(gamePiecesRecords);
+        /** @type {Piece[]} */
+        this.gamePiecesObjects = this.__setupGamePieces(gamePiecesRecords);
         /** 
-         * The chessboard is a [x][y] array of numerical indices reflecting 
-         * the ascii 'a'-'h' and '1'-'8' respectively. 
+         * The chessboard is a [x][y] array of numerical indices (0-7) reflecting 
+         * the ascii 'a'-'h' and '1'-'8' respectively, where each index represents a cell
+         * that may or may not have a Piece.
+         * @see Piece
          */
-        this.chessboard = this.__setupChessboard(this.gamePieces);
+        this.chessboard = this.__setupChessboard(this.gamePiecesObjects);
     }
 
     /**
@@ -72,33 +75,41 @@ class Game {
 
     /**
      * Set up the chessboard with Pieces at their respective cell locations.
-     * @param {Array} gamePieces Array of Piece objects.
+     * @param {Array} gamePiecesObjects Array of Piece objects.
      * @param {Number} dimension Optional dimension size of height and width of this chessboard.
+     * @return {Array} A chessboard [x][y] where the cells either contain a Piece or undefined for nothing.
      */
-    __setupChessboard(gamePieces, dimension = 8) {
+    __setupChessboard(gamePiecesObjects, dimension = 8) {
         const chessboard = [];
 
         for (let idx = 0; idx < dimension; idx++ ) {
             chessboard[idx] = [];
         }
 
-        if (gamePieces) {
-            for (let idx = 0; idx < gamePieces.length; idx++ ) {
+        if (gamePiecesObjects) {
+            for (let idx = 0; idx < gamePiecesObjects.length; idx++ ) {
                 /** @type {Piece} */
-                const piece = gamePieces[idx];
-                const cbx = Piece.coordinateXConversion(piece.raw_coordinate_x);
-                const cby = Piece.coordinateYConversion(piece.raw_coordinate_y);
+                const gamePiece = gamePiecesObjects[idx];
 
-                chessboard[cbx][cby] = piece;
+                if (gamePiece.alive) {
+                    const chessboard_x = Piece.coordinateXConversion(gamePiece.raw_coordinate_x);
+                    const chessboard_y = Piece.coordinateYConversion(gamePiece.raw_coordinate_y);
+                    chessboard[chessboard_x][chessboard_y] = gamePiece;
+                }
             }
         }
 
         return chessboard;
     }
 
-    __getGamePieceByCoordinates(convertedX, convertedY) {
-        for (let idx = 0; this.gamePieces.length; idx++) {
-            const gamePiece = this.gamePieces[idx];
+    /**
+     * Retrieves the Piece from the chessboard at the given indices.
+     * @param {Number} convertedX The numerical x-coordinate position of the desired piece to find.
+     * @param {Number} convertedY The numerical y-coordinate position of the desired piece to find.
+     */
+    __getGamePieceByConvertedCoordinates(convertedX, convertedY) {
+        for (let idx = 0; this.gamePiecesObjects.length; idx++) {
+            const gamePiece = this.gamePiecesObjects[idx];
             const x = gamePiece.raw_coordinate_x;
             const y = gamePiece.raw_coordinate_y;
 
@@ -106,19 +117,6 @@ class Game {
                 return gamePiece;
             }
         }
-    }
-
-    /**
-     * 
-     * @param {Piece} piece 
-     * @param {String} raw_coordinate_x 
-     * @param {String} raw_coordinate_y 
-     * @param {String} raw_destination_x 
-     * @param {String} raw_destination_y 
-     * @param {Array} chessboard 
-     */
-    __updatePiecePosition(piece, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) {
-        const cur_x = piece 
     }
 
     /**
@@ -153,51 +151,75 @@ class Game {
      * that is used to determine if the selected Piece can move to it.
      * @param {Object} optionalData Optional data to be used if needed.
      */
-    movePieceToPosition(pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
-        //pieceId, coordinate_x, coordinate_y, newX, newY)
-
-        // Check if move is valid
-        /*
-            1. Is move out of bounds? Instant reject if so. 
-            2. Is move even possible by the selected piece?
-                3. Is there an intercepting piece disallowing the movement then?
-                4. Is there an ally piece at the destination?
-            5. Is this current player's king in check?
-            6.      Yes: does this new move avoids the capture?
-            7. Move the piece to destination... 
-        */
-        const result = {result: false, message: "Cannot process move request at this time!"};
+    tryMovePieceToPosition(pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
+       
+        let result = {result: false, message: "Cannot process move request at this time!"};
         const cbx = Piece.coordinateXConversion(raw_coordinate_x);
         const cby = Piece.coordinateYConversion(raw_coordinate_y);
         const dbx = Piece.coordinateXConversion(raw_destination_x);
         const dby = Piece.coordinateYConversion(raw_destination_y);
-        const piece = this.__getGamePieceByCoordinates(cbx, cby);
+        /** @type {Piece} */
+        const selectedPiece = this.chessboard[cbx][cby];
+        /** @type {Piece} */
+        const destinationPiece = this.chessboard[dbx][dby];
 
         const isOriginInBounds = (cbx >= 0 && cbx <= 7) && (cby >= 0 && cby <= 7);
         const isDestinationInBounds = (dbx >= 0 && dbx <= 7) && (dby >= 0 && dby <= 7);
 
+        // Case: given coordinates are out of bounds.
         if (!isOriginInBounds) {
             result.result = false;
             result.message = `Given piece coordinates {${cbx}, ${cby}} are not within bounds!`;
-        } else if (!isDestinationInBounds) {
+            return result;
+        }
+        
+        // Case: destination coordinates out of bounds.
+        if (!isDestinationInBounds) {
             result.result = false;
             result.message = `Positions {${raw_destination_x}, ${raw_destination_y}} are out of bounds!`;
-        } else if (!piece) {
+            return result;
+        }
+        
+        // Case: selected piece does not exist at given location.
+        if (!selectedPiece) {
             result.result = false;
             result.message = `Selected piece does not exist at positions {${raw_coordinate_x}, ${raw_coordinate_y}}!`;
-        } else if (!piece.isValidMovement(dbx, dby, this.chessboard)) {
+            return result;
+        }
+
+        // Case: selected piece and destination containing a piece are of the same faction.
+        if (selectedPiece && destinationPiece && selectedPiece.faction == destinationPiece.faction) {
+            result.result = false;
+            result.message = `Cannot capture targeted piece of the same faction!`;
+            return result;
+        }
+        
+        // Case: selected piece cannot move to location; or it can.
+        if (!selectedPiece.isValidMovement(dbx, dby, this.chessboard)) {
             result.result = false;
             result.message = `Invalid movement to {${raw_destination_x}, ${raw_destination_y}}!`;
         } else {
-            result = true;
+            result.result = true;
             result.message = "";
 
+            // Update the database
             gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
-            this.chessboard[piece.raw_coordinate_x][piece.raw_coordinate_y] = undefined;
-            this.chessboard[raw_destination_x][raw_destination_y] = piece;
-            piece.raw_coordinate_x = raw_destination_x;
-            piece.raw_coordinate_y = raw_destination_y;
+            
+            // Update information locally to reflect the changes.
+            this.chessboard[cbx][cby] = undefined;
+            this.chessboard[dbx][dby] = selectedPiece;
+            
+            selectedPiece.raw_coordinate_x = raw_destination_x;
+            selectedPiece.raw_coordinate_y = raw_destination_y;
+
+            if (destinationPiece) {
+                destinationPiece.alive = false;
+                destinationPiece.raw_coordinate_x = null;
+                destinationPiece.raw_coordinate_y = null;
+            }
         }
+
+        // TODO: Determine king check.
 
         return result;
     }
