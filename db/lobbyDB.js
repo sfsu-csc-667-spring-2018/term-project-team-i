@@ -8,7 +8,7 @@ module.exports = (id, response) =>{
               AND (userid = ${id} OR opponentid = ${id})`);
         return t.batch([user, games, rejoin]);
     }).then( data =>{
-        console.log("reached data"  + JSON.stringify(data));
+        //console.log("reached data"  + JSON.stringify(data));
         let obj = JSON.parse(JSON.stringify(data[0]));
         let game = JSON.parse(JSON.stringify(data[1]));
         let rejoin = JSON.parse(JSON.stringify(data[2]));
