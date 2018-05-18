@@ -13,9 +13,15 @@ class Piece {
         this.faction = gamePieceRecord.faction;
         this.raw_coordinate_x = gamePieceRecord.coordinate_x;
         this.raw_coordinate_y = gamePieceRecord.coordinate_y;
-        this.idx_coordinate_x = Piece.coordinateXConversion(this.raw_coordinate_x);
-        this.idx_coordinate_y = Piece.coordinateYConversion(this.raw_coordinate_y);
         this.alive = gamePieceRecord.alive;
+    }
+
+    get coordinateXConverted() {
+        return Piece.coordinateXConversion(this.raw_coordinate_x);
+    }
+
+    get coordinateYConverted() {
+        return Piece.coordinateYConversion(this.raw_coordinate_y);
     }
     
     /**
@@ -26,6 +32,7 @@ class Piece {
      * @param {Number} idx_destination_y The y coordinate destination in NUMBER form (0 to 7).
      * @param {Array} chessboard The array containing all the active game pieces currently on the chessboard.
      * @param {Object} otherConditions Optional conditions for special pieces just in case.
+     * @return {boolean}
      */
     isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions) {
         throw new Error(this.isValidMovement.name + " is abstract and must be implemented.");
