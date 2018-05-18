@@ -105,101 +105,26 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
     const raw_destination_x = req.body.destination_x;
     const raw_destination_y = req.body.destination_y;
 
-    /*
-    Steps to success
-    1. Convert to use gameManager.
-    2. 
-    */
-
     gameManager.getGameInstance(gameId, 
         (gameInstance) => {
             /** @type {Game} */
             const game = gameInstance;
+            const moveResult = game.tryMovePieceToPosition(pieceId, 
+                                                            raw_coordinate_x, raw_coordinate_y, 
+                                                            raw_destination_x, raw_destination_y);
 
-            game.movePieceToPosition(pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y);
-            
+            const gamePieces = game.gamePiecesObjects;
+            const resStatusCode = (moveResult.result) ? 200 : 403;
+
+            res.statusCode = resStatusCode;
+            res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieces});
+            res.end(moveResult.message);
         },
         (failureCB) => {
-
+            console.log(failureCB);
+            res.end("Cannot move piece!");
         });
 
-    gamesDB.getGamePiecesAlive(gameId, (gamePieceRecordsJOINED) => {
-        const moveValidation = gameMoveValidator.validateMovement(gamePieceRecordsJOINED, playerId, raw_destination_x, raw_destination_y);
-
-        if (moveValidation.result) {
-            gamesDB.getGameUsers(gameId, (gameUserRecord) => {
-                gamesDB.setGamePieceCoordinates(gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {
-                    gamesDB.getGamePiecesAlive(gameId, (gamePieceRecords) => {
-                        res.statusCode = 200;
-                        res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieceRecords});
-                        res.end("Move completed");
-                    });
-                });
-            });
-        } else {
-            console.log(moveValidation.message);
-        }
-    });
-
-    /*
-    new Promise((resolve, reject) => {
-        gamesDB.getGamePiecesAlive(gameId, (gamePieceRecordsJOINED) => {
-            resolve(gamePieceRecordsJOINED);
-        });
-    })
-    .then((gamePieceRecordsJOINED) => {
-        console.log("GAME RECORDS RECEIVED");
-        const promise = new Promise((resolve, reject) => {
-            const moveValidation = gameMoveValidator.validateMovement(gamePieceRecordsJOINED, playerId, destination_x, destination_y);
-
-            if (moveValidation.result) {
-                resolve();
-            } else {
-                reject(moveValidation.message);
-            }
-        });
-
-        return promise;
-    })
-    .then(() => {
-        // Check for valid user.
-        const promise = new Promise((resolve, reject) => {
-            gamesDB.getGameUsers(gameId, (gameRecord => {
-                resolve(gameRecord);
-            }));
-        })
-
-        return promise;
-    })
-    .then((gameRecord) => {
-        const promise = new Promise((resolve, reject) => {
-            gamesDB.setGamePieceCoordinates(gameId, pieceId, coordinate_x, coordinate_y, destination_x, destination_y, () => {
-                resolve();
-            });
-        })
-        
-        return promise;
-    })
-    .then(() => {
-        const promise = new Promise((resolve, reject) => {
-            gamesDB.getGamePiecesAlive(gameId, (gamePieceRecords => {
-                resolve(gamePieceRecords);
-            }))
-        })
-        
-        return promise;
-    })
-    .then((gamePieceRecords) => {
-        res.statusCode = 200;
-        res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieceRecords});
-        res.end("Move completed!");
-    })
-    .catch(error => {
-        res.statusCode = 400;
-        res.send(error);
-    });
-    */
-    //res.end("TEST RESPONSE Got it: " + JSON.stringify(req.body));
 });
 
 router.post('/:gameId/forfeit', (req, res, next) => {
