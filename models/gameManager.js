@@ -40,7 +40,7 @@ class GameManager {
                     {
                         const gameData = gameDataRecords[0];
 
-                        gamesDB.getGamePiecesAlive(gameId, (gamePiecesRecords) => {
+                        gamesDB.getGamePieces(gameId, (gamePiecesRecords) => {
                             gameInstance = new Game(gameData, gamePiecesRecords);
                             this.activeGames.set(gameId, gameInstance);
                             resolve(gameInstance);
