@@ -49,13 +49,17 @@ class Piece {
      * @param {Number} chessboardSize The chessboard dimension.
      * @return {(Piece|undefined)} The first hit object in the scan or undefined if the chessboard size was reached.
      */
-    static getFirstPieceScan(origin_x, origin_y, origin_incX, origin_incY, chessboard, chessboardSize) {
+    static getFirstPieceScan(origin_x, origin_y, origin_incX, origin_incY, chessboard, chessboardSize = 8) {
         let hitPiece = undefined;
 
-        for (let col = origin_x + origin_incX, row = origin_y + origin_incY; (col < chessboardSize && row < chessboardSize); col += origin_incX, row += origin_incY) {
-            hitPiece = chessboard[col][row];
-            if (hitPiece != undefined) {
-                break;
+        for (let col = origin_x + origin_incX, row = origin_y + origin_incY; 
+                                        (col >= 0 && col < chessboardSize && row >= 0 && row < chessboardSize);
+                                                                                col += origin_incX, row += origin_incY) {
+            if (chessboard[col]) {
+                hitPiece = chessboard[col][row];
+                if (hitPiece != undefined) {
+                    break;
+                }
             }
         }
 
