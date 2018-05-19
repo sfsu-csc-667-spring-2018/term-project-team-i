@@ -91,7 +91,7 @@ router.post('/:gameId/message', auths, (req, res, next) => {
     console.log(user);
 
     //const indexRoute = request.app.get('io').of('/');
-    res.app.get('io').of('/games/' + gameId).emit('new game message',
+    res.app.get('io').of('/games/' + gameId).emit('game-new-message',
        {gameUser: stripHTML(user), gameMsg: stripHTML(message)});
     // {playerId: int, message: string}
 });
@@ -120,7 +120,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
             const resStatusCode = (moveResult.result) ? 200 : 304;
 
             res.statusCode = resStatusCode;
-            res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieces});
+            res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces});
             res.end(moveResult.message);
         },
         (failureCB) => {

@@ -7,12 +7,12 @@ $(document).ready(function(){
     //const $gameUser = document.getElementById("gameUser").textContent;
 
     //game message
-    gameSocket.on('new game message', data =>{
+    gameSocket.on('game-new-message', data =>{
         $gameChat.prepend('<div class="chat" id="gameChat">' + '<b>' + data.gameUser + '</b>' +': ' + data.gameMsg + '</div>' );
         $gameMessage.val('');
     });
 
-    gameSocket.on('chessboard-refresh', data => {
+    gameSocket.on('game-chessboard-refresh', data => {
         $('.chessPiece').remove();  //Clear all previous chess pieces.
         const updatedChessPieces = data.updatedChessPieces;
 
@@ -28,4 +28,6 @@ $(document).ready(function(){
             }
         }
     });
+
+    gameSocket.on('')
 });
