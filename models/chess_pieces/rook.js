@@ -1,68 +1,65 @@
 const Piece = require('../chess_pieces/piece.js');
+
 class Rook extends Piece{
 
-    moveRook(newCoordinateX, newCoordinateY, allGamePieces = []){
-        let startX = this.coordinateXConversion(this.coordinate_x);
-        let startY = this.coordinateYConversion(this.coordinate_y);
+    isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions) {
+        
+        const result = {result: false, message: ""};
+        const isMovingHorizontal = (this.coordinateXConverted == idx_destination_x);
+        const isMovingVertically = (this.coordinateYConverted == idx_destination_y);
+        const isMovingLegitimately = (isMovingHorizontal && !isMovingVertically) 
+                                        || (!isMovingHorizontal && isMovingVertically);
 
-        let X =  this.coordinateXConversion(newCoordinateX) - startX;
-        let Y = this.coordinateYConversion(newCoordinateY) - startY;
+        const coordinate_x_inc = Math.sign(idx_destination_x - this.coordinateXConverted);
+        const coordinate_y_inc = Math.sign(idx_destination_y - this.coordinateYConverted);
 
-        /**** TODO
-         * iterate through allGamePieces to see if another
-         * piece is between start and end
-         */
+        if (isMovingLegitimately) {
+            const hitPiece = Piece.getFirstPieceScan(this.coordinateXConverted, 
+                                                        this.coordinateYConverted,
+                                                                    coordinate_x_inc,
+                                                                        coordinate_y_inc,
+                                                                                chessboard);
 
-        //legit move
-        if((Y === 0) || (X === 0)) {
-            if (Y < 0) {
-                for (let i = 1; i <= Math.abs(Y); i++) {
-                    //traverse array for negative vertical direction, set X =0
-                    if(allGamePieces[startX][startY - i] === undefined)
-                        continue;
-                    else if(allGamePieces[startX][startY - i] !== undefined)
-                        return false;
-                    else
-                        return true
+            const hitPieceExistAndAlly = (hitPiece && (this.faction == hitPiece.faction));
+            const hitPieceExistAndBlocking = (hitPiece) && (hitPiece.coordinateXConverted == idx_destination_x)
+                                                        && (hitPiece.coordinateYConverted == idx_destination_y);
+
+
+            if (hitPiece) {
+                const xDestinationDiff = idx_destination_x - this.coordinateXConverted;
+                const yDestinationDiff = idx_destination_y - this.coordinateYConverted;
+                const xHitPieceDiff = hitPiece.coordinateXConverted - this.coordinateXConverted;
+                const yHitPieceDiff = hitPiece.coordinateYConverted - this.coordinateYConverted;
+
+                const magnitudeDest = Math.sqrt(Math.pow(xDestinationDiff, 2) + Math.pow(yDestinationDiff, 2));
+                const magnitudeHit = Math.sqrt(Math.pow(xHitPieceDiff, 2) + Math.pow(yHitPieceDiff, 2));
+
+                const isMovementBlocked = (magnitudeHit < magnitudeDest);
+                const isHitPieceAtDestination = (hitPiece.coordinateXConverted == idx_destination_x) 
+                                                    && (hitPiece.coordinateYConverted == idx_destination_y);
+                const isHitPieceAlly = (this.faction == hitPiece.faction);
+
+                if (isMovementBlocked) {
+                    result.result = false;
+                    result.message = `Movement to {${idx_destination_x}, ${idx_destination_y}} is blocked!`;
+                    
+                } else if (!isMovementBlocked && isHitPieceAtDestination && isHitPieceAlly) {
+                    result.result = false;
+                    result.message = `Cannot capture pieces of the same faction!`;
+                } else {
+                    result.result = true;
+                    result.message = "";
                 }
+            } else {
+                result.result = true;
+                result.message = "";
             }
-            else if (Y > 0) {
-                for (let i = 1; i <= Y; i++) {
-                    //traverse array for positive vertical direction
-                    if(allGamePieces[startX][startY + i] === undefined)
-                        continue;
-                    else if(allGamePieces[startX][startY + i] !== undefined)
-                        return false;
-                    else
-                        return true
-                }
-            }
-            else if (X > 0) {
-                for (let i = 1; i <= X; i++) {
-                    //traverse array for positive horizontal direction
-                    if(allGamePieces[startX + i][startY] === undefined)
-                        continue;
-                    else if(allGamePieces[startX + i][startY] !== undefined)
-                        return false;
-                    else
-                        return true
-                }
-            }
-            else if (X < 0) {
-                for (let i = 1; i <= Math.abs(X); i++) {
-                    //traverse array for negative horizontal direction
-                    if(allGamePieces[startX - i][startY] === undefined)
-                        continue;
-                    else if(allGamePieces[startX - i][startY] !== undefined)
-                        return false;
-                    else
-                        return true
-                }
-            }
-            else
-                return false;
+        } else {
+            result.result = false;
+            result.message = `Invalid move to {${idx_destination_x}, ${idx_destination_y}}!`;
         }
-        return false;
+
+        return result.result;
     }
 }
 
