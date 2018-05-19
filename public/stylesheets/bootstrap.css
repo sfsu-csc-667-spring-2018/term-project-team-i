@@ -3836,7 +3836,20 @@ input[type="button"].btn-block {
 
 .nav-link {
   display: block;
-  padding: 0.5rem 1rem;
+}
+
+.nav-link1 {
+  display: block;
+  padding: 10px 20px 10px 20px;
+  margin-right: 15px;
+  border: 1px solid whitesmoke;
+  border-radius: 3px;
+  color: #ffffff;
+}
+
+.nav-link1:hover, .nav-link:focus {
+  text-decoration: none;
+  color: darkgrey;
 }
 
 .nav-link:hover, .nav-link:focus {
@@ -3890,7 +3903,7 @@ input[type="button"].btn-block {
 
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
-  color: #fff;
+  color: #ffffff;
   background-color: #007bff;
 }
 
@@ -3966,8 +3979,8 @@ input[type="button"].btn-block {
 }
 
 .navbar-nav .nav-link {
-  padding-right: 0;
-  padding-left: 0;
+  padding-right: 20px;
+  padding-left: 20p;
 }
 
 .navbar-nav .dropdown-menu {
@@ -7289,6 +7302,7 @@ button.bg-dark:focus {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+
 }
 
 .sr-only-focusable:active, .sr-only-focusable:focus {

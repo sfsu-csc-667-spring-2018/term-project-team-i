@@ -3,9 +3,9 @@
 }
 
 #chessboard .squareB{
-    width: 40px;
-    height: 40px;
-    background: #060809;
+    width: 80px;
+    height: 70px;
+    background: #8b3507;
 }
 #chessboard .squareW{
     width: 40px;
@@ -15,15 +15,15 @@
 #chessboard .border{
     width: 10px;
     height: 10px;
-    background: gray;
+    background: #8b2c03;
     text-align: center;
     color: white;
     font-size: 10px;
 }
 
 #chessboard .chessPiece{
-    width: 40px;
-    height: 40px;
+    width: 70px;
+    height: 60px;
     margin-left: auto;
     margin-right: auto;
 }

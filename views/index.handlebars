@@ -1,45 +1,106 @@
+<!DOCTYPE html>
 <html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<head>
+    <style>
+        h5 {
+            text-align: center;
+        }
+        .col-4 {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+        }
+    </style>
+</head>
+
 <body>
-<div> Hello {{username}}</div>
-<div id="container-game-list"> Games
-    <div class="games-list">
-        {{#each rejoin}}
-            <form method="get" action="/games/{{id}}">
-                <div class="list">Game #{{id}}
-                    <input type="submit" value="Rejoin Game"/>
+
+<!-- display buttons, chessboard, chatroom in row & column -->
+<!-- display body in container class-->
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- display "Join Game" buttons -->
+        <div class="col-sm-2">
+
+
+        </div>
+
+        <!-- display Welcome messages, chessboard -->
+        <div class="col-sm-6">
+            <h5> Hello <strong>{{username}}!</strong></h5>
+            <h5> Welcome to Chess Game!</h5><br><br>
+            <div id="container-game-list" style="text-align: center"> Games
+                <hr>
+                <div class="row" style="margin-left: 100px">
+                    <div class="games-list">
+                        {{#each rejoin}}
+                            <form method="get" action="/games/{{id}}">
+                                <div class="list">Game #{{id}}
+                                    <input type="submit" class="btn btn-info" value="Rejoin"/>
+                                </div>
+                            </form>
+                        {{/each}}
+                    </div>
+                    <div class="row" style="margin-left: 50px">
+                        <div class="games-list">
+                            {{#each game}}
+                                <form method="get" action="/games/{{id}}">
+                                    <div class="list">Game #{{id}}
+                                        <input type="submit" class="btn btn-primary" value="Join"/>
+                                    </div>
+                                </form>
+                            {{/each}}
+                            <div class="list" id="gamesList"></div>
+                        </div>
+                    </div>
                 </div>
-            </form>
-        {{/each}}
-        {{#each game}}
-            <form method="get" action="/games/{{id}}">
-                <div class="list">Game #{{id}}
-                    <input type="submit" value="Join Game"/>
+            </div>
+        </div>
+
+        <!-- display chat & messages box-->
+        <div class="col-4">
+            <div id="container-chat"> Chat Room
+                <hr>
+                <div class="chat">
+                    <div class="row">
+                        <div class="col-sm-1">
+                            <div class="well">
+                                <ul class="list-group" id="users"></ul>
+                            </div>
+
+                        </div>
+                        <!-- display user input messages -->
+                        <div class="chat-box">
+                            <div class="chat" id="lobbyChat"></div>
+                        </div>
+
+                    </div>
                 </div>
-            </form>
-        {{/each}}
-        <div class="list" id="gamesList"></div>
+                <!--Type messages and send footer-->
+                <form class="send-message" id="LobbyMessageForm" method="post" action="/message">
+                    <div class="input-group">
+                        <input type="text" class="form-control input-sm chat_input" id="lobbyMessage"
+                               placeholder="enter message here..." name="message" autocomplete="off"/>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
+            </div>
+            <!-- End of chat & messages box-->
+        </div>
+        <p hidden id="lobbyUser">{{username}}</p>
+        <!-- End of chat-->
+
     </div>
+
+    <!-- End of class ="row" -->
 </div>
-    <div id="container-chat"> Chat
-        <div class="col-md-4">
-            <div class="well">
-                <h3>Online Users</h3>
-                <ul class="list-group" id="users"></ul>
-            </div>
-        </div>
-        <div class="chat-box">
-            <div class="chat" id="lobbyChat"></div>
-        </div>
-        <form class="send-message" id="lobbyMessageForm" method="post" action="/message" >
-            <div class="form-group">
-                <label for="message"></label>
-                <input type="text" class="form-control" id="lobbyMessage"
-                       placeholder="Enter message" name="message" autocomplete="off">
-                <br/>
-                <button type="submit" class="btn btn-primary" value="Send Message">Send Message</button>
-            </div>
-        </form>
-    </div>
-    <script src="/js/indexSocket.js"></script>
+<!-- End of container class-->
+
+<script src="/js/indexSocket.js"></script>
+
 </body>
 </html>

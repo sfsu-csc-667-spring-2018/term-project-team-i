@@ -2,41 +2,45 @@
 <html>
 <head>
     <title>Chess</title>
-    <link rel="stylesheet" href="/stylesheets/bootstrap.css" />
-    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link rel="stylesheet" href="/stylesheets/bootstrap.css"/>
+    <link rel="stylesheet" href="/stylesheets/style.css"/>
     <link rel="stylesheet" href="/stylesheets/chessboard.css"/>
-    <link rel="icon" href="/images/bKingIcon.ico" />
+    <link rel="icon" href="/images/bKingIcon.ico"/>
 
 </head>
-<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark navbar-fixed-top">
     <form action="/games" method="POST">
         <button id="btn_create_game" type="submit" class="navbar-brand" name="btn_create_game">Create Game</button>
     </form>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04"
+            aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarsExample04">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <a class="nav-link" href="/">Lobby <span class="sr-only">(current)</span></a>
+                <a class="nav-link1" href="/">Lobby <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item active">
-                <a class="nav-link" href="/users/logout">Logout <span class="sr-only">(current)</span></a>
+                <a class="nav-link1" href="https://en.wikipedia.org/wiki/Chess" target="_blank">Rules <span class="sr-only">(current)</span></a>
             </li>
         </ul>
+        <div class="navbar-nav float-left">
+            <a class="nav-link1" href="/users/logout">Logout <span class="sr-only">(current)</span></a>
+        </div>
     </div>
 </nav>
-<body id = "background">
+<body id="background">
 {{#if success_msg}}
-    <div class = "alert alert-success">{{success_msg}}</div>
+    <div class="alert alert-success">{{success_msg}}</div>
 {{/if}}
 
 {{#if error_msg}}
-    <div class = "alert alert-danger">{{error_msg}}</div>
+    <div class="alert alert-danger">{{error_msg}}</div>
 {{/if}}
 {{#if error}}
-    <div class = "alert alert-danger">{{error}}</div>
+    <div class="alert alert-danger">{{error}}</div>
 {{/if}}
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
