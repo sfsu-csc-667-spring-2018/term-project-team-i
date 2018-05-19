@@ -67,6 +67,28 @@ class Piece {
     }
 
     /**
+     * Determines if the given origin piece is blocked by another given piece from reaching its destination coordinates.
+     * @param {Piece} originPiece The Piece attempting to reach its destination.
+     * @param {Piece} possibleBlockingPiece The other Piece that may possible be blocking the origin Piece.
+     * @param {Number} idx_destination_x The destination x-coordinates to reach.
+     * @param {Number} idx_destination_y The destination y-coordinates to reach.
+     * @return {boolean} true if the possibly blocking Piece is blocking, false otherwise or if either Pieces are undefined.
+     */
+    static isOtherPieceBlocking(originPiece, possibleBlockingPiece, idx_destination_x, idx_destination_y) {
+        if (!originPiece || !possibleBlockingPiece) return false;
+
+        const xDestinationDiff = idx_destination_x - originPiece.coordinateXConverted;
+        const yDestinationDiff = idx_destination_y - originPiece.coordinateYConverted;
+        const xHitPieceDiff = possibleBlockingPiece.coordinateXConverted - originPiece.coordinateXConverted;
+        const yHitPieceDiff = possibleBlockingPiece.coordinateYConverted - originPiece.coordinateYConverted;
+
+        const magnitudeDest = Math.sqrt(Math.pow(xDestinationDiff, 2) + Math.pow(yDestinationDiff, 2));
+        const magnitudeHit = Math.sqrt(Math.pow(xHitPieceDiff, 2) + Math.pow(yHitPieceDiff, 2));
+
+        return (magnitudeHit < magnitudeDest);
+    }
+
+    /**
      * converts string x coordinates to numbers - 1 for indexes
      * @param {String} raw_coordinateX
      * @returns {number}

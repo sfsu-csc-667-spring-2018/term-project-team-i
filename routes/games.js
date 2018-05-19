@@ -112,7 +112,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
                                                             raw_destination_x, raw_destination_y);
 
             const gamePieces = game.gamePiecesObjects;
-            const resStatusCode = (moveResult.result) ? 200 : 403;
+            const resStatusCode = (moveResult.result) ? 200 : 304;
 
             res.statusCode = resStatusCode;
             res.app.get('io').of('/games/' + gameId).emit('chessboard-refresh', {updatedChessPieces: gamePieces});

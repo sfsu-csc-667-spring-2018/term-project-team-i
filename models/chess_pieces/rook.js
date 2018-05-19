@@ -20,21 +20,9 @@ class Rook extends Piece{
                                                                         coordinate_y_inc,
                                                                                 chessboard);
 
-            const hitPieceExistAndAlly = (hitPiece && (this.faction == hitPiece.faction));
-            const hitPieceExistAndBlocking = (hitPiece) && (hitPiece.coordinateXConverted == idx_destination_x)
-                                                        && (hitPiece.coordinateYConverted == idx_destination_y);
-
-
+                
             if (hitPiece) {
-                const xDestinationDiff = idx_destination_x - this.coordinateXConverted;
-                const yDestinationDiff = idx_destination_y - this.coordinateYConverted;
-                const xHitPieceDiff = hitPiece.coordinateXConverted - this.coordinateXConverted;
-                const yHitPieceDiff = hitPiece.coordinateYConverted - this.coordinateYConverted;
-
-                const magnitudeDest = Math.sqrt(Math.pow(xDestinationDiff, 2) + Math.pow(yDestinationDiff, 2));
-                const magnitudeHit = Math.sqrt(Math.pow(xHitPieceDiff, 2) + Math.pow(yHitPieceDiff, 2));
-
-                const isMovementBlocked = (magnitudeHit < magnitudeDest);
+                const isMovementBlocked = Piece.isOtherPieceBlocking(this, hitPiece, idx_destination_x, idx_destination_y);
                 const isHitPieceAtDestination = (hitPiece.coordinateXConverted == idx_destination_x) 
                                                     && (hitPiece.coordinateYConverted == idx_destination_y);
                 const isHitPieceAlly = (this.faction == hitPiece.faction);

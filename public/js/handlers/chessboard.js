@@ -55,6 +55,7 @@ class Chessboard {
         if (this.selectedCells.cellElement1 === null) {
             if (this.__getSelectedChessPiece(cellElement)) {
                 this.selectedCells.cellElement1 = cellElement;
+                console.log("Selected Piece at: " + JSON.stringify(this.selectedCells.cellElement1.dataset));
             }
         } else {
             this.selectedCells.cellElement2 = cellElement;
