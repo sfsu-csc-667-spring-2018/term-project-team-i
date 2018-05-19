@@ -5,12 +5,12 @@ class King extends Piece{
     /***TODO
      * kingCheck check
      */
-    moveKing(newCoordinateX, newCoordinateY, chessboard = []){
-        let startX = this.coordinateXConversion(this.coordinate_x);
-        let startY = this.coordinateYConversion(this.coordinate_y);
+    isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions){
+        let startX = Piece.coordinateXConversion(this.raw_coordinate_x);
+        let startY = Piece.coordinateYConversion(this.raw_coordinate_y);
 
-        let X =  this.coordinateXConversion(newCoordinateX) - startX;
-        let Y = this.coordinateYConversion(newCoordinateY) - startY;
+        let X =  idx_destination_x - startX;
+        let Y = idx_destination_y - startY;
 
         if (Y < -1 || Y > 1) return false;
         else if (X < -1 || X > 1) return false; //one square check
