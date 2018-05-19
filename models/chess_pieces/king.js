@@ -5,7 +5,7 @@ class King extends Piece{
     /***TODO
      * kingCheck check
      */
-    moveKing(newCoordinateX, newCoordinateY, allGamePieces = []){
+    moveKing(newCoordinateX, newCoordinateY, chessboard = []){
         let startX = this.coordinateXConversion(this.coordinate_x);
         let startY = this.coordinateYConversion(this.coordinate_y);
 
@@ -20,6 +20,10 @@ class King extends Piece{
         else if (Y === X) return true;
         else if (Y === -X) return true;
         return false
+    }
+
+    isKingInCheck(kingX, kingY, chessboard = []){
+
     }
 }
 
