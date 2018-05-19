@@ -25,7 +25,6 @@ class Game {
         this.hostId = gameData.userid;
         this.opponentId = gameData.opponentid;
         this.turn = gameData.turn;
-        this.gamePiecesRecords = gamePiecesRecords;
         /** @type {Piece[]} */
         this.gamePiecesObjects = this.__setupGamePieces(gamePiecesRecords);
         /** 

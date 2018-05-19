@@ -48,9 +48,7 @@ router.get('/:gameId', auths, (req, res, next) => {
                 funcSocketProtocols(res, gameId);
 
                 renderData.helpers = GamesHbsHelpers.getHandlebarHelpers();
-                // TODO: remove gameInstance.gamePiecesRecords; use gameInstance.chessboard instead.
-                //      It's up to you but in move-pieces, the chessboard must be sent back to Client ina  specific way.
-                renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.gamePiecesRecords);
+                renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.gamePiecesObjects);
                 renderData.gameId = gameId;
 
                 res.render('games',renderData);

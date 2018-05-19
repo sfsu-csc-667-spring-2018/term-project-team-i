@@ -1,3 +1,5 @@
+const Piece = require('../../models/chess_pieces/piece.js');
+
 class GamesRenderHelpers {
     
     /**
@@ -5,17 +7,17 @@ class GamesRenderHelpers {
      * the keys and the JOINED game_pieces+pieces record are the value.
      * 
      * @example {"a4": [pieceId: '4', name: 'bishop', faction: 'white']}
-     * @param {Array} gamePieceRecordsJOINED The array retrieved from the database 
+     * @param {Piece[]} gamePieceObjects The array retrieved from the database 
      * that is a JOIN-ing of game_pieces and pieces table.
      */
-    static toCellGamePieceObject (gamePieceRecordsJOINED = []) {
+    static toCellGamePieceObject (gamePieceObjects = []) {
         const returnGamePieces = {};
 
         // Sets the returning elements 
-        for (let idx = 0; idx < gamePieceRecordsJOINED.length; idx++) {
-            const gamePiece = gamePieceRecordsJOINED[idx];
-            const pieceId = gamePiece.pieceid;
-            const coordinate_xy = gamePiece.coordinate_x + gamePiece.coordinate_y;
+        for (let idx = 0; idx < gamePieceObjects.length; idx++) {
+            const gamePiece = gamePieceObjects[idx];
+            const pieceId = gamePiece.pieceId;
+            const coordinate_xy = gamePiece.raw_coordinate_x + gamePiece.raw_coordinate_y;
             const name = gamePiece.name;
             const faction = gamePiece.faction;
             const alive = gamePiece.alive;
