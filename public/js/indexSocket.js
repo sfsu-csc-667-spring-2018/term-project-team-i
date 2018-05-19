@@ -5,7 +5,7 @@ $(document).ready(function(){
 
     //lobby message
     socket.on('new lobby message', data => {
-        $lobbyChat.prepend('<div class="chat">' + data.lobbyUser + ' : '+ data.lobbyMsg + '</div>');
+        $lobbyChat.prepend('<div class="chat">' +'<b>' + data.lobbyUser + '</b>' + ' : '+ data.lobbyMsg + '</div>');
         $lobbyMessage.val('');
     });
 });

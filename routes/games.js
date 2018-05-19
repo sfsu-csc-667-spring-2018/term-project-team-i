@@ -75,6 +75,11 @@ router.get('/:gameId', auths, (req, res, next) => {
 
 });
 
+const stripHTML = (text) =>{
+    let regex = /(<([^>]+)>)/ig;
+    return text.replace(regex, "");
+};
+
 // Sends a message in the Game Room.
 router.post('/:gameId/message', auths, (req, res, next) => {
     const gameId = req.params.gameId;
@@ -87,7 +92,7 @@ router.post('/:gameId/message', auths, (req, res, next) => {
 
     //const indexRoute = request.app.get('io').of('/');
     res.app.get('io').of('/games/' + gameId).emit('new game message',
-       {gameUser: user, gameMsg: message});
+       {gameUser: stripHTML(user), gameMsg: stripHTML(message)});
     // {playerId: int, message: string}
 });
 

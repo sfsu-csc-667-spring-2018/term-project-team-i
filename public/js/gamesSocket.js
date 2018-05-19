@@ -8,7 +8,7 @@ $(document).ready(function(){
 
     //game message
     gameSocket.on('new game message', data =>{
-        $gameChat.prepend('<div class="chat" id="gameChat">' + data.gameUser + ': ' + data.gameMsg + '</div>' );
+        $gameChat.prepend('<div class="chat" id="gameChat">' + '<b>' + data.gameUser + '</b>' +': ' + data.gameMsg + '</div>' );
         $gameMessage.val('');
     });
 

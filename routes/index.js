@@ -15,8 +15,12 @@ router.post("/message", (request, response) =>{
     console.log(user);
     //const indexRoute = request.app.get('io').of('/');
     response.app.get('io').of('/').emit('new lobby message',
-        {lobbyUser: user, lobbyMsg: message});
+        {lobbyUser: stripHTML(user), lobbyMsg: stripHTML(message)});
 });
 
+const stripHTML = (text) =>{
+    let regex = /(<([^>]+)>)/ig;
+    return text.replace(regex, "");
+};
 
 module.exports = router;
