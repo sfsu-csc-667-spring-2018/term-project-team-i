@@ -42,13 +42,18 @@ class Pawn extends Piece {
         const funcNoPiecePresenceCheck = (colInc, rowInc, chessboard, allowedIfEnemy) => {
             const at_x = this.coordinateXConverted + colInc;
             const at_y = this.coordinateYConverted + rowInc;
-            /** @type {Piece} */
-            const possiblePiece = chessboard[at_x][at_y];
+            
+            if (chessboard[at_x]) {
+                /** @type {Piece} */
+                const possiblePiece = chessboard[at_x][at_y];
 
-            if (allowedIfEnemy) {
-                return (possiblePiece && possiblePiece.faction != this.faction);
+                if (allowedIfEnemy) {
+                    return (possiblePiece && possiblePiece.faction != this.faction);
+                } else {
+                    return (!possiblePiece);
+                }
             } else {
-                return (!possiblePiece);
+                return true;
             }
         }
 
