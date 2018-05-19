@@ -40,7 +40,7 @@ class Piece {
     }
 
     /**
-     * Find the first Piece object scanning toward the given direction.
+     * Find the first Piece object by scanning toward the given direction using the given incrementing values.
      * @param {Number} origin_x The starting x-coordinate position (Note that this value is incremented by origin_incX at start).
      * @param {Number} origin_y The starting y-coordinate position (Note that this value is incremented by origin_incY at start).
      * @param {Number} origin_incX The increment to add to the origin x-coordinate.

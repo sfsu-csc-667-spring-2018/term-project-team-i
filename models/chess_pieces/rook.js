@@ -10,10 +10,10 @@ class Rook extends Piece{
         const isMovingLegitimately = (isMovingHorizontal && !isMovingVertically) 
                                         || (!isMovingHorizontal && isMovingVertically);
 
-        const coordinate_x_inc = Math.sign(idx_destination_x - this.coordinateXConverted);
-        const coordinate_y_inc = Math.sign(idx_destination_y - this.coordinateYConverted);
-
         if (isMovingLegitimately) {
+            const coordinate_x_inc = Math.sign(idx_destination_x - this.coordinateXConverted);
+            const coordinate_y_inc = Math.sign(idx_destination_y - this.coordinateYConverted);
+
             const hitPiece = Piece.getFirstPieceScan(this.coordinateXConverted, 
                                                         this.coordinateYConverted,
                                                                     coordinate_x_inc,
