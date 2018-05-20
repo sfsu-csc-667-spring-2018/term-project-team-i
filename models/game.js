@@ -23,6 +23,7 @@ class Game {
     constructor (gameData, gamePiecesRecords) {
         this.gameId = gameData.gameid;
         this.hostId = gameData.userid;
+        this.active = gameData.active;
         this.opponentId = gameData.opponentid;
         this.turn = gameData.turn;
         /** @type {Piece[]} */
@@ -34,6 +35,29 @@ class Game {
          * @see Piece
          */
         this.chessboard = this.__setupChessboard(this.gamePiecesObjects);
+        this.kings = this.__getKings(this.chessboard);
+    }
+
+    /**
+     * Retrieve the King Pieces of this game.
+     * @param {Array[]} chessboard The chessboard containing all the current alive game Pieces.
+     * @return {{white: King, black: King}} An object with the two King pieces of this game.
+     */
+    __getKings(chessboard) {
+        /** @type {King} */
+        const kings = { white: "", black: ""};
+
+        for (let x = 0; x < chessboard.length; x++) {
+            for (let y = 0; y < chessboard[x].length; y++) {
+                const targetKing = chessboard[x][y];
+
+                if (targetKing && (targetKing instanceof King)) {
+                    kings[targetKing.faction] = targetKing;
+                }
+            }
+        }
+
+        return kings;
     }
 
     /**
@@ -218,8 +242,19 @@ class Game {
             }
         }
 
-        // TODO: Determine king check.
+        /** @type {King} */
+        const king = this.kings[this.turn];
+        const kingCheckResult = king.isKingCheckOrMated(this.chessboard);
 
+        if (kingCheckResult.check && !kingCheckResult.checkmate) {
+            result = kingCheckResult;
+        } else if (kingCheckResult.checkmate) {
+            //this.active = false;
+            result = kingCheckResult;
+        }
+        
+        console.log(result.message);
+        
         return result;
     }
 

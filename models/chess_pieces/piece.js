@@ -89,6 +89,36 @@ class Piece {
     }
 
     /**
+     * Converts the given number to the proper string character as reflected on the x-axis of the chessboard.
+     * In other words, it will add 97 to the given value and return the character representation based on the ASCII table.
+     * @param {Number} idx_coordinate_x The value to convert to x-coordinate reflected at the chessboard.
+     * @return {String} The x-coordinate value as a string.
+     */
+    static coordinateXAsRaw(idx_coordinate_x) {
+        // x are 'a' - 'h'
+        if (isNaN(idx_coordinate_x)) {
+            throw new Error(idx_coordinate_x + " is not a number!");
+        }
+
+        return String.fromCharCode(97 + idx_coordinate_x);
+    }
+
+    /**
+     * Converts the given number to the proper string 'number' as reflected on the y-axis of the chessboard.
+     * In other words, it will increment the given value by one and return it as a string.
+     * @param {Number} idx_coordinate_y The value to convert to y-coordinate reflected at the chessboard.
+     * @return {String} The y-coordinate value as a string.
+     */
+    static coordinateYAsRaw(idx_coordinate_y) {
+        // y are '1' - '8'
+        if (isNaN(idx_coordinate_y)) {
+            throw new Error(idx_coordinate_y + " is not a number!");
+        } 
+
+        return (idx_coordinate_y + 1).toString();
+    }
+
+    /**
      * converts string x coordinates to numbers - 1 for indexes
      * @param {String} raw_coordinateX
      * @returns {number}

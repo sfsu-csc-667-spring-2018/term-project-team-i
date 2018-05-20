@@ -1,14 +1,19 @@
 const Piece = require('../chess_pieces/piece');
 
+
 class King extends Piece{
 
     /**
-     * @private
+     * Retrieves an array of all pieces in the line of sight of this king.
+     * @param {Number} origin_x The origin x-coordinate to begin scanning from.
+     * @param {Number} origin_y The origin y-coordinate to begin scanning from.
+     * @param {Array[].Piece} chessboard The chessboard contain all Pieces.
      * @return {Piece[]} An array of Pieces that the King has a clear line of sight on.
      */
-    __getAllAttackingPieces(origin_x, origin_y, chessboard) {
+    __getPiecesInCaptureDistance(origin_x, origin_y, chessboard) {
         const hitPieces = []
 
+        // Check for other pieces except the knights due to their unique movement.
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
                 const hitPiece = Piece.getFirstPieceScan(origin_x, origin_y, x, y, chessboard);
@@ -34,13 +39,14 @@ class King extends Piece{
 
 
     /**
-     *
-     * @param {Piece[]}
-     * @param {Array[]}
-     * @private
-     * @return {Piece} Returns Piece or undefined if nothing is checking the king.
+     * Returns the Piece that is checking the King, if any.
+     * @param {Number} origin_x The origin x-coordinate for the potential enemy to valid their movement against.
+     * @param {Number} origin_y The origin y-coordinate for the potential enemy to valid their movement against.
+     * @param {Piece[]} hitPieces The array of pieces that may be viable to attacking.
+     * @param {Array[]} chessboard The chessboard contain all Pieces.
+     * @return {Piece} The piece that is targeting the king, if any. If no Piece is viable then undefined is return.
      */
-    __getCheckingPiece(origin_x, origin_y, hitPieces = [], chessboard = []) {
+    __getPieceThatsCheckingKing(origin_x, origin_y, hitPieces = [], chessboard = []) {
         let checkingPiece = undefined;
 
         for (let idx = 0; idx < hitPieces.length; idx++) {
@@ -59,18 +65,19 @@ class King extends Piece{
     }
 
     /**
-     *
-     * @param chessboard
-     * @return {Object[]<x: Number, y: Number>}
-     * @private
+     * Get chessboard positions of which this King may move to. Note that this
+     * does not determine another check upon moving there.
+     * @param {*} chessboard The chessboard contain all Pieces.
+     * @return {Object[]} An array of objects containing the keys {x: number, y: number} representing viable coordinates to move to.
      */
-    __getFreePositions(chessboard) {
+    __getPositionsThatAreOpenToKing(chessboard) {
         const freePositions = [];
 
         // Check every position for an open space to move to.
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
-                const canKingMoveTo = this.isValidMovement(this.coordinateXConverted + x, this.coordinateYConverted + y, chessboard);
+                const canKingMoveTo = this.isValidMovement(this.coordinateXConverted + x, 
+                                                                this.coordinateYConverted + y, chessboard);
                 if (canKingMoveTo) {
                     freePositions.push({x: x, y: y});
                 }
@@ -81,13 +88,12 @@ class King extends Piece{
     }
 
     /**
-     *
-     * @param chessboard
-     * @param chessboardSize
-     * @return {Piece[]}
-     * @private
+     * Get the allied Pieces of the King.
+     * @param {Array[]} chessboard The chessboard containing all Pieces.
+     * @param {Number} chessboardSize Optional size of the chessboard. Default size is 8.
+     * @return {Piece[]} All allies of that King that are still alive on the chessboard.
      */
-    __getAllies(chessboard = [], chessboardSize = 8) {
+    __getAlliesOfKing(chessboard = [], chessboardSize = 8) {
         const allies = [];
 
         for (let x = 0; x < chessboardSize; x++) {
@@ -96,7 +102,7 @@ class King extends Piece{
                     /** @type {Piece} */
                     const possibleAlly = chessboard[x][y];
 
-                    if (possibleAlly.faction == this.faction) {
+                    if (possibleAlly && possibleAlly.faction == this.faction && possibleAlly.name != this.name) {
                         allies.push(possibleAlly);
                     }
                 }
@@ -106,7 +112,12 @@ class King extends Piece{
         return allies;
     }
 
-    __getTempChessBoard(originalChessBoard = []) {
+    /**
+     * Get a duplicate of the given chessboard.
+     * @param {Array[]} originalChessBoard The original chessboard containing references to all active Pieces.
+     * @return {Array[]} A duplicate chessboard based on the given board.
+     */
+    __getDuplicateChessboard(originalChessBoard = []) {
         let tempChessBoard = [];
 
         for (let i = 0; i < originalChessBoard.length; i++) {
@@ -119,119 +130,172 @@ class King extends Piece{
         return tempChessBoard;
     }
 
-    __getSafePositionToMoveTo(freePositions, chessboard) {
-        let hasSafePosition = undefined;
+    /**
+     * Retrieves a position of which the King may move to that won't result in another check.
+     * @param {Object[]} freePositions An array of objects where the objects should be {x: number, y: number}.
+     * @param {Array[]} chessboard The chessboard containing all the Pieces that are alive.
+     * @return {{x: Number, y: Number}[]} An array of objects containing positions that the King can move to escape.
+     */
+    __getPositionsSafeForKing(freePositions, chessboard) {
+        let safePositions = [];
 
-        // 4. Check which free positions aren't checking the king.
         for (let i = 0; i < freePositions.length; i++) {
-            const x = freePositions[i].x;
-            const y = freePositions[i].y;
+            const offsetx = freePositions[i].x;
+            const offsety = freePositions[i].y;
 
-            const tempHitPieces = this.__getAllAttackingPieces(this.coordinateXConverted + x, this.coordinateYConverted + y, chessboard);
-            const tempCheckingPiece = this.__getCheckingPiece(this.coordinateXConverted + x, this.coordinateYConverted + y, tempHitPieces, chessboard);
+            const tempChessBoard = this.__getDuplicateChessboard(chessboard);
+            tempChessBoard[this.coordinateXConverted][this.coordinateYConverted] = undefined;
+            tempChessBoard[this.coordinateXConverted+offsetx][this.coordinateYConverted+offsety] = this;
+
+            const tempHitPieces = this.__getPiecesInCaptureDistance(this.coordinateXConverted + offsetx, this.coordinateYConverted + offsety, tempChessBoard);
+            const tempCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted + offsetx, this.coordinateYConverted + offsety, tempHitPieces, tempChessBoard);
 
             if (!tempCheckingPiece) {
-                hasSafePosition = {x: x, y: y};
-                break;
+                safePositions.push(
+                    [
+                        Piece.coordinateXAsRaw(this.coordinateXConverted+offsetx), 
+                        Piece.coordinateYAsRaw(this.coordinateYConverted+offsety)
+                    ]
+                );
             }
         }
 
-        return hasSafePosition;
+        return safePositions;
     }
 
-    /***TODO
-     * kingCheck check
+    /**
+     * Try to find an ally Piece of this King that can either capture or block the path of
+     * the opposing Piece that is in position to capture this King.
+     * @param {Piece} kingCheckingPiece The Piece that is in position to capture this King.
+     * @param {Array[]} chessboard The chessboard containing all Pieces that are alive.
+     * @param {Number} chessboardSize Optional chessboard size
+     * @return {Piece} A allied Piece of this King that can stop the opposing King checking Piece.
      */
-    isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions){
-        let startX = Piece.coordinateXConversion(this.raw_coordinate_x);
-        let startY = Piece.coordinateYConversion(this.raw_coordinate_y);
+    __getPieceThatCanSaveKingFrom(kingCheckingPiece, chessboard, chessboardSize = 8) {
+        let kingSavingPiece = undefined;
+        const kingAllyPieces = this.__getAlliesOfKing(chessboard);
+        const kingCheck_x_dec = Math.sign(this.coordinateXConverted - kingCheckingPiece.coordinateXConverted);
+        const kingCheck_y_dec = Math.sign(this.coordinateYConverted - kingCheckingPiece.coordinateYConverted);
 
-        let X =  idx_destination_x - startX;
-        let Y = idx_destination_y - startY;
+        for (let target_x = kingCheckingPiece.coordinateXConverted, target_y = kingCheckingPiece.coordinateYConverted;
+                                            !(target_x == this.coordinateXConverted && target_y == this.coordinateYConverted)
+                                                && ((target_x >= 0 && target_x < chessboard.length) && (target_y >= 0 && target_y < chessboard.length));
+                                                                                                    target_x += kingCheck_x_dec, target_y += kingCheck_y_dec) {
 
-        if (Y < -1 || Y > 1) return false;
-        else if (X < -1 || X > 1) return false; //one square check
+            //console.log(`CHECKING target positions {${target_x}, ${target_y}}`);                                                                                            
+            for (let kdx = 0; kdx < kingAllyPieces.length; kdx++) {
+                const kingAllyPiece = kingAllyPieces[kdx];
 
-        else if (Y === 0) return true;
-        else if (X === 0) return true;
-        else if (Y === X) return true;
-        else if (Y === -X) return true;
-        return false
+                if (kingAllyPiece.isValidMovement(target_x, target_y, chessboard)) {
+                    const chessboardDuplicate = this.__getDuplicateChessboard(chessboard);
+                    chessboardDuplicate[kingAllyPiece.coordinateXConverted][kingAllyPiece.coordinateYConverted] = undefined;                                                                        
+                    chessboardDuplicate[target_x][target_y] = kingAllyPiece; 
+                    
+                    // King scans 360 again with this temporary chessboard of where this current Ally has attempted to intercept.
+                    const newHitPieces = this.__getPiecesInCaptureDistance(this.coordinateXConverted, this.coordinateYConverted, chessboardDuplicate);
+                    const newKingCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted, this.coordinateYConverted, newHitPieces, chessboardDuplicate);
+
+                    if (!newKingCheckingPiece) {
+                        kingSavingPiece = kingAllyPiece;
+                        return kingSavingPiece;
+                    }
+                }
+            }
+        }
+
+        return kingSavingPiece;
     }
 
-    isKingInCheck(chessboard = []){
+   
+    isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions){
+        if ((idx_destination_x < 0 || idx_destination_x >= chessboard.length)
+                    || (idx_destination_y < 0 || idx_destination_y >= chessboard.length)) return false;
 
-        /*
-            1. Check 360 degrees for hitpieces via getFirstPieceScan().
-            2. Determine if any are checking this king.
-            3. Determine free positions the king can move to.
-            4. Check free positions 1 at a time and repeat steps 1-2.
-                4a. If Still checked, break; go back to original positions.
-                4b. If not checked, then new position is valid and this is not checkmate;
-                        (Let the user figure out the rest). break out of these loops via return(??)
-            5. Assumed is still checked in all free positions, check against the Checking Piece if
-                    there's anything that (of the king's faction) can kill it, or block it.
-                    5.a Loop the distance from king to checking Piece.
-                        5.a.a Loop king's alive pieces if they have isValidMovement() against that position.
-                    If this loop returns false entirely then the king is checkmated.
-         */
+        const result = {result: false, message: ""};
+        const xDestDiff = idx_destination_x - this.coordinateXConverted;
+        const yDestDiff = idx_destination_y - this.coordinateYConverted;
+
+        const magnitude = Math.sqrt(Math.pow(xDestDiff, 2) + Math.pow(yDestDiff, 2));
+        const isMovingSingleSpace = (Math.floor(magnitude) == 1); 
+
+        if (isMovingSingleSpace) {
+            const coordinate_x_inc = Math.sign(idx_destination_x - this.coordinateXConverted);
+            const coordinate_y_inc = Math.sign(idx_destination_y - this.coordinateYConverted);
+
+            const hitPiece = Piece.getFirstPieceScan(this.coordinateXConverted, 
+                                                        this.coordinateYConverted,
+                                                                    coordinate_x_inc,
+                                                                        coordinate_y_inc,
+                                                                                chessboard);
+
+                
+            if (hitPiece) {
+                const isMovementBlocked = Piece.isOtherPieceBlocking(this, hitPiece, idx_destination_x, idx_destination_y);
+                const isHitPieceAtDestination = (hitPiece.coordinateXConverted == idx_destination_x) 
+                                                    && (hitPiece.coordinateYConverted == idx_destination_y);
+                const isHitPieceAlly = (this.faction == hitPiece.faction);
+
+                if (isMovementBlocked) {
+                    result.result = false;
+                    result.message = `Movement to {${idx_destination_x}, ${idx_destination_y}} is blocked!`;
+                    
+                } else if (!isMovementBlocked && isHitPieceAtDestination && isHitPieceAlly) {
+                    result.result = false;
+                    result.message = `Cannot capture pieces of the same faction!`;
+                } else {
+                    result.result = true;
+                    result.message = "";
+                }
+            } else {
+                result.result = true;
+                result.message = "";
+            }
+        } else {
+            result.result = false;
+            result.message = `Invalid move to {${idx_destination_x}, ${idx_destination_y}}!`;
+        }
+
+
+        return result.result;
+    }
+
+    /**
+     * Determines whether or not the is checked or checkmated.
+     * @param {Array[]} chessboard The chessboard containing all the Pieces that are alive.
+     * @return {{check: boolean, checkmate: boolean, message: string}} An object determining if the King
+     * is checked or checkmated and a corresponding message indicating the status.
+     */
+    isKingCheckOrMated(chessboard = []){
 
         let result = {check: false, checkmate: false};
-        // 1. Get all attacking pieces against the king.
-        const hitPieces = this.__getAllAttackingPieces(this.coordinateXConverted, this.coordinateYConverted, chessboard);
-        // 2. Determine if they are checking the king; there can only be one checking piece at a time.
-        const checkingPiece = this.__getCheckingPiece(this.coordinateXConverted, this.coordinateYConverted, hitPieces, chessboard);
+        const hitPieces = this.__getPiecesInCaptureDistance(this.coordinateXConverted, this.coordinateYConverted, chessboard);
+        const kingCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted, this.coordinateYConverted, hitPieces, chessboard);
 
-        if (checkingPiece) {
+        if (kingCheckingPiece) {
             // 3. If King is checked then get free positions around King.
-            const freePositions = this.__getFreePositions(chessboard);
-            const hasSafePositionToMoveTo = this.__getSafePositionToMoveTo(freePositions, chessboard);
+            const kingAvailableMovementPositions = this.__getPositionsThatAreOpenToKing(chessboard);
+            const kingCanMoveToASafePosition = this.__getPositionsSafeForKing(kingAvailableMovementPositions, chessboard);
+            //console.log("KING CHECK: has a safe spot by translating to: " + JSON.stringify(kingCanMoveToASafePosition));
 
-            // 5. NO safe positions for the King to escape to; Check if anyone else can kill the checking piece.
-            if (!hasSafePositionToMoveTo) {
+            if (kingCanMoveToASafePosition.length > 0) {
+                result.check = true;
+                result.checkmate = false;
+                result.message = `${this.faction} King is CHECKED! You may move the King to one of these positions to escape: ${JSON.stringify(kingCanMoveToASafePosition)}`;
+            } else {
+                const kingSavingPiece = this.__getPieceThatCanSaveKingFrom(kingCheckingPiece, chessboard);
 
-                const hasPieceAllyToInterfere = this.__getAllyMoveDestination(pieceAlly, target_x, target_y)
+                if (kingSavingPiece) {
+                    const kspName = kingSavingPiece.name;
+                    const ksp_rawX = kingSavingPiece.raw_coordinate_x;
+                    const ksp_rawY = kingSavingPiece.raw_coordinate_y;
 
-                const allies = this.__getAllies(chessboard);
-
-                const canAllyKillPiece = (pieceAlly, checkingPiece) => {
-                    let canKill = false;
-
-                    if (pieceAlly.isValidMovement(checkingPiece.coordinateXConverted, checkingPiece.coordinateYConverted, chessboard)) {
-                        // Use temp chessboard to move ally piece.
-                        // Use temp chessboard to see if King is still in check.
-                        const tempChessBoard = this.__getTempChessBoard(chessboard);
-                        tempChessBoard[checkingPiece.coordinateXConverted][checkingPiece.coordinateYConverted] = pieceAlly;
-
-                        const tempHitPieces = this.__getAllAttackingPieces(this.coordinateXConverted, this.coordinateYConverted, tempChessBoard);
-                        const tempCheckingPiece = this.__getCheckingPiece(this.coordinateXConverted, this.coordinateYConverted, tempHitPieces, tempChessBoard);
-
-                        if (!tempCheckingPiece) {
-                            return result;
-                        }
-                    }
-                };
-
-                for (let i = 0; i < allies.length; i++) {
-                    const pieceAlly = allies[i];
-
-                    // 6. Check if ally can kill enemy piece.
-                    if (checkingPiece.name == 'knight') {
-                        if (pieceAlly.isValidMovement(checkingPiece.coordinateXConverted, checkingPiece.coordinateYConverted, chessboard)) {
-                            // Use temp chessboard to move ally piece.
-                            // Use temp chessboard to see if King is still in check.
-                            const tempChessBoard = this.__getTempChessBoard(chessboard);
-                            tempChessBoard[checkingPiece.coordinateXConverted][checkingPiece.coordinateYConverted] = pieceAlly;
-
-                            const tempHitPieces = this.__getAllAttackingPieces(this.coordinateXConverted, this.coordinateYConverted, tempChessBoard);
-                            const tempCheckingPiece = this.__getCheckingPiece(this.coordinateXConverted, this.coordinateYConverted, tempHitPieces, tempChessBoard);
-
-                            if (!tempCheckingPiece) {
-                                return result;
-                            }
-                        }
-                    } else {
-                    }
+                    result.check = true;
+                    result.checkmate = false;
+                    result.message = `${this.faction} King CHECKED! ${kspName} at {${ksp_rawX}, ${ksp_rawY}} can save the King!`;
+                } else {
+                    result.check = true;
+                    result.checkmate = true;
+                    result.message = `${this.faction} CHECKMATED! ${kingCheckingPiece.faction} WINS!`;
                 }
             }
         }
