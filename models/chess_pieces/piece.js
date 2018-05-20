@@ -33,7 +33,7 @@ class Piece {
      * @param {Number} idx_destination_y The y coordinate destination in NUMBER form (0 to 7).
      * @param {Array} chessboard The array containing all the active game pieces currently on the chessboard.
      * @param {Object} otherConditions Optional conditions for special pieces just in case.
-     * @return {{message: String}} An object containing a response object {message: ""}.
+     * @return {{valid: boolean, message: String}} An object containing the result and corresponding message.
      */
     isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions) {
         throw new Error(this.isValidMovement.name + " is abstract and must be implemented.");
