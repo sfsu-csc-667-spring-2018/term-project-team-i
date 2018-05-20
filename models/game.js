@@ -176,7 +176,7 @@ class Game {
      */
     tryMovePieceToPosition(pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
        
-        let result = {result: false, message: "Cannot process move request at this time!"};
+        let result = {result: false, message: "Cannot process move request at this time!", upgradePawn: false};
         const cbx = Piece.coordinateXConversion(raw_coordinate_x);
         const cby = Piece.coordinateYConversion(raw_coordinate_y);
         const dbx = Piece.coordinateXConversion(raw_destination_x);
@@ -225,15 +225,24 @@ class Game {
             result.result = true;
             result.message = "";
 
+            //white pawn upgrade
             // Update the database
             gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
-            
+
+
             // Update information locally to reflect the changes.
             this.chessboard[cbx][cby] = undefined;
             this.chessboard[dbx][dby] = selectedPiece;
             
             selectedPiece.raw_coordinate_x = raw_destination_x;
             selectedPiece.raw_coordinate_y = raw_destination_y;
+
+            if(pieceId == 1 && selectedPiece.raw_coordinate_y == '8')
+                result.upgradePawn = true;
+            else if(pieceId == 7 && selectedPiece.raw_coordinate_y == '1')
+                result.upgradePawn = true;
+            else
+                result.upgradePawn = false;
 
             if (destinationPiece) {
                 destinationPiece.alive = false;

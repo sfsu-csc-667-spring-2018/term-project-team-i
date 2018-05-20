@@ -10,7 +10,7 @@ class King extends Piece{
      * @param {Array[].Piece} chessboard The chessboard contain all Pieces.
      * @return {Piece[]} An array of Pieces that the King has a clear line of sight on.
      */
-    __getPiecesInCaptureDistance(origin_x, origin_y, chessboard) {
+    __getPiecesInSightFrom(origin_x, origin_y, chessboard) {
         const hitPieces = []
 
         // Check for other pieces except the knights due to their unique movement.
@@ -147,7 +147,7 @@ class King extends Piece{
             tempChessBoard[this.coordinateXConverted][this.coordinateYConverted] = undefined;
             tempChessBoard[this.coordinateXConverted+offsetx][this.coordinateYConverted+offsety] = this;
 
-            const tempHitPieces = this.__getPiecesInCaptureDistance(this.coordinateXConverted + offsetx, this.coordinateYConverted + offsety, tempChessBoard);
+            const tempHitPieces = this.__getPiecesInSightFrom(this.coordinateXConverted + offsetx, this.coordinateYConverted + offsety, tempChessBoard);
             const tempCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted + offsetx, this.coordinateYConverted + offsety, tempHitPieces, tempChessBoard);
 
             if (!tempCheckingPiece) {
@@ -192,7 +192,7 @@ class King extends Piece{
                     chessboardDuplicate[target_x][target_y] = kingAllyPiece; 
                     
                     // King scans 360 again with this temporary chessboard of where this current Ally has attempted to intercept.
-                    const newHitPieces = this.__getPiecesInCaptureDistance(this.coordinateXConverted, this.coordinateYConverted, chessboardDuplicate);
+                    const newHitPieces = this.__getPiecesInSightFrom(this.coordinateXConverted, this.coordinateYConverted, chessboardDuplicate);
                     const newKingCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted, this.coordinateYConverted, newHitPieces, chessboardDuplicate);
 
                     if (!newKingCheckingPiece) {
@@ -268,7 +268,7 @@ class King extends Piece{
     isKingCheckOrMated(chessboard = []){
 
         let result = {check: false, checkmate: false};
-        const hitPieces = this.__getPiecesInCaptureDistance(this.coordinateXConverted, this.coordinateYConverted, chessboard);
+        const hitPieces = this.__getPiecesInSightFrom(this.coordinateXConverted, this.coordinateYConverted, chessboard);
         const kingCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted, this.coordinateYConverted, hitPieces, chessboard);
 
         if (kingCheckingPiece) {

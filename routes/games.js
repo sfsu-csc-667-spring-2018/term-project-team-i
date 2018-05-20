@@ -28,6 +28,9 @@ router.get('/:gameId', auths, (req, res, next) => {
     const playerId = req.user.id;
     const gameId = req.params.gameId;
     const renderData = {};
+    const playerName = req.user.username;
+
+    console.log("player name in game is " + playerName);
 
     gameManager.getGameInstance(gameId, 
         (returnedGameInstance) => {
@@ -44,12 +47,22 @@ router.get('/:gameId', auths, (req, res, next) => {
                 });
             }
 
+            const individualFuncSocketProtocol = (res, gameId) =>{
+                res.app.get('io').of('/games/' + gameId + '/' + playerName).on('connection',socket =>{
+                    socket.on('disconnect', () => {
+                        console.log("Player left + " + playerName);
+                    });
+                });
+            }
             const funcSuccess = () => {
                 funcSocketProtocols(res, gameId);
+                individualFuncSocketProtocol(res, gameId, playerId);
 
                 renderData.helpers = GamesHbsHelpers.getHandlebarHelpers();
                 renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.gamePiecesObjects);
                 renderData.gameId = gameId;
+                renderData.playerName = playerName;
+
 
                 res.render('games',renderData);
             }
@@ -101,6 +114,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
     // {playerId: int, pieceid: int, coordinate_x: string, coordinate_y: string, destination_x, destination_y}
 
     const playerId = req.user.id;
+    const playerName = req.user.username;
     const gameId = req.params.gameId;
     const pieceId = req.body.pieceId;
     const raw_coordinate_x = req.body.coordinate_x;
@@ -121,6 +135,10 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 
             res.statusCode = resStatusCode;
             res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces});
+            console.log("UPGRADE PAWN "+ (moveResult.upgradePawn));
+            if(moveResult.upgradePawn === true) {
+                res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('upgrade-pawn-prompt', {playerName: playerName, pieceId: pieceId, x: raw_destination_x, y: raw_destination_y});
+            }
             res.end(moveResult.message);
         },
         (failureCB) => {
@@ -128,6 +146,10 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
             res.end("Cannot move piece!");
         });
 
+});
+
+router.post('/:gameId/upgrade-pawn', (req, res, next) =>{
+    console.log("POSTed");
 });
 
 router.post('/:gameId/forfeit', (req, res, next) => {
