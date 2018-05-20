@@ -231,7 +231,6 @@ class King extends Piece{
                             }
                         }
                     } else {
-                        if ()
                     }
                 }
             }
