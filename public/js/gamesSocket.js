@@ -33,7 +33,19 @@ $(document).ready(function(){
     });
 
     gameUserSocket.on('upgrade-pawn-prompt', data => {
-        $actionMessage.append('<div class="actions">' + data.playerName + '</div>' )
+        $actionMessage.append('<div class="actions">' + 'Choose Upgrade ' + '</div>' );
+
+        $('body').append(`<form class="upgrade-pawn-form" method="POST" action="/games/${url}/upgrade-pawn">
+                            <input type="submit" value="Queen" id="closeInput">
+                            <input type="submit" value="Bishop" id="closeInput">
+                            <input type="submit" value="Rook" id="closeInput">
+                            <input type="submit" value="Knight" id="closeInput">
+                          </form>`
+        );
+
         console.log("MESSAGE RECIEVED" + data.playerName);
+        console.log("Piece id is: " +  data.pieceId + " X is : " + data.x + " Y is : " + data.y);
+
     });
+
 });

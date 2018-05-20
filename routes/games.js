@@ -137,7 +137,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
             res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces});
             console.log("UPGRADE PAWN "+ (moveResult.upgradePawn));
             if(moveResult.upgradePawn === true) {
-                res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('upgrade-pawn-prompt', {playerName: playerName});
+                res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('upgrade-pawn-prompt', {playerName: playerName, pieceId: pieceId, x: raw_destination_x, y: raw_destination_y});
             }
             res.end(moveResult.message);
         },
@@ -149,7 +149,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 });
 
 router.post('/:gameId/upgrade-pawn', (req, res, next) =>{
-
+    console.log("POSTed");
 });
 
 router.post('/:gameId/forfeit', (req, res, next) => {
