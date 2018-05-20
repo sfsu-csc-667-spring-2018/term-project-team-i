@@ -1,7 +1,7 @@
 
 const ensureAuth = (request, response, next) =>{
     if (request.isAuthenticated()) {
-        console.log("Authenticated");
+        //console.log("Authenticated");
         return next();
     } else {
         request.flash('error_msg', 'Not Logged in');
