@@ -4,7 +4,7 @@ const Piece = require('../chess_pieces/piece');
 class King extends Piece{
 
     /**
-     * Retrieves an array of all pieces in the line of sight of this king.
+     * Retrieves an array of all pieces in the line of sight from the given origin.
      * @param {Number} origin_x The origin x-coordinate to begin scanning from.
      * @param {Number} origin_y The origin y-coordinate to begin scanning from.
      * @param {Array[].Piece} chessboard The chessboard contain all Pieces.
@@ -131,7 +131,7 @@ class King extends Piece{
     }
 
     /**
-     * Retrieves a position of which the King may move to that won't result in another check.
+     * Retrieves positions of which the King may move to that won't result in another check.
      * @param {Object[]} freePositions An array of objects where the objects should be {x: number, y: number}.
      * @param {Array[]} chessboard The chessboard containing all the Pieces that are alive.
      * @return {{x: Number, y: Number}[]} An array of objects containing positions that the King can move to escape.
@@ -208,55 +208,15 @@ class King extends Piece{
 
    
     isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions){
-        if ((idx_destination_x < 0 || idx_destination_x >= chessboard.length)
-                    || (idx_destination_y < 0 || idx_destination_y >= chessboard.length)) return false;
-
-        const result = {result: false, message: ""};
+        const result = {valid: false, message: ""};
         const xDestDiff = idx_destination_x - this.coordinateXConverted;
         const yDestDiff = idx_destination_y - this.coordinateYConverted;
 
         const magnitude = Math.sqrt(Math.pow(xDestDiff, 2) + Math.pow(yDestDiff, 2));
         const isMovingSingleSpace = (Math.floor(magnitude) == 1); 
 
-        if (isMovingSingleSpace) {
-            const coordinate_x_inc = Math.sign(idx_destination_x - this.coordinateXConverted);
-            const coordinate_y_inc = Math.sign(idx_destination_y - this.coordinateYConverted);
 
-            const hitPiece = Piece.getFirstPieceScan(this.coordinateXConverted, 
-                                                        this.coordinateYConverted,
-                                                                    coordinate_x_inc,
-                                                                        coordinate_y_inc,
-                                                                                chessboard);
-
-                
-            if (hitPiece) {
-                const isMovementBlocked = Piece.isOtherPieceBlocking(this, hitPiece, idx_destination_x, idx_destination_y);
-                const isHitPieceAtDestination = (hitPiece.coordinateXConverted == idx_destination_x) 
-                                                    && (hitPiece.coordinateYConverted == idx_destination_y);
-                const isHitPieceAlly = (this.faction == hitPiece.faction);
-
-                if (isMovementBlocked) {
-                    result.result = false;
-                    result.message = `Movement to {${idx_destination_x}, ${idx_destination_y}} is blocked!`;
-                    
-                } else if (!isMovementBlocked && isHitPieceAtDestination && isHitPieceAlly) {
-                    result.result = false;
-                    result.message = `Cannot capture pieces of the same faction!`;
-                } else {
-                    result.result = true;
-                    result.message = "";
-                }
-            } else {
-                result.result = true;
-                result.message = "";
-            }
-        } else {
-            result.result = false;
-            result.message = `Invalid move to {${idx_destination_x}, ${idx_destination_y}}!`;
-        }
-
-
-        return result.result;
+        return this.__movementLinearHandler(isMovingSingleSpace, idx_destination_x, idx_destination_y, chessboard);
     }
 
     /**
@@ -267,7 +227,7 @@ class King extends Piece{
      */
     isKingCheckOrMated(chessboard = []){
 
-        let result = {check: false, checkmate: false};
+        let result = {check: false, checkmate: false, message: ""};
         const hitPieces = this.__getPiecesInSightFrom(this.coordinateXConverted, this.coordinateYConverted, chessboard);
         const kingCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted, this.coordinateYConverted, hitPieces, chessboard);
 

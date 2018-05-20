@@ -3,20 +3,40 @@ const Piece = require('../chess_pieces/piece.js');
 class Knight extends Piece{
 
     isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions){
-        let startX = Piece.coordinateXConversion(this.raw_coordinate_x);
-        let startY = Piece.coordinateYConversion(this.raw_coordinate_y);
 
-        let X =  idx_destination_x - startX;
-        let Y = idx_destination_y - startY;
+        let isMoveLegitimate = false;
+        const result = {valid: false, message: ""};
+        const offsets = [[2,1], [2,-1], [1,2], [1,-2], [-1,-2], [-1,2], [-2,-1], [-2,1]];
 
-        if (Y < -2 || Y > 2) return false;
-        else if (X < -2 || X > 2) return false; //range check
-        else if (Y === X + 3) return true;
-        else if (Y === X - 3) return true;
-        else if (Y === -X + 3) return true;
-        else if (Y === -X - 3) return true;
+        for (let i = 0; i < offsets.length; i++) {
+            const offsetx = offsets[i][0];
+            const offsety = offsets[i][1];
+            const isExactlyDestinationX = (idx_destination_x == this.coordinateXConverted + offsetx);
+            const isExactlyDestinationY = (idx_destination_y == this.coordinateYConverted + offsety);
 
-        return false;
+            if (isExactlyDestinationX && isExactlyDestinationY) {
+                isMoveLegitimate = true;
+                break;
+            }
+        }
+
+        if (!isMoveLegitimate) {
+            result.valid = false;
+            result.message = `Invalid movement pattern to [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`;
+        } else {
+            /** @type {Piece} */
+            const possibleAlly = chessboard[idx_destination_x][idx_destination_y];
+
+            if (possibleAlly && possibleAlly.faction == this.faction) {
+                result.valid = false;
+                result.message = `Cannot capture pieces of the same faction!`;
+            } else {
+                result.valid = true;
+                result.message = `Successful move to {${Piece.coordinateXAsRaw(idx_destination_x)}, ${Piece.coordinateYAsRaw(idx_destination_y)}}`;
+            }
+        }
+
+        return result;
     }
 }
 

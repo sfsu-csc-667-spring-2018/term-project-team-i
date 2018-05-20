@@ -32,7 +32,6 @@ class Pawn extends Piece {
      * @returns {boolean} A boolean result indicate if the movement was valid.
      */
     __isValidMovement(idx_destination_x, idx_destination_y, directionContraint, chessboard = [], otherConditions) {
-        
         /**
          * This helper function is used to determine if the given position has an enemy
          * or any piece. In context of the pawn, moving diagonally by {1,1} space requires
@@ -57,6 +56,9 @@ class Pawn extends Piece {
             }
         }
 
+        
+        const result = {valid: false, message: ""};
+        
         const isDestinationDiagRight = ( (idx_destination_x == (this.coordinateXConverted + 1)) && (idx_destination_y == (this.coordinateYConverted + 1*(directionContraint))) );
         const theresEnemyDiagRight = funcNoPiecePresenceCheck(1, 1*directionContraint, chessboard, true);
         const isDestinationDiagLeft = ( (idx_destination_x == (this.coordinateXConverted - 1)) && (idx_destination_y == (this.coordinateYConverted + 1*(directionContraint))) );
@@ -66,11 +68,31 @@ class Pawn extends Piece {
         const isDestinationForwardTwo = ( (idx_destination_x == (this.coordinateXConverted - 0)) && (idx_destination_y == (this.coordinateYConverted + 2*(directionContraint))) );
         const theresNoPieceAtForwardTwo = (this.isInitialMove) ? funcNoPiecePresenceCheck(0, 2*directionContraint, chessboard, false) : false;
 
+        const isMovingRight = (isDestinationDiagRight && theresEnemyDiagRight);
+        const isMovingLeft = (isDestinationDiagLeft && theresEnemyDiagLeft);
+        const isMovingUpOne = (isDestinationForwardOne && theresNoPieceAtForwardOne);
+        const isMovingUpTwo = (this.isInitialMove && isDestinationForwardTwo && theresNoPieceAtForwardOne && theresNoPieceAtForwardTwo);
+
         // Now this is refined autism.
-        return ((isDestinationDiagRight && theresEnemyDiagRight) 
-                    || (isDestinationDiagLeft && theresEnemyDiagLeft) 
-                        || (isDestinationForwardOne && theresNoPieceAtForwardOne) 
-                            || (this.isInitialMove && isDestinationForwardTwo && theresNoPieceAtForwardOne && theresNoPieceAtForwardTwo)) ;
+        result.valid  = (isMovingRight || isMovingLeft || isMovingUpOne || isMovingUpTwo);    
+        // Error messages
+        if (!result.valid && ((isDestinationDiagRight && !theresEnemyDiagRight) || (isDestinationDiagLeft && !theresEnemyDiagLeft))) {
+            result.message = `Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] without an opposing piece to capture!`;
+        } else if (!result.valid && isDestinationForwardOne && !theresNoPieceAtForwardOne) {
+            result.message = `Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] due to a blocking Piece!`;
+        } else if (!result.valid && isDestinationForwardTwo) {
+            if (!this.isInitialMove) {
+                result.message = `Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] due to out of range.`;
+            } else if (this.isInitialMove && (theresNoPieceAtForwardOne || theresNoPieceAtForwardTwo)){
+                result.message = `Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] due to a blocking Piece!`;
+            }
+        } else if (!result.valid) {
+            result.message = `Invalid movement pattern to [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`;
+        } else {
+            result.message = `Successful move to {${Piece.coordinateXAsRaw(idx_destination_x)}, ${Piece.coordinateYAsRaw(idx_destination_y)}}`;
+        }
+
+        return result;
     }
 
     /**

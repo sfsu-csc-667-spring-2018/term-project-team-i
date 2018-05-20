@@ -176,7 +176,7 @@ class Game {
      */
     tryMovePieceToPosition(pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
        
-        let result = {result: false, message: "Cannot process move request at this time!", upgradePawn: false};
+        let result = {valid: false, message: "Cannot process move request at this time!", upgradePawn: false};
         const cbx = Piece.coordinateXConversion(raw_coordinate_x);
         const cby = Piece.coordinateYConversion(raw_coordinate_y);
         const dbx = Piece.coordinateXConversion(raw_destination_x);
@@ -191,75 +191,69 @@ class Game {
 
         // Case: given coordinates are out of bounds.
         if (!isOriginInBounds) {
-            result.result = false;
+            result.valid = false;
             result.message = `Given piece coordinates {${cbx}, ${cby}} are not within bounds!`;
-            return result;
         }
-        
         // Case: destination coordinates out of bounds.
-        if (!isDestinationInBounds) {
-            result.result = false;
+        else if (!isDestinationInBounds) {
+            result.valid = false;
             result.message = `Positions {${raw_destination_x}, ${raw_destination_y}} are out of bounds!`;
-            return result;
         }
-        
         // Case: selected piece does not exist at given location.
-        if (!selectedPiece) {
-            result.result = false;
+        else if (!selectedPiece) {
+            result.valid = false;
             result.message = `Selected piece does not exist at positions {${raw_coordinate_x}, ${raw_coordinate_y}}!`;
-            return result;
         }
-
         // Case: selected piece and destination containing a piece are of the same faction.
-        if (selectedPiece && destinationPiece && selectedPiece.faction == destinationPiece.faction) {
-            result.result = false;
+        else if (selectedPiece && destinationPiece && selectedPiece.faction == destinationPiece.faction) {
+            result.valid = false;
             result.message = `Cannot capture targeted piece of the same faction!`;
-            return result;
-        }
-        
-        // Case: selected piece cannot move to location; or it can.
-        if (!selectedPiece.isValidMovement(dbx, dby, this.chessboard)) {
-            result.result = false;
-            result.message = `Invalid movement to {${raw_destination_x}, ${raw_destination_y}}!`;
         } else {
-            result.result = true;
-            result.message = "";
 
-            //white pawn upgrade
-            // Update the database
-            gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
+            result = selectedPiece.isValidMovement(dbx, dby, this.chessboard);
 
-
-            // Update information locally to reflect the changes.
-            this.chessboard[cbx][cby] = undefined;
-            this.chessboard[dbx][dby] = selectedPiece;
             
-            selectedPiece.raw_coordinate_x = raw_destination_x;
-            selectedPiece.raw_coordinate_y = raw_destination_y;
+            //if (result.valid) {
+                /** @type {King} */
+                /*
+                const king = this.kings[this.turn];
+                const kingCheckResult = king.isKingCheckOrMated(this.chessboard);
 
-            if(pieceId == 1 && selectedPiece.raw_coordinate_y == '8')
-                result.upgradePawn = true;
-            else if(pieceId == 7 && selectedPiece.raw_coordinate_y == '1')
-                result.upgradePawn = true;
-            else
-                result.upgradePawn = false;
-
-            if (destinationPiece) {
-                destinationPiece.alive = false;
-                destinationPiece.raw_coordinate_x = null;
-                destinationPiece.raw_coordinate_y = null;
+                if (kingCheckResult.check && !kingCheckResult.checkmate) {
+                    result = kingCheckResult;
+                } else if (kingCheckResult.checkmate) {
+                    //this.active = false;
+                    result = kingCheckResult;
+                }
             }
-        }
+            */
 
-        /** @type {King} */
-        const king = this.kings[this.turn];
-        const kingCheckResult = king.isKingCheckOrMated(this.chessboard);
+            // Case: movement is valid.
+            if (result.valid) {
 
-        if (kingCheckResult.check && !kingCheckResult.checkmate) {
-            result = kingCheckResult;
-        } else if (kingCheckResult.checkmate) {
-            //this.active = false;
-            result = kingCheckResult;
+                // Update the database.
+                gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
+                // Update information locally to reflect the changes.
+                this.chessboard[cbx][cby] = undefined;
+                this.chessboard[dbx][dby] = selectedPiece;
+                
+                selectedPiece.raw_coordinate_x = raw_destination_x;
+                selectedPiece.raw_coordinate_y = raw_destination_y;
+
+                if(pieceId == 1 && selectedPiece.raw_coordinate_y == '8')
+                    result.upgradePawn = true;
+                else if(pieceId == 7 && selectedPiece.raw_coordinate_y == '1')
+                    result.upgradePawn = true;
+                else
+                    result.upgradePawn = false;
+
+                if (destinationPiece) {
+                    destinationPiece.alive = false;
+                    destinationPiece.raw_coordinate_x = null;
+                    destinationPiece.raw_coordinate_y = null;
+                }
+            }
+            
         }
         
         console.log(result.message);
