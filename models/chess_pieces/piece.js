@@ -34,7 +34,7 @@ class Piece {
      * @return {{valid: boolean, message: string}} An object with data determining if the movement passed general failure checks.
      */
     __movementLinearHandler(isMovingLegitCheck, idx_destination_x, idx_destination_y, chessboard, chessboardSize = 8) {
-        const result = {valid: true, message: `Successful move to {${Piece.coordinateXAsRaw(idx_destination_x)}, ${Piece.coordinateYAsRaw(idx_destination_y)}}`};
+        const result = {result: true, message: `Successful move to {${Piece.coordinateXAsRaw(idx_destination_x)}, ${Piece.coordinateYAsRaw(idx_destination_y)}}`};
         
         const isOutOfBounds = ((idx_destination_x < 0 || idx_destination_x >= chessboard.length) 
                                         || (idx_destination_y < 0 || idx_destination_y >= chessboard.length));
@@ -48,10 +48,10 @@ class Piece {
                                      
         // Begin checking for movement issues.                                                                        
         if (!isMovingLegitCheck) {
-            result.valid = false;
+            result.result = false;
             result.message = `Invalid movement pattern to [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`;
         } else if (isOutOfBounds) {
-            result.valid = false;
+            result.result = false;
             result.message = `Cannot move out of bounds [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`;
         } else if (hitPiece) {
 
@@ -61,10 +61,10 @@ class Piece {
             const isHitPieceAlly = (this.faction == hitPiece.faction);
 
             if (isMovementBlocked) {
-                result.valid = false;
+                result.result = false;
                 result.message = `Movement to {${idx_destination_x}, ${idx_destination_y}} is blocked by ${hitPiece.name} at [${hitPiece.raw_coordinate_x}][${hitPiece.raw_coordinate_y}]!`;
             } else if (!isMovementBlocked && isHitPieceAtDestination && isHitPieceAlly) {
-                result.valid = false;
+                result.result = false;
                 result.message = `Cannot capture pieces of the same faction!`;
             }
         }
