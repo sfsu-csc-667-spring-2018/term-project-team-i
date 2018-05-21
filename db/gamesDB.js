@@ -421,7 +421,34 @@ class GamesDB {
             })
     }
 
+    upgradePawn(gameId, userId, pieceId, pieceName, x, y, callbackFunction, dbx = db){
+        const updatePawn = `UPDATE game_pieces
+                            SET pieceid=($1)
+                            WHERE gameid=${gameId} AND userid=${userId} AND
+                            pieceid=${pieceId} AND coordinate_x='${x}' AND coordinate_y='${y}';`;
 
+        const getUpdatedPawn = `SELECT * FROM game_pieces
+                                FULL OUTER JOIN pieces
+                                ON game_pieces.pieceid=pieces.id
+                                WHERE gameid=${gameId} AND userid=${userId} AND
+                                pieceid=($1) AND coordinate_x='${x}' AND coordinate_y='${y}'`;
+
+        if(pieceId == 1 && pieceName == 'queen'){
+            dbx.any(updatePawn, [5])
+                .then(() => {
+                    dbx.one(getUpdatedPawn, [5])
+                        .then((gamePieceRecord) =>{
+                            callbackFunction(gamePieceRecord);
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        })
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+        }
+    }
 }
 
 module.exports = GamesDB;

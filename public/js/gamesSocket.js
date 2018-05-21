@@ -27,7 +27,7 @@ $(document).ready(function(){
                                             data-piece_faction="${updatedChessPiece.faction}" class="chessPiece" 
                                             src="images/${updatedChessPiece.faction+updatedChessPiece.name}.png">`;
 
-                $(`.chessCell[data-coordinate_x='${updatedChessPiece.raw_coordinate_x}'][data-coordinate_y='${updatedChessPiece.raw_coordinate_y}'`).append(chessPieceElement);
+                $(`.chessCell[data-coordinate_x='${updatedChessPiece.raw_coordinate_x}'][data-coordinate_y='${updatedChessPiece.raw_coordinate_y}']`).append(chessPieceElement);
             }
         }
     });
@@ -35,17 +35,65 @@ $(document).ready(function(){
     gameUserSocket.on('upgrade-pawn-prompt', data => {
         $actionMessage.append('<div class="actions">' + 'Choose Upgrade ' + '</div>' );
 
-        $('body').append(`<form class="upgrade-pawn-form" method="POST" action="/games/${url}/upgrade-pawn">
-                            <input type="submit" value="Queen" id="closeInput">
-                            <input type="submit" value="Bishop" id="closeInput">
-                            <input type="submit" value="Rook" id="closeInput">
-                            <input type="submit" value="Knight" id="closeInput">
-                          </form>`
-        );
+        const upgradePawnOptions = ['queen', 'bishop', 'knight', 'rook'];
 
+        $('body').append(`<div id="upgrade-pawn-container">`);
+        for (let i = 0; i < upgradePawnOptions.length; i++) {
+            $('body').append
+            (
+                //`<input type="button" value="${upgradePawnOptions[i]}" id="closeInput" name="${upgradePawnOptions[i]}">`
+
+
+
+                `<form class="upgrade-pawn-form" method="POST" action="/games/${url}/upgrade-pawn">
+                <input type="hidden" value="${upgradePawnOptions[i]}" name="pieceName">
+                <input type="hidden" value="${data.pieceId}" name="pieceId">
+                <input type="hidden" value="${data.x}" name="x">
+                <input type="hidden" value="${data.y}" name="y">
+                <input type="submit" value="${upgradePawnOptions[i]}" id="closeInput" name="${upgradePawnOptions[i]}">
+                </form>`
+            )
+        }
+
+        $('body').append(`</div>`);
+
+        /*
+        $('body').append(`<div id="upgrade-pawn-container">
+                          <form class="upgrade-pawn-form" method="POST" action="/games/${url}/upgrade-pawn">
+                            <input type="hidden" value=queen name="pieceName">
+                            <input type="hidden" value="${data.pieceId}" name="pieceId">
+                            <input type="hidden" value="${data.x}" name="x">
+                            <input type="hidden" value="${data.y}" name="y">
+                            <input type="submit" value="Queen" id="closeInput" name="QUEEN">
+                          </form>
+                            <form class="upgrade-pawn-form" method="POST" action="/games/${url}/upgrade-pawn">
+                            <input type="hidden" value=bishop name="pieceName">
+                            <input type="hidden" value="${data.pieceId}" name="pieceId">
+                            <input type="hidden" value="${data.x}" name="x">
+                            <input type="hidden" value="${data.y}" name="y">
+                            <input type="submit" value="Bishop" id="closeInput" name="BISHOP">
+                          </form>
+                          <form class="upgrade-pawn-form" method="POST" action="/games/${url}/upgrade-pawn">
+                            <input type="hidden" value=rook name="pieceName">
+                            <input type="hidden" value="${data.pieceId}" name="pieceId">
+                            <input type="hidden" value="${data.x}" name="x">
+                            <input type="hidden" value="${data.y}" name="y">
+                            <input type="submit" value="Rook" id="closeInput" name="ROOK">
+                          </form>
+                          <form class="upgrade-pawn-form" method="POST" action="/games/${url}/upgrade-pawn">
+                            <input type="hidden" value=knight name="pieceName">
+                            <input type="hidden" value="${data.pieceId}" name="pieceId">
+                            <input type="hidden" value="${data.x}" name="x">
+                            <input type="hidden" value="${data.y}" name="y">
+                            <input type="submit" value="Knight" id="closeInput" name="KNIGHT">
+                          </form>
+                          </div>`*/
+
+        //);
+
+        //${data.pieceId}, ${data.x}, ${data.y}
         console.log("MESSAGE RECIEVED" + data.playerName);
         console.log("Piece id is: " +  data.pieceId + " X is : " + data.x + " Y is : " + data.y);
 
     });
-
 });

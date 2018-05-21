@@ -149,9 +149,42 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 });
 
 router.post('/:gameId/upgrade-pawn', (req, res, next) =>{
-    console.log("POSTed");
+    const gameId =  Number(req.params.gameId);
+    const userId = req.user.id;
+    const pieceId = Number(removeQuotes(JSON.stringify(req.body.pieceId)));
+    const pieceName = removeQuotes(JSON.stringify(req.body.pieceName));
+    const xCoord = removeQuotes(JSON.stringify(req.body.x));
+    const yCoord = removeQuotes(JSON.stringify(req.body.y));
+
+    console.log("gameid is " + gameId+ " pieceName is" + pieceName + " PIECE ID IS "+ pieceId + " userid is " + userId + " xcoord is "+ xCoord + " ycoord is " + yCoord);
+    console.log("gameid is " + typeof gameId + " pieceName is" + typeof pieceName + " PIECE ID IS "+ typeof pieceId + " userid is " + typeof userId + " xcoord is "+ typeof xCoord + " ycoord is " + typeof yCoord);
+    gamesDB.upgradePawn(gameId, userId, pieceId, pieceName, xCoord, yCoord,(updatedPieceRecord) =>{
+        gameManager.getGameInstance(gameId,
+        (gameInstance) => {
+            console.log("1.GOT HERE IN GAMES UPDATE PIECE");
+            const game = gameInstance;
+            const updatedGamePiece = game.getInitializeGamePiece(updatedPieceRecord);
+            console.log(`This should be a queen: ${JSON.stringify(updatedGamePiece)}`);
+            game.setChessboardGamePiece(updatedGamePiece);
+            const gamePieces = game.gamePiecesObjects;
+            const resStatusCode = 200;
+            res.statusCode = resStatusCode;
+            res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces})
+            res.end("Successfully updated pawn piece: " + pieceName);
+        },
+        (failure) => {
+
+        });
+    });
+
+    const playerName = req.user.username;
+    //res.app.get('io').of('/games/'+ gameId + '/' + playerName).on('upgrade-pawn-response', )
+    console.log("POSTed "  + " " + (JSON.stringify(req.body.pieceId)) + " " + (JSON.stringify(req.body.x)));
 });
 
+const removeQuotes = (str) =>{
+    return str.replace(/['"]+/g, '');
+}
 router.post('/:gameId/forfeit', (req, res, next) => {
     // {playerId: int, forfeit: boolean}
 });
