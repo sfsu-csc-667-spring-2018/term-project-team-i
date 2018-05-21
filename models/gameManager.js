@@ -46,6 +46,7 @@ class GameManager {
                             resolve(gameInstance);
                         });
                     } else {
+                        console.log(`No game record of ID: ${gameId}!`);
                         reject(`No game record of ID: ${gameId}!`);
                     }
                 });

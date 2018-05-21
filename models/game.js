@@ -26,32 +26,54 @@ class Game {
         this.active = gameData.active;
         this.opponentId = gameData.opponentid;
         this.turn = gameData.turn;
-        /** @type {Piece[]} */
-        this.gamePiecesObjects = this.__setupGamePieces(gamePiecesRecords);
+        this.__initialize(gamePiecesRecords);
+        this.kings = this.getKings(this.chessboard);
+    }
+
+    __initialize(gamePiecesRecords) {
         /** 
          * The chessboard is a [x][y] array of numerical indices (0-7) reflecting 
          * the ascii 'a'-'h' and '1'-'8' respectively, where each index represents a cell
          * that may or may not have a Piece.
          * @see Piece
          */
-        //this.chessboard = this.__setupChessboardGamePieces(this.gamePiecesObjects);
-        this.chessboard = this.__setupChessboard();
-        this.__setupChessboardGamePieces(this.gamePiecesObjects);
-        this.kings = this.__getKings(this.chessboard);
+        this.chessboard = [];
+        const gamePieces = [];       // Piece objects.
+
+        // Initialize #x# chessboard.
+        for (let x = 0; x < 8; x++) {
+            this.chessboard[x] = [];
+        }
+
+        // Initialize an array of Piece objects.
+        for (let i = 0; i < gamePiecesRecords.length; i++ ) {
+            const gamePieceRecord = gamePiecesRecords[i];
+            gamePieces.push(this.createGamePieceInitByDBRecord(gamePieceRecord));
+        }
+
+        // Add each game Piece onto the chessboard.
+        for (let i = 0; i < gamePieces.length; i++ ) {
+            /** @type {Piece} */
+            const gamePiece = gamePieces[i];
+            const gpx = gamePiece.coordinateXConverted;
+            const gpy = gamePiece.coordinateYConverted;
+            this.chessboard[gpx][gpy] = gamePiece;
+        }
+        
     }
 
     /**
      * Retrieve the King Pieces of this game.
-     * @param {Array[]} chessboard The chessboard containing all the current alive game Pieces.
+     * @param {Array[]} this.chessboard The chessboard containing all the current alive game Pieces.
      * @return {{white: King, black: King}} An object with the two King pieces of this game.
      */
-    __getKings(chessboard) {
+    getKings() {
         /** @type {King} */
         const kings = { white: "", black: ""};
 
-        for (let x = 0; x < chessboard.length; x++) {
-            for (let y = 0; y < chessboard[x].length; y++) {
-                const targetKing = chessboard[x][y];
+        for (let x = 0; x < this.chessboard.length; x++) {
+            for (let y = 0; y < this.chessboard[x].length; y++) {
+                const targetKing = this.chessboard[x][y];
 
                 if (targetKing && (targetKing instanceof King)) {
                     kings[targetKing.faction] = targetKing;
@@ -63,22 +85,12 @@ class Game {
     }
 
     /**
-     * Set up an array of Pieces.
-     * @param {Array} gamePiecesRecords Array of objects where each object represents a record that
-     * was joined between game and game_users table of a certain game.
+     * Returns a new Piece object based on the given information in the game Piece record.
+     * @param {{gameid: number, pieceid: number, userid: number, coordinate_x: string, coordinate_y: string, alive: boolean, name: string, faction: string}[]} gamePieceRecord 
+     * A single JOINED record from the game_pieces and pieces table pertaining to one piece with the same piece ID referenced in both.
+     * @return {Piece}
      */
-    __setupGamePieces(gamePiecesRecords) {
-        const gamePieces = [];
-
-        for (let idx = 0; idx < gamePiecesRecords.length; idx++ ) {
-            const gamePieceRecord = gamePiecesRecords[idx];
-            gamePieces.push(this.getInitializeGamePiece(gamePieceRecord));
-        }
-
-        return gamePieces;
-    }
-
-    getInitializeGamePiece(gamePieceRecord) {
+    createGamePieceInitByDBRecord(gamePieceRecord) {
         const gamePieceName = gamePieceRecord.name;
         /** @type {Piece} */
         let gamePieceObject = undefined;
@@ -102,40 +114,56 @@ class Game {
         return gamePieceObject;
     }
 
-    __setupChessboard(dimension = 8) {
-        const chessboard = [];
+    /**
+     * Gets all the game Pieces that are alive on the chessboard.
+     * @return {Piece[]} An array of all the living game Pieces on the chessboard.
+     */
+    getGamePiecesAllOnBoard() {
+        const gamePieces = [];
 
-        for (let idx = 0; idx < dimension; idx++ ) {
-            chessboard[idx] = [];
+        for (let i = 0; i < this.chessboard.length; i++) {
+            for (let j = 0; j < this.chessboard[x].length; j++) {
+                const piece = this.chessboard[x][j];
+
+                if (piece) {
+                    gamePieces.push(piece);
+                }
+            }
         }
 
-        return chessboard;
+        return gamePieces;
     }
 
     /**
-     * Set up the chessboard with Pieces at their respective cell locations.
-     * @param {Array} gamePiecesObjects Array of Piece objects.
-     * @param {Number} dimension Optional dimension size of height and width of this chessboard.
-     * @return {Array} A chessboard [x][y] where the cells either contain a Piece or undefined for nothing.
+     * Retrieve the Piece of the specified ID.
+     * @param {Number} pieceId The Piece ID to identify the Piece to find.
      */
-    __setupChessboardGamePieces(gamePiecesObjects, dimension = 8) {
-        if (gamePiecesObjects) {
-            for (let idx = 0; idx < gamePiecesObjects.length; idx++ ) {
-                /** @type {Piece} */
-                const gamePiece = gamePiecesObjects[idx];
-                this.setChessboardGamePiece(gamePiece);
+    getGamePieceByID(pieceId) {
+        const targetGamePiece = undefined;
+        const gamePieces = this.getGamePiecesAllOnBoard();
+
+        for (let i = 0; i < gamePieces.length; i++) {
+            const curGamePiece = gamePieces[i];
+            if (curGamePiece && curGamePiece.pieceId == pieceId) {
+                targetGamePiece = curGamePiece;
+                break;
             }
         }
+
+        return targetGamePiece;
     }
 
-    setChessboardGamePiece(gamePieceObject) {
-        const gamePiece = gamePieceObject;
+    /**
+     * Get the Piece from the chessboard by the given raw x-y coordinates.
+     * @param {String} raw_coordinate_x The string x coordinate reflected on the chessboard.
+     * @param {String} raw_coordinate_y The string y coordinate reflected on the chessboard.
+     * @return {Piece} The Piece or undefined found by the given coordinates.
+     */
+    getGamePieceByRawCoordinates(raw_coordinate_x, raw_coordinate_y) {
+        const convertedX = Piece.coordinateXConversion(raw_coordinate_x);
+        const convertedY = Piece.coordinateYConversion(raw_coordinate_y);
 
-        if (gamePiece.alive) {
-            const chessboard_x = Piece.coordinateXConversion(gamePiece.raw_coordinate_x);
-            const chessboard_y = Piece.coordinateYConversion(gamePiece.raw_coordinate_y);
-            this.chessboard[chessboard_x][chessboard_y] = gamePiece;
-        }
+        return this.getGamePieceByConvertedCoordinates(convertedX, convertedY);
     }
 
     /**
@@ -143,15 +171,66 @@ class Game {
      * @param {Number} convertedX The numerical x-coordinate position of the desired piece to find.
      * @param {Number} convertedY The numerical y-coordinate position of the desired piece to find.
      */
-    __getGamePieceByConvertedCoordinates(convertedX, convertedY) {
-        for (let idx = 0; this.gamePiecesObjects.length; idx++) {
-            const gamePiece = this.gamePiecesObjects[idx];
+    getGamePieceByConvertedCoordinates(convertedX, convertedY) {
+        for (let idx = 0; this.getGamePiecesAllOnBoard.length; idx++) {
+            const gamePiece = this.getGamePiecesAllOnBoard[idx];
             const x = gamePiece.raw_coordinate_x;
             const y = gamePiece.raw_coordinate_y;
 
             if (x == convertedX && y == convertedY) {
                 return gamePiece;
             }
+        }
+    }
+
+    /**
+     * Sets the given game Piece onto the chessboard.
+     * @param {Piece} gamePiece The game piece to place onto the board. Its internal coordinate values will be used.
+     */
+    setGamePieceOnChessboard(gamePiece) {
+        if (gamePiece && gamePiece.alive) {
+            const chessboard_x = Piece.coordinateXConversion(gamePiece.raw_coordinate_x);
+            const chessboard_y = Piece.coordinateYConversion(gamePiece.raw_coordinate_y);
+            this.chessboard[chessboard_x][chessboard_y] = gamePiece;
+        }
+    }
+
+    /**
+     * Upgrades the given Pawn piece into another specified Piece.
+     * @param {Number} userId The User of whom is trying to upgrade the given pawn.
+     * @param {Number} target_pieceId The Piece ID of which to convert to the type by given name.
+     * @param {String} target_raw_coordinate_x The string x coordinate to identify the pawn.
+     * @param {String} target_raw_coordinate_y The string y coordinate to identify the pawn.
+     * @param {String} pieceNameToUpgradeTo The name of the piece type to upgrade to ['queen', 'bishop', 'rook', 'knight'].
+     * @param {Function} successfulCB The callback function of which to return the object {result: Boolean, message: String, chessboardPieces: Piece[]}.
+     * @param {Function} failureCB The callback fucntion to call should the upgrade result in failure.
+     */
+    setPawnUpgrade(userId, target_pieceId, target_raw_coordinate_x, target_raw_coordinate_y, pieceNameToUpgradeTo, successfulCB, failureCB) {
+        const result = {result: false, message: "", chessboardPieces: {}};
+        const tPieceId = target_pieceId;
+        const tRawX = target_raw_coordinate_x;
+        const tRawY = target_raw_coordinate_y;
+        const upgradeName = pieceNameToUpgradeTo;
+
+        const pawnPiece = this.getGamePieceByRawCoordinates(target_raw_coordinate_x, target_raw_coordinate_y);
+
+        if (pawnPiece) {
+            gamesDB.setPawnUpgrade(this.gameId, userId, tPieceId, upgradeName, tRawX, tRawY, (newGamePieceRecord) => {
+                const newPiece = this.createGamePieceInitByDBRecord(newGamePieceRecord);
+                this.setGamePieceOnChessboard(newPiece);
+
+                result.result = true;
+                result.message = "Successful upgrade!";
+                result.chessboardPieces = this.getGamePiecesAllOnBoard();
+
+                successfulCB(result);
+            });
+        } else {
+            result.result = false;
+            result.message = "Unsuccessful upgrade!";
+            result.chessboardPieces = this.getGamePiecesAllOnBoard();
+
+            failureCB(result);
         }
     }
 

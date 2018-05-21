@@ -421,7 +421,7 @@ class GamesDB {
             })
     }
 
-    upgradePawn(gameId, userId, pieceId, pieceName, x, y, callbackFunction, dbx = db){
+    setPawnUpgrade(gameId, userId, pieceId, pieceName, x, y, callbackFunction, dbx = db){
         const updatePawn = `UPDATE game_pieces
                             SET pieceid=($1)
                             WHERE gameid=${gameId} AND userid=${userId} AND
