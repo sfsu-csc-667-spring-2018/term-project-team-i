@@ -34,7 +34,9 @@ class Game {
          * that may or may not have a Piece.
          * @see Piece
          */
-        this.chessboard = this.__setupChessboard(this.gamePiecesObjects);
+        //this.chessboard = this.__setupChessboardGamePieces(this.gamePiecesObjects);
+        this.chessboard = this.__setupChessboard();
+        this.__setupChessboardGamePieces(this.gamePiecesObjects);
         this.kings = this.__getKings(this.chessboard);
     }
 
@@ -70,30 +72,44 @@ class Game {
 
         for (let idx = 0; idx < gamePiecesRecords.length; idx++ ) {
             const gamePieceRecord = gamePiecesRecords[idx];
-            const gamePieceName = gamePieceRecord.name;
-            /** @type {Piece} */
-            let gamePieceObject = undefined;
-            
-            if (gamePieceName == 'pawn') {
-                gamePieceObject = new Pawn(gamePieceRecord);
-            } else if (gamePieceName == 'rook') {
-                gamePieceObject = new Rook(gamePieceRecord);
-            } else if (gamePieceName == 'knight') {
-                gamePieceObject = new Knight(gamePieceRecord);
-            } else if (gamePieceName == 'bishop') {
-                gamePieceObject = new Bishop(gamePieceRecord);
-            } else if (gamePieceName == 'queen') {
-                gamePieceObject = new Queen(gamePieceRecord);
-            } else if (gamePieceName == 'king') {
-                gamePieceObject = new King(gamePieceRecord);
-            } else {
-                throw new TypeError(`Error: cannot instantiate ${gamePieceName}`);
-            }
-
-            gamePieces.push(gamePieceObject);
+            gamePieces.push(this.getInitializeGamePiece(gamePieceRecord));
         }
 
         return gamePieces;
+    }
+
+    getInitializeGamePiece(gamePieceRecord) {
+        const gamePieceName = gamePieceRecord.name;
+        /** @type {Piece} */
+        let gamePieceObject = undefined;
+
+        if (gamePieceName == 'pawn') {
+            gamePieceObject = new Pawn(gamePieceRecord);
+        } else if (gamePieceName == 'rook') {
+            gamePieceObject = new Rook(gamePieceRecord);
+        } else if (gamePieceName == 'knight') {
+            gamePieceObject = new Knight(gamePieceRecord);
+        } else if (gamePieceName == 'bishop') {
+            gamePieceObject = new Bishop(gamePieceRecord);
+        } else if (gamePieceName == 'queen') {
+            gamePieceObject = new Queen(gamePieceRecord);
+        } else if (gamePieceName == 'king') {
+            gamePieceObject = new King(gamePieceRecord);
+        } else {
+            throw new TypeError(`Error: cannot instantiate ${gamePieceName}`);
+        }
+
+        return gamePieceObject;
+    }
+
+    __setupChessboard(dimension = 8) {
+        const chessboard = [];
+
+        for (let idx = 0; idx < dimension; idx++ ) {
+            chessboard[idx] = [];
+        }
+
+        return chessboard;
     }
 
     /**
@@ -102,27 +118,24 @@ class Game {
      * @param {Number} dimension Optional dimension size of height and width of this chessboard.
      * @return {Array} A chessboard [x][y] where the cells either contain a Piece or undefined for nothing.
      */
-    __setupChessboard(gamePiecesObjects, dimension = 8) {
-        const chessboard = [];
-
-        for (let idx = 0; idx < dimension; idx++ ) {
-            chessboard[idx] = [];
-        }
-
+    __setupChessboardGamePieces(gamePiecesObjects, dimension = 8) {
         if (gamePiecesObjects) {
             for (let idx = 0; idx < gamePiecesObjects.length; idx++ ) {
                 /** @type {Piece} */
                 const gamePiece = gamePiecesObjects[idx];
-
-                if (gamePiece.alive) {
-                    const chessboard_x = Piece.coordinateXConversion(gamePiece.raw_coordinate_x);
-                    const chessboard_y = Piece.coordinateYConversion(gamePiece.raw_coordinate_y);
-                    chessboard[chessboard_x][chessboard_y] = gamePiece;
-                }
+                this.setChessboardGamePiece(gamePiece);
             }
         }
+    }
 
-        return chessboard;
+    setChessboardGamePiece(gamePieceObject) {
+        const gamePiece = gamePieceObject;
+
+        if (gamePiece.alive) {
+            const chessboard_x = Piece.coordinateXConversion(gamePiece.raw_coordinate_x);
+            const chessboard_y = Piece.coordinateYConversion(gamePiece.raw_coordinate_y);
+            this.chessboard[chessboard_x][chessboard_y] = gamePiece;
+        }
     }
 
     /**
