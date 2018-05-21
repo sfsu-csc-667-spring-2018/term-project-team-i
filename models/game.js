@@ -176,6 +176,7 @@ class Game {
 
     /**
      * Determines if the Piece of the given piece ID can be moved to the destination position.
+     * @param {number} userId The current users' id
      * @param {Number} pieceId The piece ID to identify the type of Piece to move.
      * @param {String} raw_coordinate_x The raw x-coordinate passed in from the player 
      * that is used to identify the selected Piece's through its x-coordinate.
@@ -187,7 +188,7 @@ class Game {
      * that is used to determine if the selected Piece can move to it.
      * @param {Object} optionalData Optional data to be used if needed.
      */
-    tryMovePieceToPosition(pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
+    tryMovePieceToPosition(userId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
        
         let result = {result: false, message: "Cannot process move request at this time!", upgradePawn: false};
         const cbx = Piece.coordinateXConversion(raw_coordinate_x);
@@ -201,6 +202,21 @@ class Game {
 
         const isOriginInBounds = (cbx >= 0 && cbx <= 7) && (cby >= 0 && cby <= 7);
         const isDestinationInBounds = (dbx >= 0 && dbx <= 7) && (dby >= 0 && dby <= 7);
+
+        const host = {faction: 'white'};
+        const opponent = {faction: 'black'};
+
+        // TURNS
+        if(this.turn === 'black' && host.faction === 'white' && userId === this.hostId) {
+            result.result = false;
+            result.message = `ITS NOT YOUR TURN`;
+            return result;
+        }
+        else if(this.turn === 'white' && opponent.faction === 'black' && userId === this.opponentId) {
+            result.result = false;
+            result.message = `ITS NOT YOUR TURN`;
+            return result;
+        }
 
         // Case: given coordinates are out of bounds.
         if (!isOriginInBounds) {
@@ -229,7 +245,6 @@ class Game {
             result.message = `Cannot capture targeted piece of the same faction!`;
             return result;
         }
-        
         // Case: selected piece cannot move to location; or it can.
         if (!selectedPiece.isValidMovement(dbx, dby, this.chessboard)) {
             result.result = false;
@@ -241,7 +256,12 @@ class Game {
             //white pawn upgrade
             // Update the database
             gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
+            gamesDB.updateTurn(this.gameId, this.turn, () =>{});
 
+            if(this.turn === 'white')
+                this.turn = 'black';
+            else if(this.turn === 'black')
+                this.turn ='white';
 
             // Update information locally to reflect the changes.
             this.chessboard[cbx][cby] = undefined;
@@ -266,6 +286,7 @@ class Game {
 
         /** @type {King} */
         const king = this.kings[this.turn];
+        console.log("KING TURN IS" + this.turn);
         const kingCheckResult = king.isKingCheckOrMated(this.chessboard);
 
         if (kingCheckResult.check && !kingCheckResult.checkmate) {
