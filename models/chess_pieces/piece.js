@@ -23,6 +23,54 @@ class Piece {
     get coordinateYConverted() {
         return Piece.coordinateYConversion(this.raw_coordinate_y);
     }
+
+    /**
+     * Determines if the desired movement is successful. The checks employed
+     * within are as such: ally faction check, any piece blocking, out of bounds destination.
+     * @param {boolean} isMovingLegitCheck The given boolean indicating whether the piece has a valid movement pattern.
+     * This value must be determined by this method's caller, which is unique to different Piece types.
+     * @param {Number} idx_destination_x The destination x-coordinate.
+     * @param {Number} idx_destination_y The destination y-coordinate.
+     * @return {{valid: boolean, message: string}} An object with data determining if the movement passed general failure checks.
+     */
+    __movementLinearHandler(isMovingLegitCheck, idx_destination_x, idx_destination_y, chessboard, chessboardSize = 8) {
+        const result = {valid: true, message: `Successful move to {${Piece.coordinateXAsRaw(idx_destination_x)}, ${Piece.coordinateYAsRaw(idx_destination_y)}}`};
+        
+        const isOutOfBounds = ((idx_destination_x < 0 || idx_destination_x >= chessboard.length) 
+                                        || (idx_destination_y < 0 || idx_destination_y >= chessboard.length));
+        const coordinate_x_inc = Math.sign(idx_destination_x - this.coordinateXConverted);
+        const coordinate_y_inc = Math.sign(idx_destination_y - this.coordinateYConverted);
+        const hitPiece = Piece.getFirstPieceScan(this.coordinateXConverted,
+                                                        this.coordinateYConverted,
+                                                                    coordinate_x_inc,
+                                                                        coordinate_y_inc,
+                                                                                chessboard);
+                                     
+        // Begin checking for movement issues.                                                                        
+        if (!isMovingLegitCheck) {
+            result.valid = false;
+            result.message = `Invalid movement pattern to [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`;
+        } else if (isOutOfBounds) {
+            result.valid = false;
+            result.message = `Cannot move out of bounds [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`;
+        } else if (hitPiece) {
+
+            const isMovementBlocked = Piece.isOtherPieceBlocking(this, hitPiece, idx_destination_x, idx_destination_y);
+            const isHitPieceAtDestination = (hitPiece.coordinateXConverted == idx_destination_x) 
+                                                && (hitPiece.coordinateYConverted == idx_destination_y);
+            const isHitPieceAlly = (this.faction == hitPiece.faction);
+
+            if (isMovementBlocked) {
+                result.valid = false;
+                result.message = `Movement to {${idx_destination_x}, ${idx_destination_y}} is blocked by ${hitPiece.name} at [${hitPiece.raw_coordinate_x}][${hitPiece.raw_coordinate_y}]!`;
+            } else if (!isMovementBlocked && isHitPieceAtDestination && isHitPieceAlly) {
+                result.valid = false;
+                result.message = `Cannot capture pieces of the same faction!`;
+            }
+        }
+
+        return result;
+    }
     
     /**
      * Determines if the given destinations are valid positions the piece can move to.
