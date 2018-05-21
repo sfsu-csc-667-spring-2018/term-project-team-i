@@ -59,7 +59,7 @@ router.get('/:gameId', auths, (req, res, next) => {
                 individualFuncSocketProtocol(res, gameId, playerId);
 
                 renderData.helpers = GamesHbsHelpers.getHandlebarHelpers();
-                renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.gamePiecesObjects);
+                renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.getGamePiecesAllOnBoard());
                 renderData.gameId = gameId;
                 renderData.playerName = playerName;
 
@@ -130,7 +130,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
                                                             raw_coordinate_x, raw_coordinate_y, 
                                                             raw_destination_x, raw_destination_y);
 
-            const gamePieces = game.gamePiecesObjects;
+            const gamePieces = game.getGamePiecesAllOnBoard();
             const resStatusCode = (moveResult.result) ? 200 : 304;
 
             res.statusCode = resStatusCode;
@@ -162,10 +162,11 @@ router.post('/:gameId/upgrade-pawn', (req, res, next) =>{
         gameManager.getGameInstance(gameId,
         (gameInstance) => {
             console.log("1.GOT HERE IN GAMES UPDATE PIECE");
+            /** @type {Game} */
             const game = gameInstance;
-            const updatedGamePiece = game.getInitializeGamePiece(updatedPieceRecord);
+            const updatedGamePiece = game.createGamePieceInitByDBRecord(updatedPieceRecord);
             console.log(`This should be a queen: ${JSON.stringify(updatedGamePiece)}`);
-            game.setChessboardGamePiece(updatedGamePiece);
+            game.setGamePieceOnChessboard(updatedGamePiece);
             const gamePieces = game.gamePiecesObjects;
             const resStatusCode = 200;
             res.statusCode = resStatusCode;
