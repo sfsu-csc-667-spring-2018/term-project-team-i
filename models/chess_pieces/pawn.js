@@ -95,7 +95,7 @@ class Pawn extends Piece {
             throw new Error(this.name + ": expecting destination x and y coordinates in Number form.");
         }
 
-        let result = false;
+        let result = {result: false, message: ""};
 
         if (this.faction === this.name_white) {
             result = this.__isValidMovement(idx_destination_x, idx_destination_y, 1, chessboard);

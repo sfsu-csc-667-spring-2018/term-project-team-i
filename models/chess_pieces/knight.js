@@ -26,7 +26,7 @@ class Knight extends Piece{
             result.result = true;
         }
 
-        return false;
+        return result;
     }
 }
 
