@@ -216,9 +216,11 @@ class Game {
             result.message = `Cannot capture targeted piece of the same faction!`;
             return result;
         }
-        
+
+        result = selectedPiece.isValidMovement(dbx, dby, this.chessboard);
+        console.log(JSON.stringify(result));
         // Case: selected piece cannot move to location; or it can.
-        if (!selectedPiece.isValidMovement(dbx, dby, this.chessboard)) {
+        if (!result.result) {
             result.result = false;
             result.message = `Invalid movement to {${raw_destination_x}, ${raw_destination_y}}!`;
         } else {
@@ -257,12 +259,16 @@ class Game {
 
         if (kingCheckResult.check && !kingCheckResult.checkmate) {
             result = kingCheckResult;
+            result.result = false;
+            console.log("KING CHECKED: " + result.message);
         } else if (kingCheckResult.checkmate) {
             //this.active = false;
             result = kingCheckResult;
+            result.result = false;
+            console.log("KING CHECKMATE: " + result.message);
         }
         
-        console.log(result.message);
+        //console.log(result.message);
         
         return result;
     }

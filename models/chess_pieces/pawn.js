@@ -57,6 +57,7 @@ class Pawn extends Piece {
             }
         }
 
+        const result = {result: false, message: ""};
         const isDestinationDiagRight = ( (idx_destination_x == (this.coordinateXConverted + 1)) && (idx_destination_y == (this.coordinateYConverted + 1*(directionContraint))) );
         const theresEnemyDiagRight = funcNoPiecePresenceCheck(1, 1*directionContraint, chessboard, true);
         const isDestinationDiagLeft = ( (idx_destination_x == (this.coordinateXConverted - 1)) && (idx_destination_y == (this.coordinateYConverted + 1*(directionContraint))) );
@@ -67,10 +68,16 @@ class Pawn extends Piece {
         const theresNoPieceAtForwardTwo = (this.isInitialMove) ? funcNoPiecePresenceCheck(0, 2*directionContraint, chessboard, false) : false;
 
         // Now this is refined autism.
-        return ((isDestinationDiagRight && theresEnemyDiagRight) 
-                    || (isDestinationDiagLeft && theresEnemyDiagLeft) 
-                        || (isDestinationForwardOne && theresNoPieceAtForwardOne) 
-                            || (this.isInitialMove && isDestinationForwardTwo && theresNoPieceAtForwardOne && theresNoPieceAtForwardTwo)) ;
+        result.result = ((isDestinationDiagRight && theresEnemyDiagRight) 
+                        || (isDestinationDiagLeft && theresEnemyDiagLeft) 
+                            || (isDestinationForwardOne && theresNoPieceAtForwardOne) 
+                                || (this.isInitialMove && isDestinationForwardTwo && theresNoPieceAtForwardOne && theresNoPieceAtForwardTwo)) ;
+
+        if (!result.result) {
+            result.message = `Invalid move to {${idx_destination_x}, ${idx_destination_y}}!`;
+        }     
+
+        return result;
     }
 
     /**

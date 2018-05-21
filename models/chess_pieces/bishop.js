@@ -46,7 +46,7 @@ class Bishop extends Piece{
             result.message = `Invalid move to {${idx_destination_x}, ${idx_destination_y}}!`;
         }
 
-        return result.result;
+        return result;
     }
 
     moveBishop(newCoordinateX, newCoordinateY, allGamePieces = []){

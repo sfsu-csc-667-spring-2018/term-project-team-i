@@ -52,7 +52,7 @@ class King extends Piece{
         for (let idx = 0; idx < hitPieces.length; idx++) {
             const hitPiece = hitPieces[idx];
             const isHitPieceEnemy = (hitPiece) && (this.faction !== hitPiece.faction);
-            const isHitPieceChecking = (hitPiece) && hitPiece.isValidMovement(origin_x, origin_y, chessboard);
+            const isHitPieceChecking = (hitPiece) && hitPiece.isValidMovement(origin_x, origin_y, chessboard).result;
 
             // King is checked.
             if (isHitPieceEnemy && isHitPieceChecking) {
@@ -77,7 +77,7 @@ class King extends Piece{
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
                 const canKingMoveTo = this.isValidMovement(this.coordinateXConverted + x, 
-                                                                this.coordinateYConverted + y, chessboard);
+                                                                this.coordinateYConverted + y, chessboard).result;
                 if (canKingMoveTo) {
                     freePositions.push({x: x, y: y});
                 }
@@ -186,7 +186,7 @@ class King extends Piece{
             for (let kdx = 0; kdx < kingAllyPieces.length; kdx++) {
                 const kingAllyPiece = kingAllyPieces[kdx];
 
-                if (kingAllyPiece.isValidMovement(target_x, target_y, chessboard)) {
+                if (kingAllyPiece.isValidMovement(target_x, target_y, chessboard).result) {
                     const chessboardDuplicate = this.__getDuplicateChessboard(chessboard);
                     chessboardDuplicate[kingAllyPiece.coordinateXConverted][kingAllyPiece.coordinateYConverted] = undefined;                                                                        
                     chessboardDuplicate[target_x][target_y] = kingAllyPiece; 
@@ -256,7 +256,7 @@ class King extends Piece{
         }
 
 
-        return result.result;
+        return result;
     }
 
     /**

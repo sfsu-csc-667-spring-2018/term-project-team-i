@@ -51,7 +51,7 @@ class Queen extends Piece{
             result.message = `Invalid move to {${idx_destination_x}, ${idx_destination_y}}!`;
         }
 
-        return result.result;
+        return result;
     }
 
     moveQueen(newCoordinateX, newCoordinateY, allGamePieces = []){
