@@ -14,6 +14,9 @@ router.post("/message",auths, (request, response) =>{
 
     response.app.get('io').of('/').emit('new lobby message',
         {lobbyUser: stripHTML(user), lobbyMsg: stripHTML(message)});
+
+    response.statusCode = 200;
+    response.end();
 });
 
 const stripHTML = (text) =>{

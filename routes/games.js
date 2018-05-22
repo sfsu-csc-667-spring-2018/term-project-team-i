@@ -100,6 +100,9 @@ router.post('/:gameId/message', auths, (req, res, next) => {
 
     res.app.get('io').of('/games/' + gameId).emit('game-new-message',
        {gameUser: stripHTML(user), gameMsg: stripHTML(message)});
+
+    res.statusCode = 200;
+    res.end();
 });
 
 // Moves a piece to position
