@@ -102,7 +102,7 @@ router.post('/:gameId/message', auths, (req, res, next) => {
        {gameUser: stripHTML(user), gameMsg: stripHTML(message)});
 
     res.statusCode = 200;
-    res.end();
+    //res.end();
 });
 
 // Moves a piece to position
