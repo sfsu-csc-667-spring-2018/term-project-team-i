@@ -37,6 +37,10 @@ $(document).ready(function(){
         }
     });
 
+    gameUserSocket.on('move-message', data=>{
+        $actionMessage.append('<div class="actions">' + data.message + '</div>' );
+    });
+
     gameUserSocket.on('upgrade-pawn-prompt', data => {
         $actionMessage.append('<div class="actions">' + 'Choose Upgrade ' + '</div>' );
 
