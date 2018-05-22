@@ -55,7 +55,11 @@ Once this is done now it is time to get our dependencies by running:
   
         npm install
 
-To run the app run:
+To run the app, first make sure that the current environment is set to "development":
+
+        set NODE_ENV=development
+
+run:
 
         npm run start
         
