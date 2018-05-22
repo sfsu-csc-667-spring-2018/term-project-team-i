@@ -4,10 +4,15 @@ $(document).ready(function(){
     const gameSocket = io('/games/' + url);
     const gameUserSocket = io('/games/' + url + '/' + gameUsername);
 
-    // const $gameMessageForm = $('#gameMessageForm');
+    const $gameMessageForm = $('#gameMessageForm');
     const $gameMessage = $('#gameMessage');
     const $gameChat = $('#gameChat');
     const $actionMessage = $('.actions');
+
+    $gameMessageForm.submit((evt) => {
+        evt.preventDefault();
+        $.post(`${url}/message`, {gameMessage: $gameMessage.val()});
+    })
 
     //const $gameUser = document.getElementById("gameUser").textContent;
     gameSocket.on('game-new-message', data =>{
