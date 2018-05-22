@@ -286,6 +286,8 @@ class Game {
 
         const host = {faction: 'white'};
         const opponent = {faction: 'black'};
+       console.log("THE PIECE ID IS " + pieceId);
+       console.log("THE PIECE ID IS " + typeof pieceId);
 
         // TURNS
         if(this.turn === 'black' && host.faction === 'white' && userId === this.hostId) {

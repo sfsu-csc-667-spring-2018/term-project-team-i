@@ -30,8 +30,6 @@ router.get('/:gameId', auths, (req, res, next) => {
     const renderData = {};
     const playerName = req.user.username;
 
-    console.log("player name in game is " + playerName);
-
     gameManager.getGameInstance(gameId, 
         (returnedGameInstance) => {
             /** @type {Game} */
@@ -62,7 +60,6 @@ router.get('/:gameId', auths, (req, res, next) => {
                 renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.getGamePiecesAllOnBoard());
                 renderData.gameId = gameId;
                 renderData.playerName = playerName;
-
 
                 res.render('games',renderData);
             }
@@ -95,18 +92,14 @@ const stripHTML = (text) =>{
 
 // Sends a message in the Game Room.
 router.post('/:gameId/message', auths, (req, res, next) => {
+    // {playerId: int, message: string}
     const gameId = req.params.gameId;
-    console.log(gameId);
 
     const message = req.body.gameMessage;
-    console.log('POSTED MESSAGE ' + message);
     const user = req.user.username;
-    console.log(user);
 
-    //const indexRoute = request.app.get('io').of('/');
     res.app.get('io').of('/games/' + gameId).emit('game-new-message',
        {gameUser: stripHTML(user), gameMsg: stripHTML(message)});
-    // {playerId: int, message: string}
 });
 
 // Moves a piece to position
@@ -137,8 +130,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
                 const moveResult = game.tryMovePieceToPosition(playerId, pieceId,
                     raw_coordinate_x, raw_coordinate_y,
                     raw_destination_x, raw_destination_y);
-                console.log('the current turn issssss');
-                console.log(game.turn);
+                console.log('the current turn is ' + game.turn);
                 const gamePieces = game.getGamePiecesAllOnBoard();
                 const resStatusCode = (moveResult.result) ? 200 : 304;
 

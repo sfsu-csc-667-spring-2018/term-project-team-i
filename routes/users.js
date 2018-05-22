@@ -1,11 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const db = require('../db');
 const bcrypt = require('bcryptjs');
 const User = require("../db/usersDB");
 const passport = require('../auth');
-//const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
 
 
 router.get("/register", (request, response) => {

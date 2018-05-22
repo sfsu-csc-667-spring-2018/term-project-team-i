@@ -13,11 +13,8 @@ const lookup = (username, password, done) =>{
                 bcrypt.compare(password, hash.password, (err, match) =>{
                     if(err) throw err;
                     if(match){
-                        console.log(hash.password);
-                        console.log("password verified");
                         return done(null, user);
                     } else{
-                        console.log("invalid pass");
                         return done(null, false, {message: 'Invalid Password'})
                     }
                 })
