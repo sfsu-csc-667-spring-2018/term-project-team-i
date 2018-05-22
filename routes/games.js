@@ -139,7 +139,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 
                 res.statusCode = resStatusCode;
                 res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces});
-
+                res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('move-message', {message: moveResult.message});
                 console.log("UPGRADE PAWN " + (moveResult.upgradePawn));
                 if (moveResult.upgradePawn === true) {
                     res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('upgrade-pawn-prompt', {
