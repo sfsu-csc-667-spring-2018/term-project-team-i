@@ -152,6 +152,11 @@
         let clearUrl = url.substring(0, url.indexOf("?"));
         window.history.replaceState({}, document.title, clearUrl);
     }
+
+    $('form').submit(function (event) {
+        event.preventDefault(); //prevents the default action
+
+    });
 </script>
 
 </html>
