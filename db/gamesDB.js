@@ -449,6 +449,28 @@ class GamesDB {
                 })
         }
     }
+
+    updateTurn(gameId, turn, callbackFunction, dbx = db){
+        const updateGameTurnWhite = `UPDATE games
+                                     SET turn = 'white'
+                                     WHERE id = ${gameId}`;
+
+        const updateGameTurnBlack = `UPDATE games
+                                     SET turn = 'black'
+                                     WHERE id = ${gameId}`;
+
+        if(turn === 'white'){
+            dbx.any(updateGameTurnBlack)
+                .then(()=>{
+                    callbackFunction();
+                }).catch(error=> console.log(error));
+        }
+        else
+            dbx.any(updateGameTurnWhite)
+                .then(()=>{
+                    callbackFunction();
+                }).catch(error=> console.log(error));
+    }
 }
 
 module.exports = GamesDB;
