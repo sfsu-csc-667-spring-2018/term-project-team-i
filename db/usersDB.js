@@ -15,7 +15,6 @@ const registerUser  = userObject => {
 const loginUsername = (findUsername, callback) => {
     return db.one(`SELECT username, id FROM users WHERE username = ($1)`, findUsername)
         .then(data => {
-            console.log(data);
             return callback(null, data);
         }).catch(error => {
                 console.log(error);
@@ -26,7 +25,6 @@ const loginUsername = (findUsername, callback) => {
 const loginUserID = (findUserID, callback) => {
     return db.one(`SELECT id FROM users WHERE username = ($1)`, findUserID)
         .then(data => {
-            console.log(data);
             return callback(null, data);
         }).catch(error => {
             console.log(error);
@@ -40,13 +38,10 @@ const loginPassword = (checkUser) => {
 
 const serialize =(user, done) => {
     console.log("reached serialize");
-    //console.log("user = " + user.id);
     done(null, user.id);
 };
 
 const deserialize = (id, done) => {
-    //console.log("reached deserialize");
-    //console.log("id =" + id);
     db.one(`SELECT * FROM users WHERE id = ${id}`, {id})
         .then(({id, username}) => done(null, {id, username}))
         .catch(error => done(error));

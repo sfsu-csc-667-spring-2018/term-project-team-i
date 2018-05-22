@@ -9,8 +9,6 @@ module.exports = (userid, gameid, successCallback, failureCallback) => {
         .then(result => {
             let host = JSON.parse(JSON.stringify(result)).userid;
             let opponent = JSON.parse(JSON.stringify(result)).opponentid;
-            console.log("host is " + host + " opponent is " + opponent);
-            //console.log("result user " + JSON.parse(JSON.stringify(result))[0].opponentid);
             if (opponent === null && host !== userid) {
                 db.any(`UPDATE game_users SET opponentid = ${userid} WHERE gameid = ${gameid}`)
                     .then(() => {

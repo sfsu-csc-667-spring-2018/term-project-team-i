@@ -286,8 +286,32 @@ class Game {
 
         const host = {faction: 'white'};
         const opponent = {faction: 'black'};
+       console.log("THE PIECE ID IS " + pieceId);
+       console.log("THE PIECE ID IS " + typeof pieceId);
 
         // TURNS
+        if(this.turn === 'black'){
+            if(userId === this.hostId && (Number(pieceId) >= 7)) {
+                console.log("NOT WHITE TURN");
+                result.result = false;
+                result.message = `ITS NOT YOUR TURN`;
+                return result;
+            }
+            else if(userId === this.opponentId && (Number(pieceId) >= 7)){
+                result = selectedPiece.isValidMovement(dbx, dby, this.chessboard);
+            }
+        }
+        else if(this.turn === 'white') {
+            if (userId === this.opponentId && (Number(pieceId) < 7)) {
+                console.log("NOT BLACK TURN");
+                result.result = false;
+                result.message = `ITS NOT YOUR TURN`;
+                return result;
+            }
+            else if(userId === this.hostId && (Number(pieceId) < 7))
+                result = selectedPiece.isValidMovement(dbx, dby, this.chessboard);
+        }
+        /*
         if(this.turn === 'black' && host.faction === 'white' && userId === this.hostId) {
             result.result = false;
             result.message = `ITS NOT YOUR TURN`;
@@ -297,7 +321,7 @@ class Game {
             result.result = false;
             result.message = `ITS NOT YOUR TURN`;
             return result;
-        }
+        }*/
 
         // Case: given coordinates are out of bounds.
         if (!isOriginInBounds) {
@@ -327,7 +351,7 @@ class Game {
             return result;
         }
 
-        result = selectedPiece.isValidMovement(dbx, dby, this.chessboard);
+        //result = selectedPiece.isValidMovement(dbx, dby, this.chessboard);
         console.log(JSON.stringify(result));
         // Case: selected piece cannot move to location; or it can.
         if (!result.result) {
