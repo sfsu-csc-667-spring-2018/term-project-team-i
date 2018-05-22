@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="/stylesheets/chessboard.css"/>
     <link rel="icon" href="/images/bKingIcon.ico"/>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
 </head>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark navbar-fixed-top">
     <form action="/games" method="POST">
@@ -26,9 +30,17 @@
                 <a class="nav-link1" href="https://en.wikipedia.org/wiki/Chess" target="_blank">Rules <span class="sr-only">(current)</span></a>
             </li>
         </ul>
-        <div class="navbar-nav float-left">
+
+        <ul class="navbar-nav navbar-right">
+            <li class="nav-item active navbar-nav">
+                <a class="nav-link1" href="/users/logout">Logout <span class="sr-only">(current)</span></a>
+            </li>
+        </ul>
+        <!--
+        <div class="navbar-nav float-right">
             <a class="nav-link1" href="/users/logout">Logout <span class="sr-only">(current)</span></a>
         </div>
+        -->
     </div>
 </nav>
 <body id="background">
