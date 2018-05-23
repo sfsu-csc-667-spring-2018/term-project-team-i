@@ -77,6 +77,7 @@ router.get('/:gameId', auths, (req, res, next) => {
             } else {
                 funcFailure();
             }
+            
         },
         (failureError) => {
             req.flash('error_msg', "Cannot access game!");
@@ -120,36 +121,45 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 
     gameManager.getGameInstance(gameId, 
         (gameInstance) => {
+
             /** @type {Game} */
             const game = gameInstance;
             const hostPlayerTurn = {host: game.hostId, userId: playerId};
             const opponentPlayer = game.opponentId;
 
-            if(game.opponentId === null ){
-                console.log("GAME NOT READY YET");
-            }
-            else {
+            if (game.active) {
 
-                const moveResult = game.tryMovePieceToPosition(playerId, pieceId,
-                    raw_coordinate_x, raw_coordinate_y,
-                    raw_destination_x, raw_destination_y);
-                console.log('the current turn is ' + game.turn);
-                const gamePieces = game.getGamePiecesAllOnBoard();
-                const resStatusCode = (moveResult.result) ? 200 : 304;
-
-                res.statusCode = resStatusCode;
-                res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces});
-                res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('move-message', {message: moveResult.message});
-                console.log("UPGRADE PAWN " + (moveResult.upgradePawn));
-                if (moveResult.upgradePawn === true) {
-                    res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('upgrade-pawn-prompt', {
-                        playerName: playerName,
-                        pieceId: pieceId,
-                        x: raw_destination_x,
-                        y: raw_destination_y
-                    });
+                if(game.opponentId === null ){
+                    console.log("GAME NOT READY YET");
                 }
-                res.end(moveResult.message);
+                else {
+
+                    const moveResult = game.tryMovePieceToPosition(playerId, pieceId,
+                        raw_coordinate_x, raw_coordinate_y,
+                        raw_destination_x, raw_destination_y);
+                    console.log('the current turn is ' + game.turn);
+                    const gamePieces = game.getGamePiecesAllOnBoard();
+                    const resStatusCode = (moveResult.result) ? 200 : 304;
+
+                    res.statusCode = resStatusCode;
+                    res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces});
+                    //res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('move-message', {message: moveResult.message});
+                    res.app.get('io').of('/games/' + gameId).emit('move-message', {message: moveResult.message});
+                    console.log("UPGRADE PAWN " + (moveResult.upgradePawn));
+                    if (moveResult.upgradePawn === true) {
+                        res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('upgrade-pawn-prompt', {
+                            playerName: playerName,
+                            pieceId: pieceId,
+                            x: raw_destination_x,
+                            y: raw_destination_y
+                        });
+                    }
+                    res.end(moveResult.message);
+                }
+            } else {
+                // GAME OVER CODE
+                res.app.get('io').of('/games/' + gameId).emit('game-ended', {data: "GAME OVER"});
+                res.end();
             }
         },
         (failureCB) => {

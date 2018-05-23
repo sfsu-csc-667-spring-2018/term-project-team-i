@@ -255,6 +255,16 @@ class Game {
         });
     }
 
+    setGameActiveState(state, callbackFunction) {
+        this.active = state;
+        const stateLiteral = (state) ? 'active' : 'not_active';
+
+        gamesDB.setGameActiveState(this.gameId, stateLiteral, () => {
+            callbackFunction();
+        });
+
+    }
+
     /**
      * Determines if the Piece of the given piece ID can be moved to the destination position.
      * @param {number} userId The current users' id
@@ -271,6 +281,11 @@ class Game {
      */
     tryMovePieceToPosition(userId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
        
+        if (!this.active) {
+            const result = {result: false, message: "Game is over! LEAVE!", isGameOver: true};
+            return result;
+        }
+
         let result = {result: false, message: "Cannot process move request at this time!", upgradePawn: false};
         const cbx = Piece.coordinateXConversion(raw_coordinate_x);
         const cby = Piece.coordinateYConversion(raw_coordinate_y);
@@ -392,9 +407,10 @@ class Game {
             }
         }
 
+        // This now refers to opponent
         /** @type {King} */
         const king = this.kings[this.turn];
-        console.log("KING TURN IS" + this.turn);
+        //console.log("KING TURN IS" + this.turn);
         const kingCheckResult = king.isKingCheckOrMated(this.chessboard);
 
         if (kingCheckResult.check && !kingCheckResult.checkmate) {
@@ -406,6 +422,8 @@ class Game {
             result = kingCheckResult;
             result.result = false;
             console.log("KING CHECKMATE: " + result.message);
+            this.active = false;
+            this.setGameActiveState(false);
         }
         
         //console.log(result.message);

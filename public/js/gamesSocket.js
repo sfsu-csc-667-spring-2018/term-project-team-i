@@ -14,6 +14,11 @@ $(document).ready(function(){
         $.post(`${url}/message`, {gameMessage: $gameMessage.val()});
     })
 
+    gameSocket.on('game-ended', data => {
+        window.alert(data.data);
+        window.location = '/';
+    })
+
     //const $gameUser = document.getElementById("gameUser").textContent;
     gameSocket.on('game-new-message', data =>{
         $gameChat.prepend('<div class="chat" id="gameChat">' + '<b>' + data.gameUser + '</b>' +': ' + data.gameMsg + '</div>' );
@@ -37,7 +42,7 @@ $(document).ready(function(){
         }
     });
 
-    gameUserSocket.on('move-message', data=>{
+    gameSocket.on('move-message', data=>{
         $actionMessage.append('<div class="actions">' + data.message + '</div>' );
     });
 
