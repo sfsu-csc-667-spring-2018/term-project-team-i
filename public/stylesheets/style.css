@@ -99,7 +99,7 @@ span.user {
 }
 #container-chat {
     width: 320px;
-    height: 500px;
+    height: 600px;
     margin: auto;
     border: solid 3px #ccc;
     border-radius: 5px;
@@ -110,13 +110,17 @@ span.user {
 #container-chat .chat-box{
     overflow: auto;
     direction: rtl;
-    height: 340px;
+    height: 400px;
+    width: 320px;
+    padding: 2px;
 }
 
 #container-chat .chat{
     display: block;
     margin-top: auto;
     border-radius: 5px;
+    overflow: hidden;
+    padding: 10px;
 }
 
 #container-chat .send-message{
@@ -137,7 +141,7 @@ span.user {
 #container-game-list .games-list{
     overflow: auto;
     direction: rtl;
-    height: 400px;
+    height: 500px;
 }
 
 #container-game-list .list{

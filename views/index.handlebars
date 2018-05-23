@@ -23,13 +23,11 @@
 <div class="container-fluid">
     <div class="row">
 
-        <!-- display "Join Game" buttons -->
         <div class="col-sm-2">
 
 
         </div>
 
-        <!-- display Welcome messages, chessboard -->
         <div class="col-sm-6">
             <h5> Hello <strong>{{username}}!</strong></h5>
             <h5> Welcome to Chess Game!</h5><br><br>
@@ -61,20 +59,17 @@
             </div>
         </div>
 
-        <!-- display chat & messages box-->
         <div class="col-4">
             <div id="container-chat"> Chat Room
                 <hr>
                 <div class="chat">
                     <div class="row">
-                        <!-- display user input messages -->
                         <div class="chat-box">
                             <div class="chat" id="lobbyChat"></div>
                         </div>
 
                     </div>
                 </div>
-                <!--Type messages and send footer-->
                 <form class="send-message" id="LobbyMessageForm" method="post" action="/message">
                     <div class="input-group">
                         <input type="text" class="form-control input-sm chat_input" id="lobbyMessage"
@@ -83,16 +78,11 @@
                     </div>
                 </form>
             </div>
-            <!-- End of chat & messages box-->
         </div>
         <p hidden id="lobbyUser">{{username}}</p>
-        <!-- End of chat-->
 
     </div>
-
-    <!-- End of class ="row" -->
 </div>
-<!-- End of container class-->
 
 <script src="/js/indexSocket.js"></script>
 
