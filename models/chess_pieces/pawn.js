@@ -73,7 +73,6 @@ class Pawn extends Piece {
         const isMovingUpOne = (isDestinationForwardOne && theresNoPieceAtForwardOne);
         const isMovingUpTwo = (this.isInitialMove && isDestinationForwardTwo && theresNoPieceAtForwardOne && theresNoPieceAtForwardTwo);
 
-        // Now this is refined autism.
         result.result  = (isMovingRight || isMovingLeft || isMovingUpOne || isMovingUpTwo);    
         // Error messages
         if (!result.result && ((isDestinationDiagRight && !theresEnemyDiagRight) || (isDestinationDiagLeft && !theresEnemyDiagLeft))) {

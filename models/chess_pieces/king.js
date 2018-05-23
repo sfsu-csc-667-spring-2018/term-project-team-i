@@ -181,8 +181,7 @@ class King extends Piece{
                                             !(target_x == this.coordinateXConverted && target_y == this.coordinateYConverted)
                                                 && ((target_x >= 0 && target_x < chessboard.length) && (target_y >= 0 && target_y < chessboard.length));
                                                                                                     target_x += kingCheck_x_dec, target_y += kingCheck_y_dec) {
-
-            //console.log(`CHECKING target positions {${target_x}, ${target_y}}`);                                                                                            
+                                                                                       
             for (let kdx = 0; kdx < kingAllyPieces.length; kdx++) {
                 const kingAllyPiece = kingAllyPieces[kdx];
 
@@ -235,8 +234,7 @@ class King extends Piece{
             // 3. If King is checked then get free positions around King.
             const kingAvailableMovementPositions = this.__getPositionsThatAreOpenToKing(chessboard);
             const kingCanMoveToASafePosition = this.__getPositionsSafeForKing(kingAvailableMovementPositions, chessboard);
-            //console.log("KING CHECK: has a safe spot by translating to: " + JSON.stringify(kingCanMoveToASafePosition));
-
+            
             if (kingCanMoveToASafePosition.length > 0) {
                 result.check = true;
                 result.checkmate = false;

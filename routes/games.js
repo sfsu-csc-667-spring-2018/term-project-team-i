@@ -3,12 +3,10 @@ const handlebars = require('express-handlebars');
 const GamesDB = require('../db/gamesDB.js');
 const GameManager = require('../models/gameManager.js');
 const GamesHbsHelpers = require('../routes/gamesControllers/gamesRenderHelpers.js');
-const GameMoveValidator = require('../routes/gamesControllers/gameMoveValidator.js');
 const Game = require('../models/game.js');
 const router = express.Router();
 const gamesDB = new GamesDB();
 const gameManager = new GameManager();
-const gameMoveValidator = new GameMoveValidator();
 const auths = require('../auth/authenticate');
 const gameAuth = require('../auth/gameAuth');
 

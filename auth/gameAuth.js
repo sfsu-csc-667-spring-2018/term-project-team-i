@@ -2,9 +2,6 @@ const db = require('../db');
 
 module.exports = (userid, gameid, successCallback, failureCallback) => {
 
-    console.log('Userid for game ' + userid);
-    console.log('Gameid is ' + gameid);
-
     db.one(`SELECT * FROM game_users WHERE gameid = ${gameid}`)
         .then(result => {
             let host = JSON.parse(JSON.stringify(result)).userid;

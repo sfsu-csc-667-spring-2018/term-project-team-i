@@ -37,7 +37,6 @@ const loginPassword = (checkUser) => {
 };
 
 const serialize =(user, done) => {
-    console.log("reached serialize");
     done(null, user.id);
 };
 

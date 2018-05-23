@@ -301,13 +301,10 @@ class Game {
 
         const host = {faction: 'white'};
         const opponent = {faction: 'black'};
-       console.log("THE PIECE ID IS " + pieceId);
-       console.log("THE PIECE ID IS " + typeof pieceId);
 
         // TURNS
         if(this.turn === 'black'){
             if(userId === this.hostId && (Number(pieceId) >= 7)) {
-                console.log("NOT WHITE TURN");
                 result.result = false;
                 result.message = `ITS NOT YOUR TURN`;
                 return result;
@@ -318,7 +315,6 @@ class Game {
         }
         else if(this.turn === 'white') {
             if (userId === this.opponentId && (Number(pieceId) < 7)) {
-                console.log("NOT BLACK TURN");
                 result.result = false;
                 result.message = `ITS NOT YOUR TURN`;
                 return result;
@@ -366,8 +362,6 @@ class Game {
             return result;
         }
 
-        //result = selectedPiece.isValidMovement(dbx, dby, this.chessboard);
-        console.log(JSON.stringify(result));
         // Case: selected piece cannot move to location; or it can.
         if (!result.result) {
             result.result = false;
@@ -376,8 +370,6 @@ class Game {
             result.result = true;
             result.message = "";
 
-            //white pawn upgrade
-            // Update the database
             gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
             gamesDB.updateTurn(this.gameId, this.turn, () =>{});
 
@@ -410,23 +402,18 @@ class Game {
         // This now refers to opponent
         /** @type {King} */
         const king = this.kings[this.turn];
-        //console.log("KING TURN IS" + this.turn);
         const kingCheckResult = king.isKingCheckOrMated(this.chessboard);
 
         if (kingCheckResult.check && !kingCheckResult.checkmate) {
             result = kingCheckResult;
             result.result = false;
-            console.log("KING CHECKED: " + result.message);
         } else if (kingCheckResult.checkmate) {
             //this.active = false;
             result = kingCheckResult;
             result.result = false;
-            console.log("KING CHECKMATE: " + result.message);
             this.active = false;
             this.setGameActiveState(false);
         }
-        
-        //console.log(result.message);
         
         return result;
     }
