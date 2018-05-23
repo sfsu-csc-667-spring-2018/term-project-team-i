@@ -8,6 +8,7 @@ $(document).ready(function(){
     const $gameMessage = $('#gameMessage');
     const $gameChat = $('#gameChat');
     const $actionMessage = $('.actions');
+    const $gameForfeit = $('game-forfeit');
 
     $gameMessageForm.submit((evt) => {
         evt.preventDefault();

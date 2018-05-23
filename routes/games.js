@@ -208,6 +208,23 @@ const removeQuotes = (str) =>{
 }
 router.post('/:gameId/forfeit', (req, res, next) => {
     // {playerId: int, forfeit: boolean}
+    const gameId =  Number(req.params.gameId);
+
+    gameManager.getGameInstance(gameId,
+        (gameInstance) => {
+            /** @type {Game} */
+            const game = gameInstance;
+
+            game.setGameActiveState(false, () => {
+                // GAME OVER CODE
+                res.app.get('io').of('/games/' + gameId).emit('game-ended', {data: "GAME OVER"});
+                res.end();
+            })
+        },  
+        () => {
+            res.end();
+        }
+    )
 });
 
 /*
