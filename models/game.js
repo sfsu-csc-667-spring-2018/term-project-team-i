@@ -260,7 +260,9 @@ class Game {
         const stateLiteral = (state) ? 'active' : 'not_active';
 
         gamesDB.setGameActiveState(this.gameId, stateLiteral, () => {
-            callbackFunction();
+            if (callbackFunction && (typeof (callbackFunction) == 'function')) {
+                callbackFunction();
+            }
         });
 
     }
@@ -412,7 +414,7 @@ class Game {
             result = kingCheckResult;
             result.result = false;
             this.active = false;
-            this.setGameActiveState(false);
+            this.setGameActiveState(false, () => {});
         }
         
         return result;

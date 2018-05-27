@@ -166,13 +166,14 @@ class King extends Piece{
     /**
      * Try to find an ally Piece of this King that can either capture or block the path of
      * the opposing Piece that is in position to capture this King.
+     * @private
      * @param {Piece} kingCheckingPiece The Piece that is in position to capture this King.
      * @param {Array[]} chessboard The chessboard containing all Pieces that are alive.
      * @param {Number} chessboardSize Optional chessboard size
      * @return {Piece} A allied Piece of this King that can stop the opposing King checking Piece.
      */
-    __getPieceThatCanSaveKingFrom(kingCheckingPiece, chessboard, chessboardSize = 8) {
-        let kingSavingPiece = undefined;
+    __getPiecesThatCanSaveKingFrom(kingCheckingPiece, chessboard, chessboardSize = 8) {
+        let kingSavingPieces = [];
         const kingAllyPieces = this.__getAlliesOfKing(chessboard);
         const kingCheck_x_dec = Math.sign(this.coordinateXConverted - kingCheckingPiece.coordinateXConverted);
         const kingCheck_y_dec = Math.sign(this.coordinateYConverted - kingCheckingPiece.coordinateYConverted);
@@ -191,18 +192,17 @@ class King extends Piece{
                     chessboardDuplicate[target_x][target_y] = kingAllyPiece; 
                     
                     // King scans 360 again with this temporary chessboard of where this current Ally has attempted to intercept.
-                    const newHitPieces = this.__getPiecesInSightFrom(this.coordinateXConverted, this.coordinateYConverted, chessboardDuplicate);
-                    const newKingCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted, this.coordinateYConverted, newHitPieces, chessboardDuplicate);
+                    const isKingStillChecked = this.isKingChecked(chessboardDuplicate);
 
-                    if (!newKingCheckingPiece) {
-                        kingSavingPiece = kingAllyPiece;
-                        return kingSavingPiece;
+                    if (!isKingStillChecked) {
+                        const kingSavingPiece = kingAllyPiece;
+                        kingSavingPieces.push(kingSavingPiece);
                     }
                 }
             }
         }
 
-        return kingSavingPiece;
+        return kingSavingPieces;
     }
 
    
@@ -218,6 +218,21 @@ class King extends Piece{
         return this.__movementLinearHandler(isMovingSingleSpace, idx_destination_x, idx_destination_y, chessboard);
     }
 
+    getSafePositionsAroundKing(chessboard = []) {
+        const kingAvailableMovementPositions = this.__getPositionsThatAreOpenToKing(chessboard);
+        const kingPositionsSafeToMoveTo = this.__getPositionsSafeForKing(kingAvailableMovementPositions, chessboard);
+
+        return kingPositionsSafeToMoveTo;
+    }
+
+    isKingChecked(chessboard = []) {
+        const results = {result: false, checkingPiece: undefined};
+        const hitPieces = this.__getPiecesInSightFrom(this.coordinateXConverted, this.coordinateYConverted, chessboard);
+        const kingCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted, this.coordinateYConverted, hitPieces, chessboard);
+        
+        return kingCheckingPiece;
+    }
+
     /**
      * Determines whether or not the is checked or checkmated.
      * @param {Array[]} chessboard The chessboard containing all the Pieces that are alive.
@@ -226,34 +241,50 @@ class King extends Piece{
      */
     isKingCheckOrMated(chessboard = []){
 
-        let result = {check: false, checkmate: false};
-        const hitPieces = this.__getPiecesInSightFrom(this.coordinateXConverted, this.coordinateYConverted, chessboard);
-        const kingCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted, this.coordinateYConverted, hitPieces, chessboard);
+        /*
+        Assume worst case scenario and King is checkmated.
+        1. 360 scan around King and check what can check the king.
+        2. Get open and SAFE positions around the King.
+        3. Check if allied pieces can capture the enemy piece.
+        4. Check if King is checked by moving the one piece.
+        5. Check if allied pieces can block capturing piece.
+        6. Check if King is chekced by moving the one piece.
+        */
 
-        if (kingCheckingPiece) {
-            // 3. If King is checked then get free positions around King.
-            const kingAvailableMovementPositions = this.__getPositionsThatAreOpenToKing(chessboard);
-            const kingCanMoveToASafePosition = this.__getPositionsSafeForKing(kingAvailableMovementPositions, chessboard);
+        let result = {check: false, checkmate: false};
+        const isKingChecked = this.isKingChecked(chessboard);
+
+        if (isKingChecked) {
+            /** @type {Piece} */
+            const enemyCheckingPiece = isKingChecked;
+            const safePositionsAroundKing = this.getSafePositionsAroundKing(chessboard);
             
-            if (kingCanMoveToASafePosition.length > 0) {
+            if (safePositionsAroundKing.length > 0) {
                 result.check = true;
                 result.checkmate = false;
-                result.message = `${this.faction} King is CHECKED! You may move the King to one of these positions to escape: ${JSON.stringify(kingCanMoveToASafePosition)}`;
+                result.message = `${this.faction} King is CHECKED! You may move the King to one of these positions to escape: ${JSON.stringify(safePositionsAroundKing)}`;
             } else {
-                const kingSavingPiece = this.__getPieceThatCanSaveKingFrom(kingCheckingPiece, chessboard);
+                const kingSavingPieces = this.__getPiecesThatCanSaveKingFrom(enemyCheckingPiece, chessboard);
 
-                if (kingSavingPiece) {
-                    const kspName = kingSavingPiece.name;
-                    const ksp_rawX = kingSavingPiece.raw_coordinate_x;
-                    const ksp_rawY = kingSavingPiece.raw_coordinate_y;
+                if (kingSavingPieces > 0) {
 
                     result.check = true;
                     result.checkmate = false;
-                    result.message = `${this.faction} King CHECKED! ${kspName} at {${ksp_rawX}, ${ksp_rawY}} can save the King!`;
+                    result.message = `${this.faction} King CHECKED! ${kspName}; `;
+
+                    for (let i = 0; i < kingSavingPieces.length; i++) {
+                        let kingSavingPiece = kingSavingPieces[i];
+
+                        const kspName = kingSavingPiece.name;
+                        const ksp_rawX = kingSavingPiece.raw_coordinate_x;
+                        const ksp_rawY = kingSavingPiece.raw_coordinate_y;
+
+                        result.message += `Piece at [${ksp_rawX}][${ksp_rawY}] can save the King!`
+                    }
                 } else {
-                    result.check = true;
+                    result.check = false;
                     result.checkmate = true;
-                    result.message = `${this.faction} CHECKMATED! ${kingCheckingPiece.faction} WINS!`;
+                    result.message = `${this.faction} CHECKMATED! ${enemyCheckingPiece.faction} WINS!`;
                 }
             }
         }
