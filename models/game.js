@@ -404,7 +404,7 @@ class Game {
         // This now refers to opponent
         /** @type {King} */
         const king = this.kings[this.turn];
-        const kingCheckResult = king.isKingCheckOrMated(this.chessboard);
+        const kingCheckResult = king.isKingCheckedOrMated(this.chessboard);
 
         if (kingCheckResult.check && !kingCheckResult.checkmate) {
             result = kingCheckResult;

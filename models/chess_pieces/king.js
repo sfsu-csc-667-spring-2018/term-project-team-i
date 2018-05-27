@@ -142,22 +142,29 @@ class King extends Piece{
         for (let i = 0; i < freePositions.length; i++) {
             const offsetx = freePositions[i].x;
             const offsety = freePositions[i].y;
-
+            const original_x = this.coordinateXConverted;
+            const original_y = this.coordinateYConverted;
+            
             const tempChessBoard = this.__getDuplicateChessboard(chessboard);
-            tempChessBoard[this.coordinateXConverted][this.coordinateYConverted] = undefined;
-            tempChessBoard[this.coordinateXConverted+offsetx][this.coordinateYConverted+offsety] = this;
+            tempChessBoard[original_x][original_y] = undefined;
+            tempChessBoard[original_x+offsetx][original_y+offsety] = this;
+            this.raw_coordinate_x = Piece.coordinateXAsRaw(original_x+offsetx);
+            this.raw_coordinate_y = Piece.coordinateYAsRaw(original_y+offsety);
 
-            const tempHitPieces = this.__getPiecesInSightFrom(this.coordinateXConverted + offsetx, this.coordinateYConverted + offsety, tempChessBoard);
-            const tempCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted + offsetx, this.coordinateYConverted + offsety, tempHitPieces, tempChessBoard);
+            const tempHitPieces = this.__getPiecesInSightFrom(original_x+offsetx, original_y+offsety, tempChessBoard);
+            const tempCheckingPiece = this.__getPieceThatsCheckingKing(original_x+offsetx, original_y+offsety, tempHitPieces, tempChessBoard);
 
             if (!tempCheckingPiece) {
                 safePositions.push(
                     [
-                        Piece.coordinateXAsRaw(this.coordinateXConverted+offsetx), 
-                        Piece.coordinateYAsRaw(this.coordinateYConverted+offsety)
+                        Piece.coordinateXAsRaw(original_x+offsetx), 
+                        Piece.coordinateYAsRaw(original_y+offsety)
                     ]
                 );
             }
+
+            this.raw_coordinate_x = Piece.coordinateXAsRaw(original_x);
+            this.raw_coordinate_y = Piece.coordinateYAsRaw(original_y);
         }
 
         return safePositions;
@@ -239,19 +246,9 @@ class King extends Piece{
      * @return {{check: boolean, checkmate: boolean, message: string}} An object determining if the King
      * is checked or checkmated and a corresponding message indicating the status.
      */
-    isKingCheckOrMated(chessboard = []){
+    isKingCheckedOrMated(chessboard = []){
 
-        /*
-        Assume worst case scenario and King is checkmated.
-        1. 360 scan around King and check what can check the king.
-        2. Get open and SAFE positions around the King.
-        3. Check if allied pieces can capture the enemy piece.
-        4. Check if King is checked by moving the one piece.
-        5. Check if allied pieces can block capturing piece.
-        6. Check if King is chekced by moving the one piece.
-        */
-
-        let result = {check: false, checkmate: false};
+        let result = {check: false, checkmate: false, message: ""};
         const isKingChecked = this.isKingChecked(chessboard);
 
         if (isKingChecked) {
@@ -289,6 +286,7 @@ class King extends Piece{
             }
         }
 
+        console.log(result.message);
         return result;
     }
 }
