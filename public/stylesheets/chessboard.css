@@ -2,16 +2,19 @@
     margin-right: auto;
 }
 
-#chessboard .squareB{
+.chesscell{
     width: 80px;
-    height: 70px;
+    height: 80px;
+}
+
+.chesscell-squareB{
     background: #8b3507;
 }
-#chessboard .squareW{
-    width: 40px;
-    height: 40px;
+
+.chesscell-squareW{
     background: #fff5dd;
 }
+
 #chessboard .border{
     width: 10px;
     height: 10px;
@@ -22,8 +25,8 @@
 }
 
 #chessboard .chessPiece{
-    width: 70px;
-    height: 60px;
-    margin-left: auto;
-    margin-right: auto;
+    width: 80px;
+    height: 80px;
+    /*margin-left: auto;
+    margin-right: auto;*/
 }
