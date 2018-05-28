@@ -286,7 +286,6 @@ class King extends Piece{
             }
         }
 
-        console.log(result.message);
         return result;
     }
 }

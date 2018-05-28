@@ -66,16 +66,18 @@ class Game {
 
     /**
      * Retrieve the King Pieces of this game.
-     * @param {Array[]} this.chessboard The chessboard containing all the current alive game Pieces.
+     * @param {Array[]} chessboard The chessboard containing all the current alive game Pieces.
      * @return {{white: King, black: King}} An object with the two King pieces of this game.
      */
-    getKings() {
+    getKings(chessboard) {
+        const realChessboard = (chessboard) ? chessboard : this.chessboard;
+
         /** @type {King} */
         const kings = { white: "", black: ""};
 
-        for (let x = 0; x < this.chessboard.length; x++) {
-            for (let y = 0; y < this.chessboard[x].length; y++) {
-                const targetKing = this.chessboard[x][y];
+        for (let x = 0; x < realChessboard.length; x++) {
+            for (let y = 0; y < realChessboard[x].length; y++) {
+                const targetKing = realChessboard[x][y];
 
                 if (targetKing && (targetKing instanceof King)) {
                     kings[targetKing.faction] = targetKing;
@@ -120,12 +122,13 @@ class Game {
      * Gets all the game Pieces that are alive on the chessboard.
      * @return {Piece[]} An array of all the living game Pieces on the chessboard.
      */
-    getGamePiecesAllOnBoard() {
+    getGamePiecesAllOnBoard(chessboard) {
         const gamePieces = [];
+        const realChessboard = (chessboard) ? chessboard : this.chessboard;
 
-        for (let i = 0; i < this.chessboard.length; i++) {
-            for (let j = 0; j < this.chessboard[i].length; j++) {
-                const piece = this.chessboard[i][j];
+        for (let i = 0; i < realChessboard.length; i++) {
+            for (let j = 0; j < realChessboard[i].length; j++) {
+                const piece = realChessboard[i][j];
 
                 if (piece) {
                     gamePieces.push(piece);
@@ -269,7 +272,7 @@ class Game {
 
     /**
      * Determines if the Piece of the given piece ID can be moved to the destination position.
-     * @param {number} userId The current users' id
+     * @param {number} movingPlayerId The current users' id
      * @param {Number} pieceId The piece ID to identify the type of Piece to move.
      * @param {String} raw_coordinate_x The raw x-coordinate passed in from the player 
      * that is used to identify the selected Piece's through its x-coordinate.
@@ -281,142 +284,210 @@ class Game {
      * that is used to determine if the selected Piece can move to it.
      * @param {Object} optionalData Optional data to be used if needed.
      */
-    tryMovePieceToPosition(userId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
-       
-        if (!this.active) {
-            const result = {result: false, message: "Game is over! LEAVE!", isGameOver: true};
+    tryMovePieceToPosition(movingPlayerId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
+
+        const isGameOver = (currentGameState) => {
+            const result = {result: false, message: ""};
+            result.result = (!currentGameState);
+            result.message = (!currentGameState) ? `GAME IS OVER!` : ``;
+
             return result;
         }
 
-        let result = {result: false, message: "Cannot process move request at this time!", upgradePawn: false};
-        const cbx = Piece.coordinateXConversion(raw_coordinate_x);
-        const cby = Piece.coordinateYConversion(raw_coordinate_y);
-        const dbx = Piece.coordinateXConversion(raw_destination_x);
-        const dby = Piece.coordinateYConversion(raw_destination_y);
-        /** @type {Piece} */
-        const selectedPiece = this.chessboard[cbx][cby];
-        /** @type {Piece} */
-        const destinationPiece = this.chessboard[dbx][dby];
+        const isMovingPlayerTurn = (movingPlayerId) => {
+            const result = {result: false, message: ""};
+            const isWhitesTurn = (this.turn == 'white' && movingPlayerId == this.hostId);
+            const isBlacksTurn = (this.turn == 'black' && movingPlayerId == this.opponentId);
 
-        const isOriginInBounds = (cbx >= 0 && cbx <= 7) && (cby >= 0 && cby <= 7);
-        const isDestinationInBounds = (dbx >= 0 && dbx <= 7) && (dby >= 0 && dby <= 7);
-
-        const host = {faction: 'white'};
-        const opponent = {faction: 'black'};
-
-        // TURNS
-        if(this.turn === 'black'){
-            if(userId === this.hostId && (Number(pieceId) >= 7)) {
+            if ((isWhitesTurn && !isBlacksTurn) || (!isWhitesTurn && isBlacksTurn)) {
+                result.result = true;
+                result.message = "";
+            } else {
                 result.result = false;
-                result.message = `ITS NOT YOUR TURN`;
-                return result;
+                result.message = `${this.turn}: not your turn!`;
             }
-            else if(userId === this.opponentId && (Number(pieceId) >= 7)){
-                result = selectedPiece.isValidMovement(dbx, dby, this.chessboard);
-            }
+
+            return result;
         }
-        else if(this.turn === 'white') {
-            if (userId === this.opponentId && (Number(pieceId) < 7)) {
+
+        const isMovingPieceSelectable = (movingPlayerId, raw_coordinate_x, raw_coordinate_y, chessboard) => {
+            const result = {result: false, message: ""};
+            const realChessboard = (chessboard) ? chessboard : this.chessboard;
+            const cbx = Piece.coordinateXConversion(raw_coordinate_x);
+            const cby = Piece.coordinateYConversion(raw_coordinate_y);
+            const isSelectionInBounds = (cbx >= 0 && cbx <= 7) && (cby >= 0 && cby <= 7);
+            const movingPlayerFaction = (this.turn == 'white' && movingPlayerId == this.hostId) ? 'white' : 'black';
+
+            if (isSelectionInBounds) {
+                /** @type {Piece} */
+                const selectedPiece = realChessboard[cbx][cby];
+
+                if (selectedPiece) {
+                    if (selectedPiece.faction == movingPlayerFaction) {
+                        result.result = true;
+                        result.message = ``;
+                    } else {
+                        result.result = false;
+                        result.message = `Selected ${selectedPiece.name} at [${raw_coordinate_x}][${raw_coordinate_y}] is not of your faction!`
+                    }
+                } else {
+                    result.result = false;
+                    result.message = `Selection {${raw_coordinate_x}, ${raw_coordinate_y}} refers to nothing!`;
+                }
+            } else {
                 result.result = false;
-                result.message = `ITS NOT YOUR TURN`;
-                return result;
+                result.message = `Selected coordinates [${raw_coordinate_x}][${raw_coordinate_y}] is out of bounds!`
             }
-            else if(userId === this.hostId && (Number(pieceId) < 7))
-                result = selectedPiece.isValidMovement(dbx, dby, this.chessboard);
-        }
-        /*
-        if(this.turn === 'black' && host.faction === 'white' && userId === this.hostId) {
-            result.result = false;
-            result.message = `ITS NOT YOUR TURN`;
-            return result;
-        }
-        else if(this.turn === 'white' && opponent.faction === 'black' && userId === this.opponentId) {
-            result.result = false;
-            result.message = `ITS NOT YOUR TURN`;
-            return result;
-        }*/
 
-        // Case: given coordinates are out of bounds.
-        if (!isOriginInBounds) {
-            result.result = false;
-            result.message = `Given piece coordinates {${cbx}, ${cby}} are not within bounds!`;
-            return result;
-        }
-        
-        // Case: destination coordinates out of bounds.
-        if (!isDestinationInBounds) {
-            result.result = false;
-            result.message = `Positions {${raw_destination_x}, ${raw_destination_y}} are out of bounds!`;
-            return result;
-        }
-        
-        // Case: selected piece does not exist at given location.
-        if (!selectedPiece) {
-            result.result = false;
-            result.message = `Selected piece does not exist at positions {${raw_coordinate_x}, ${raw_coordinate_y}}!`;
             return result;
         }
 
-        // Case: selected piece and destination containing a piece are of the same faction.
-        if (selectedPiece && destinationPiece && selectedPiece.faction == destinationPiece.faction) {
-            result.result = false;
-            result.message = `Cannot capture targeted piece of the same faction!`;
+        const isDestinationInBounds = (destination_x, destination_y) => {
+            const result = {result: false, message: ""};
+            const dbx = Piece.coordinateXConversion(raw_destination_x);
+            const dby = Piece.coordinateYConversion(raw_destination_y);
+            const isDestinationInBounds = (dbx >= 0 && dbx <= 7) && (dby >= 0 && dby <= 7);
+
+            result.result = isDestinationInBounds;
+            result.message = (!isDestinationInBounds) ? `Destination [${raw_coordinate_x}][${raw_coordinate_y}] is out of bounds!` : "";
+
             return result;
         }
 
-        // Case: selected piece cannot move to location; or it can.
-        if (!result.result) {
-            result.result = false;
-            result.message = `Invalid movement to {${raw_destination_x}, ${raw_destination_y}}!`;
-        } else {
-            result.result = true;
-            result.message = "";
+        const canPieceMoveResult = (raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
+            const result = {result: false, message: ""};
+            const realChessboard = (chessboard) ? chessboard : this.chessboard;
+            const cbx = Piece.coordinateXConversion(raw_coordinate_x);
+            const cby = Piece.coordinateYConversion(raw_coordinate_y);
+            const dbx = Piece.coordinateXConversion(raw_destination_x);
+            const dby = Piece.coordinateYConversion(raw_destination_y);
+            /** @type {Piece} */
+            const selectedPiece = realChessboard[cbx][cby];
 
-            gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
-            gamesDB.updateTurn(this.gameId, this.turn, () =>{});
+            return selectedPiece.isValidMovement(dbx, dby, realChessboard);
+        }
 
-            if(this.turn === 'white')
-                this.turn = 'black';
-            else if(this.turn === 'black')
-                this.turn ='white';
+        const isFactionKingCheckedOrMated = (currentPlayerFaction, chessboard) => {
+            const result = {check: false, checkmate: false, message: ""};
+            const realChessboard = (chessboard) ? chessboard : this.chessboard;
+            /** @type {King} */
+            const king = this.kings[currentPlayerFaction];
+            const kingCheckResult = king.isKingCheckedOrMated(realChessboard);
 
-            // Update information locally to reflect the changes.
-            this.chessboard[cbx][cby] = undefined;
-            this.chessboard[dbx][dby] = selectedPiece;
-            
+            return kingCheckResult;
+        }
+
+        const willMoveCheckCurrentPlayer = (currentPlayerFaction, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
+            const result = {check: false, checkmate: false, message: ""};
+            const cbx = Piece.coordinateXConversion(raw_coordinate_x);
+            const cby = Piece.coordinateYConversion(raw_coordinate_y);
+            const dbx = Piece.coordinateXConversion(raw_destination_x);
+            const dby = Piece.coordinateYConversion(raw_destination_y);
+            const duplChessboard = getDuplicateChessboard(chessboard);
+            /** @type {Piece} */
+            const selectedPiece = chessboard[cbx][cby];
+            duplChessboard[cbx][cby] = undefined;
+            duplChessboard[dbx][dby] = selectedPiece;
             selectedPiece.raw_coordinate_x = raw_destination_x;
             selectedPiece.raw_coordinate_y = raw_destination_y;
 
-            if(pieceId == 1 && selectedPiece.raw_coordinate_y == '8')
-                result.upgradePawn = true;
-            else if(pieceId == 7 && selectedPiece.raw_coordinate_y == '1')
-                result.upgradePawn = true;
-            else
-                result.upgradePawn = false;
+            /** @type {King} */
+            const king = this.kings[currentPlayerFaction];
+            const kingCheckResult = king.isKingCheckedOrMated(duplChessboard);
 
+            // Reset the internal king values.
+            selectedPiece.raw_coordinate_x = raw_coordinate_x;
+            selectedPiece.raw_coordinate_y = raw_coordinate_y;
+
+            return kingCheckResult;
+        }
+
+        const getMoveSelectedPieceTo = (gameId, movingPieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
+            const cbx = Piece.coordinateXConversion(raw_coordinate_x);
+            const cby = Piece.coordinateYConversion(raw_coordinate_y);
+            const dbx = Piece.coordinateXConversion(raw_destination_x);
+            const dby = Piece.coordinateYConversion(raw_destination_y);
+            /** @type {Piece} */
+            const selectedPiece = chessboard[cbx][cby];
+            /** @type {Piece|undefined} */
+            const destinationPiece = chessboard[dbx][dby];
+
+            chessboard[cbx][cby] = undefined;
+            chessboard[dbx][dby] = selectedPiece;
+
+            selectedPiece.raw_coordinate_x = raw_destination_x;
+            selectedPiece.raw_coordinate_y = raw_destination_y;
             if (destinationPiece) {
                 destinationPiece.alive = false;
                 destinationPiece.raw_coordinate_x = null;
                 destinationPiece.raw_coordinate_y = null;
             }
+
+            gamesDB.setGamePieceCoordinates(gameId, movingPieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
+
+            return selectedPiece;
         }
 
-        // This now refers to opponent
-        /** @type {King} */
-        const king = this.kings[this.turn];
-        const kingCheckResult = king.isKingCheckedOrMated(this.chessboard);
+        const getUpdateTurn = (gameId, currentTurn) => {
+            const nextTurn = (currentTurn == 'white') ? 'black' : 'white';
+            gamesDB.updateTurn(gameId, nextTurn, () => {});
 
-        if (kingCheckResult.check && !kingCheckResult.checkmate) {
-            result = kingCheckResult;
-            result.result = false;
-        } else if (kingCheckResult.checkmate) {
-            //this.active = false;
-            result = kingCheckResult;
-            result.result = false;
-            this.active = false;
-            this.setGameActiveState(false, () => {});
+            return nextTurn;
         }
-        
+
+        /**
+         * Get a duplicate of the given chessboard.
+         * @param {Array[]} originalChessBoard The original chessboard containing references to all active Pieces.
+         * @return {Array[]} A duplicate chessboard based on the given board.
+         */
+        const getDuplicateChessboard = (originalChessBoard = []) => {
+           let tempChessBoard = [];
+   
+           for (let i = 0; i < originalChessBoard.length; i++) {
+               tempChessBoard[i] = [];
+               for (let j = 0; j < originalChessBoard[i].length; j++) {
+                   tempChessBoard[i][j] = originalChessBoard[i][j];
+               }
+           }
+   
+           return tempChessBoard;
+        }
+
+        let result = isGameOver(this.active);
+        if (!result.result) {
+            result = isMovingPlayerTurn(movingPlayerId);
+            if (result.result) {
+                result = isMovingPieceSelectable(movingPlayerId, raw_coordinate_x, raw_coordinate_y);
+                if (result.result) {
+                    result = isDestinationInBounds(raw_destination_x, raw_destination_y);
+                    if (result.result) {
+                        result = canPieceMoveResult(raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y);
+                        if (result.result) {
+                            result = willMoveCheckCurrentPlayer(this.turn, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y,  this.chessboard);
+                            if (result.check || result.checkmate) {
+                                result.result = false;
+                                result.message = `Cannot move piece due to resulting ${this.turn} King check!`;
+                            } else {
+                                const selectedPiece = getMoveSelectedPieceTo(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard);
+                                const nextTurn = getUpdateTurn(this.gameId, this.turn);
+                                const isEnemyKingCheckmated = isFactionKingCheckedOrMated(nextTurn);
+                                this.turn = nextTurn;
+
+                                result.result = true;
+                                result.message = `Successful move from [${raw_coordinate_x}][${raw_coordinate_y}] to [${raw_destination_x}][${raw_destination_y}]!`;
+
+                                if (isEnemyKingCheckmated.checkmate) {
+                                    this.active = false;
+                                    this.setGameActiveState(false, () => {});
+                                    result.message += ` ${this.turn} CHECKMATED! GAME OVER!`;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return result;
     }
 

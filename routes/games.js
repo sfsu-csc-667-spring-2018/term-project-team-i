@@ -135,7 +135,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
                     const moveResult = game.tryMovePieceToPosition(playerId, pieceId,
                         raw_coordinate_x, raw_coordinate_y,
                         raw_destination_x, raw_destination_y);
-                    console.log('the current turn is ' + game.turn);
+                    
                     const gamePieces = game.getGamePiecesAllOnBoard();
                     const resStatusCode = (moveResult.result) ? 200 : 304;
 
