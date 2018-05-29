@@ -24,7 +24,7 @@
     font-size: 10px;
 }
 
-#chessboard .chessPiece{
+#chessboard .chesspiece{
     width: 80px;
     height: 80px;
     /*margin-left: auto;

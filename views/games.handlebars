@@ -3,7 +3,7 @@
 
 <body>
 
-    <div class="container-fluid">
+    <div class="container-fluid my-5">
         <div class="row">
             <div class="col-lg-8">
 
@@ -26,7 +26,7 @@
                                                                                     ../this }} chesscell ">
                                         {{#with (lookup @root.gamePieces (chessboard_appendTwoStr this ../this)) as |gamePiece|}}
                                             <img data-piece_id="{{gamePiece.pieceId}}" data-piece_name="{{gamePiece.name}}"
-                                                    data-piece_faction="{{gamePiece.faction}}" class="chessPiece"
+                                                    data-piece_faction="{{gamePiece.faction}}" class="chesspiece"
                                                     src="images/{{gamePiece.faction}}{{gamePiece.name}}.png">
                                         {{/with}}
                                     </td>
