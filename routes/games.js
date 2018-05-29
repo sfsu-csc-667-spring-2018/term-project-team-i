@@ -12,6 +12,14 @@ const gameAuth = require('../auth/gameAuth');
 
 const activeGames = new Map();
 
+router.get('/', auths, (req, res, next) => {
+    const playerId = req.user.id;
+
+    gameManager.createGameInstance(playerId, 'white', (gameId) => {
+        res.redirect('/games/'+gameId);
+    });
+})
+
 // Create new game room. req.body = {playerId: int}
 router.post('/', auths, (req, res, next) => {
     const playerId = req.user.id;
