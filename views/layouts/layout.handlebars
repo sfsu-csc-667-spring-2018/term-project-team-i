@@ -1,44 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chess</title>
-    
+
+    <title>Team-I-Chess</title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/stylesheets/bootstrap.css"/>
-    <link rel="stylesheet" href="/stylesheets/style.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src='/socket.io/socket.io.js'></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="/stylesheets/chessboard.css"/>
     <link rel="icon" href="/images/bKingIcon.ico"/>
 
 </head>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <div class="container">
-        <form action="/games" method="POST">
-            <button id="btn_create_game" type="submit" class="navbar-brand" name="btn_create_game">Create Game</button>
-        </form>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="/">Lobby <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="https://en.wikipedia.org/wiki/Chess" target="_blank">Rules <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/users/register">Register <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/users/login">Login <span class="sr-only">(current)</span></a>
-                </li>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+
+        <div class="navbar-header">
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>                        
+            </button>
+
+            <a class="navbar-brand" href="/">Team-I-Chess</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="https://en.wikipedia.org/wiki/Chess">Rules</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/users/register"><span class="glyphicon glyphicon-user"></span> Register</a></li>
+                <li><a href="/users/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
             </ul>
         </div>
+        
     </div>
 </nav>
 
-<body id="background">
+<body>
 {{#if success_msg}}
     <div class="alert alert-success">{{success_msg}}</div>
 {{/if}}
@@ -49,9 +53,8 @@
 {{#if error}}
     <div class="alert alert-danger">{{error}}</div>
 {{/if}}
-<script src="http://code.jquery.com/jquery-latest.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script src='/socket.io/socket.io.js'></script>
 {{{body}}}
+
+
 </body>
 </html>
