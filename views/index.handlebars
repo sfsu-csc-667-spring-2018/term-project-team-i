@@ -1,90 +1,90 @@
-<!DOCTYPE html>
-<html>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<head>
-    <style>
-        h5 {
-            text-align: center;
-        }
-        .col-4 {
-            position: fixed;
-            right: 0;
-            bottom: 0;
-        }
-    </style>
-</head>
 
-<body>
-
-<!-- display buttons, chessboard, chatroom in row & column -->
-<!-- display body in container class-->
-
-<div class="container-fluid my-5">
+<div class="container-fluid">
     <div class="row">
 
-        <div class="col-sm-2">
-
+        <div class="sidebar-sticky col-md-2 d-none d-md-block bg-light">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">
+                    <span data-feather="home"></span>
+                    Dashboard <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                    <span data-feather="file"></span>
+                    Orders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                    <span data-feather="shopping-cart"></span>
+                    Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                    <span data-feather="users"></span>
+                    Customers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                    <span data-feather="bar-chart-2"></span>
+                    Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                    <span data-feather="layers"></span>
+                    Integrations
+                    </a>
+                </li>
+            </ul>
 
         </div>
 
-        <div class="col-sm-6">
-            <h5> Hello <strong>{{username}}!</strong></h5>
-            <h5> Welcome to Chess Game!</h5><br><br>
-            <div id="container-game-list" style="text-align: center"> Games
-                <hr>
-                <div class="row" style="margin-left: 100px">
-                    <div class="games-list">
-                        {{#each rejoin}}
-                            <form method="get" action="/games/{{id}}">
-                                <div class="list">Game #{{id}}
-                                    <input type="submit" class="btn btn-info" value="Rejoin"/>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+            <div class="row" style="min-width: 540px;"> 
+
+                <div class="col-12 col-md-7">
+                    <div class="card border-dark mx-auto text-center">
+                        <div class="card-header">Games</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h5 class="card-title">Dark card title</h5>
+                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
                                 </div>
-                            </form>
-                        {{/each}}
+                                <div class="col-6">
+                                    <h5 class="card-title">Dark card title</h5>
+                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
                     </div>
-                    <div class="row" style="margin-left: 50px">
-                        <div class="games-list">
-                            {{#each game}}
-                                <form method="get" action="/games/{{id}}">
-                                    <div class="list">Game #{{id}}
-                                        <input type="submit" class="btn btn-primary" value="Join"/>
-                                    </div>
-                                </form>
-                            {{/each}}
-                            <div class="list" id="gamesList"></div>
+                </div>
+
+                <div class="col-12 col-md-5">
+                    <div class="card border-dark mx-auto text-center">
+                        <div class="card-header">Header</div>
+                        <div class="card-body">
+                            <h5 class="card-title">Dark card title</h5>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-4">
-            <div id="container-chat"> Chat Room
-                <hr>
-                <div class="chat">
-                    <div class="row">
-                        <div class="chat-box">
-                            <div class="chat" id="lobbyChat"></div>
-                        </div>
-
-                    </div>
-                </div>
-                <form class="send-message" id="LobbyMessageForm" method="post" action="/message">
-                    <div class="input-group">
-                        <input type="text" class="form-control input-sm chat_input" id="lobbyMessage"
-                               placeholder="enter message here..." name="message" autocomplete="off"/>
-                        <button type="submit" class="btn btn-primary">Send</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <p hidden id="lobbyUser">{{username}}</p>
+        </main>
 
     </div>
+    
+    
+
 </div>
 
+<link rel="stylesheet" href="/stylesheets/sidebar.css"/>
+<link rel="stylesheet" href="/stylesheets/chat.css"/>
 <script src="/js/indexSocket.js"></script>
-
-</body>
-</html>
