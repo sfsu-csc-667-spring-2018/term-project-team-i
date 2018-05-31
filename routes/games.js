@@ -233,7 +233,7 @@ router.post('/:gameId/forfeit', (req, res, next) => {
     )
 });
 
-/*
+
 router.post('/:gameId/draw-request', (req, res, next) => {
     // {playerId: int, draw-request: boolean}
 });
@@ -241,5 +241,5 @@ router.post('/:gameId/draw-request', (req, res, next) => {
 router.post('/:gameId/draw-response', (req, res, next) => {
     // {playerId: int, draw-response: boolean}
 });
-*/
+
 module.exports = router;

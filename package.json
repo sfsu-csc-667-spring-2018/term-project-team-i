@@ -23,6 +23,7 @@
     "express-session": "*",
     "express-validator": "*",
     "morgan": "~1.9.0",
+    "npm": "^6.1.0",
     "passport": "*",
     "passport-http": "*",
     "passport-local": "*",
