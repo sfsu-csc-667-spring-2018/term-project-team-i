@@ -10,16 +10,16 @@
                 <table id="chessboard">
                     <tbody>
                         <tr>
-                            <td class="border"></td>
+                            <td class="chessborder"></td>
                             {{#chessboard_setupBorderAscii 65 1 7}}
-                                <td class="border">{{this}}</td>
+                                <td class="chessborder">{{this}}</td>
                             {{/chessboard_setupBorderAscii}}
-                            <td class="border"></td>
+                            <td class="chessborder"></td>
                         </tr>
 
                         {{#chessboard_setupBorderAscii 56 -1 7}}
                             <tr>
-                                <td class="border">{{this}}</td>
+                                <td class="chessborder">{{this}}</td>
                                 {{#chessboard_setupBorderAscii 97 1 7}}
                                     <td data-coordinate_x="{{this}}" data-coordinate_y="{{../this}}"
                                         class="{{chessboard_setupBlackOrWhiteClass 'chesscell-squareB' 'chesscell-squareW' this
@@ -31,15 +31,15 @@
                                         {{/with}}
                                     </td>
                                 {{/chessboard_setupBorderAscii}}
-                                <td class="border">{{this}}</td>
+                                <td class="chessborder">{{this}}</td>
                             </tr>
                         {{/chessboard_setupBorderAscii}}
                         <tr>
-                            <td class="border"></td>
+                            <td class="chessborder"></td>
                             {{#chessboard_setupBorderAscii 65 1 7}}
-                                <td class="border">{{this}}</td>
+                                <td class="chessborder">{{this}}</td>
                             {{/chessboard_setupBorderAscii}}
-                            <td class="border"></td>
+                            <td class="chessborder"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -144,6 +144,7 @@
 <script src="/js/games.js"></script>
 <script src="/js/gamesSocket.js"></script>
 <script src="/js/chatSocket.js"></script>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
 <script>
     let url = window.location.toString();
