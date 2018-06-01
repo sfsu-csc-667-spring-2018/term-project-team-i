@@ -101,7 +101,7 @@
                     <!--<h5 class="card-title">Dark card title</h5>-->
                     <p id="hiddenName" hidden>{{playerName}}</p>
                     <div>
-                        <div id="gameChat" class="card-text message text-left" style="max-width:250px; height: 370px; overflow-y: scroll">
+                        <div id="chatDisplay" class="card-text message text-left" style="max-width:250px; height: 370px; overflow-y: scroll">
                             <!-- Chat messages to display here.-->
                         </div>
                     </div>
@@ -109,11 +109,11 @@
             </div>
 
             <div class="card-footer">
-                <form class="send-message" id="gameMessageForm" method="post" action="/message">
+                <form class="send-message" id="chatMessageForm" method="post" action="/message">
                     <div class="input-group">
                         <label for="message"></label>
-                        <input type="text" class="form-control" id="gameMessage"
-                            placeholder="enter message here..." name="gameMessage" autocomplete="off">
+                        <input type="text" class="form-control" id="chatMessage"
+                            placeholder="enter message here..." name="chatMessage" autocomplete="off">
                         <button type="submit" class="btn btn-primary" value="Send">Send</button>
                     </div>
                 </form>
@@ -130,4 +130,4 @@
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 <link rel="stylesheet" href="/stylesheets/sidebar.css"/>
 <link rel="stylesheet" href="/stylesheets/chat.css"/>
-<script src="/js/indexSocket.js"></script>
+<script src="/js/chatSocket.js"></script>
