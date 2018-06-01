@@ -45,26 +45,45 @@
                 </table>
                 
             </div>
-            <div class="col-lg-4">
-                <div id="container-chat"> Chat
-                    <hr>
-                    <p id="hiddenName" hidden>{{playerName}}</p>
-                    <div class="chat">
-                        <div class="row">
-                            <div class="chat-box">
-                                <div class="chat" id="gameChat"></div>
+            
+            <div id="chat" class="card border-dark text-center" style="position: fixed; bottom: 0px; right: 0px;">
+
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-9">
+                            <p class="offset-md-1">Chat</p>
+                        </div>
+                        <div class="col-1">
+                            <a class="btn btn-primary" data-toggle="collapse" href="#chatboxCollapse" role="button" aria-expanded="false" aria-controls="chatboxCollapse">
+                                <i class="fas fa-window-minimize"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="chatboxCollapse" class="collapse show">
+                    <div class="card-body" style="height: 400px">
+                        <!--<h5 class="card-title">Dark card title</h5>-->
+                        <p id="hiddenName" hidden>{{playerName}}</p>
+                        <div>
+                            <div id="chatDisplay" class="card-text message text-left" style="max-width:250px; height: 370px; overflow-y: scroll">
+                                <!-- Chat messages to display here.-->
                             </div>
                         </div>
                     </div>
-                    <form class="send-message" id="gameMessageForm" method="post" action="/games/{{gameId}}/message">
+                </div>
+
+                <div class="card-footer">
+                    <form class="send-message" id="chatMessageForm" method="post" action="/message">
                         <div class="input-group">
                             <label for="message"></label>
-                            <input type="text" class="form-control" id="gameMessage"
-                                placeholder="enter message here..." name="gameMessage" autocomplete="off">
+                            <input type="text" class="form-control" id="chatMessage"
+                                placeholder="enter message here..." name="chatMessage" autocomplete="off">
                             <button type="submit" class="btn btn-primary" value="Send">Send</button>
                         </div>
                     </form>
                 </div>
+
             </div>
         </div>
 
@@ -124,6 +143,8 @@
 <script src="/js/handlers/chessboard.js"></script>
 <script src="/js/games.js"></script>
 <script src="/js/gamesSocket.js"></script>
+<script src="/js/chatSocket.js"></script>
+
 <script>
     let url = window.location.toString();
     if (url.indexOf("?") > 0) {
