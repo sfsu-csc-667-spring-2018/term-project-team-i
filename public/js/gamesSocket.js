@@ -3,28 +3,15 @@ $(document).ready(function(){
     const gameUsername = document.getElementById('hiddenName').innerText;
     const gameSocket = io('/games/' + url);
     const gameUserSocket = io('/games/' + url + '/' + gameUsername);
-
-    const $gameMessageForm = $('#gameMessageForm');
-    const $gameMessage = $('#gameMessage');
-    const $gameChat = $('#gameChat');
     const $actionMessage = $('.actions');
     const $gameForfeit = $('game-forfeit');
 
-    $gameMessageForm.submit((evt) => {
-        evt.preventDefault();
-        $.post(`${url}/message`, {gameMessage: $gameMessage.val()});
-    })
 
     gameSocket.on('game-ended', data => {
         window.alert(data.data);
         window.location = '/';
     })
 
-    //const $gameUser = document.getElementById("gameUser").textContent;
-    gameSocket.on('game-new-message', data =>{
-        $gameChat.prepend('<div class="chat" id="gameChat">' + '<b>' + data.gameUser + '</b>' +': ' + data.gameMsg + '</div>' );
-        $gameMessage.val('');
-    });
 
     gameSocket.on('game-chessboard-refresh', data => {
         $('.chessPiece').remove();  //Clear all previous chess pieces.
