@@ -12,8 +12,8 @@ router.post("/message",auths, (request, response) =>{
     const message = request.body.message;
     const user = request.user.username;
 
-    response.app.get('io').of('/').emit('new lobby message',
-        {lobbyUser: stripHTML(user), lobbyMsg: stripHTML(message)});
+    response.app.get('io').of('/').emit('socket-chat-message',
+        {chatUser: stripHTML(user), chatMessage: stripHTML(message)});
 
     response.statusCode = 200;
     response.end();

@@ -102,11 +102,11 @@ router.post('/:gameId/message', auths, (req, res, next) => {
     // {playerId: int, message: string}
     const gameId = req.params.gameId;
 
-    const message = req.body.gameMessage;
+    const message = req.body.message;
     const user = req.user.username;
-
-    res.app.get('io').of('/games/' + gameId).emit('game-new-message',
-       {gameUser: stripHTML(user), gameMsg: stripHTML(message)});
+    
+    res.app.get('io').of('/games/' + gameId).emit('socket-chat-message',
+    {chatUser: stripHTML(user), chatMessage: stripHTML(message)});
 
     res.statusCode = 200;
     res.end();
