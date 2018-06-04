@@ -26,8 +26,8 @@
     font-size: 10px;
 }
 
-.chesspiece {
-    
+.chesspiece:hover {
+    background-image: url('/images/green_bg.svg');
 }
 
 .chessboard {
