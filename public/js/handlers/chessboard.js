@@ -6,8 +6,8 @@ class Chessboard {
             cellElement2: null
         };
 
-        this.classChessCell = "chessCell";
-        this.classChessPiece = "chessPiece";
+        this.classChessCell = "chesscell";
+        this.classChessPiece = "chesspiece";
         this.movepieceRoute = '/move-piece';
     }
 
@@ -16,7 +16,7 @@ class Chessboard {
      * It will return the chess piece element if true, but the boolean false otherwise.
      * @param {HTMLElement} chessCellElement The parent element to find the child under.
      */
-    __getSelectedChessPiece(chessCellElement) {
+    __getSelectedChessPiece(chessCellElement = this.classChessCell) {
         return chessCellElement.querySelector("."+this.classChessPiece);
     }
 

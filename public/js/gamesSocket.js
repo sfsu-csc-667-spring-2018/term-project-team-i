@@ -3,9 +3,9 @@ $(document).ready(function(){
     const gameUsername = document.getElementById('hiddenName').innerText;
     const gameSocket = io('/games/' + url);
     const gameUserSocket = io('/games/' + url + '/' + gameUsername);
-    const $actionMessage = $('.actions');
+    const $actionMessage = $('.chessactions-card-body');
     const $gameForfeit = $('game-forfeit');
-
+    
 
     gameSocket.on('game-ended', data => {
         window.alert(data.data);
@@ -14,26 +14,28 @@ $(document).ready(function(){
 
 
     gameSocket.on('game-chessboard-refresh', data => {
-        $('.chessPiece').remove();  //Clear all previous chess pieces.
+        $('.chesspiece').remove();  //Clear all previous chess pieces.
         const updatedChessPieces = data.updatedChessPieces;
-
+        
         for (let idx = 0; idx < updatedChessPieces.length; idx++) {
             const updatedChessPiece = updatedChessPieces[idx];
 
             if (updatedChessPiece.alive) {
                 const chessPieceElement =   `<img data-piece_id="${updatedChessPiece.pieceId}" data-piece_name="${updatedChessPiece.name}"
-                                            data-piece_faction="${updatedChessPiece.faction}" class="chessPiece" 
+                                            data-piece_faction="${updatedChessPiece.faction}" class="chesspiece h-100 w-100" 
                                             src="images/${updatedChessPiece.faction+updatedChessPiece.name}.png">`;
 
-                $(`.chessCell[data-coordinate_x='${updatedChessPiece.raw_coordinate_x}'][data-coordinate_y='${updatedChessPiece.raw_coordinate_y}']`).append(chessPieceElement);
+
+                $(`.chesscell[data-coordinate_x=${updatedChessPiece.raw_coordinate_x}][data-coordinate_y=${updatedChessPiece.raw_coordinate_y}]`).append(chessPieceElement);
             }
         }
     });
 
     gameSocket.on('move-message', data=>{
-        $actionMessage.append('<div class="actions">' + data.message + '</div>' );
+        $actionMessage.append('<p>' + data.message + '</p>' );
     });
 
+    /*
     gameUserSocket.on('upgrade-pawn-prompt', data => {
         $actionMessage.append('<div class="actions">' + 'Choose Upgrade ' + '</div>' );
 
@@ -56,4 +58,5 @@ $(document).ready(function(){
         $('body').append(`</div>`);
 
     });
+    */
 });
