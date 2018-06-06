@@ -5,7 +5,8 @@ $(document).ready(function(){
     const gameUserSocket = io('/games/' + url + '/' + gameUsername);
     const $actionMessage = $('.chessactions-card-body');
     const $gameForfeit = $('game-forfeit');
-    
+    const chessboard = new Chessboard();
+    chessboard.initialize();
 
     gameSocket.on('game-ended', data => {
         window.alert(data.data);
@@ -27,6 +28,7 @@ $(document).ready(function(){
 
 
                 $(`.chesscell[data-coordinate_x=${updatedChessPiece.raw_coordinate_x}][data-coordinate_y=${updatedChessPiece.raw_coordinate_y}]`).append(chessPieceElement);
+                chessboard.setChessPieceHighlights();
             }
         }
     });

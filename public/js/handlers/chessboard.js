@@ -6,9 +6,20 @@ class Chessboard {
             cellElement2: null
         };
 
+        /* Element Class and ID names */
+        this.playerNameID = 'hiddenName';
+        this.playerFactionID = 'hiddenFaction';
         this.classChessCell = "chesscell";
         this.classChessPiece = "chesspiece";
         this.movepieceRoute = '/move-piece';
+
+        this.playerFactionName = document.querySelector(`#${this.playerFactionID}`).innerHTML;
+        console.log("You are " + this.playerFactionName);
+    }
+
+    initialize() {
+        this.setSelectionListenersToCells();
+        this.setChessPieceHighlights();
     }
 
     /**
@@ -16,7 +27,7 @@ class Chessboard {
      * It will return the chess piece element if true, but the boolean false otherwise.
      * @param {HTMLElement} chessCellElement The parent element to find the child under.
      */
-    __getSelectedChessPiece(chessCellElement = this.classChessCell) {
+    __getSelectedChessPiece(chessCellElement) {
         return chessCellElement.querySelector("."+this.classChessPiece);
     }
 
@@ -29,19 +40,49 @@ class Chessboard {
      * 
      * @param {*} chessCellClassName 
      */
-    addSelectionListenersTo(classChessCell = this.classChessCell) {
+    setSelectionListenersToCells(classChessCell = this.classChessCell) {
         const command = 'click';
         const chessCellElements = document.querySelectorAll("."+classChessCell);
 
         //1. Set 'onclick' event for every class of 'chessCell' HTMLElement.
         for (let cceIdx = 0; cceIdx < chessCellElements.length; cceIdx++) {
             const chessCellElement = chessCellElements[cceIdx];
-
+            
             chessCellElement.addEventListener(command, () => {
                 this.addCellSelectedElement(chessCellElement);
                 this.sendCellSelectedElements();
             });
         }
+    }
+
+    setChessPieceHighlights(classChessPiece = this.classChessPiece) {
+        const chessPieces = document.querySelectorAll(`.${classChessPiece}`);
+
+        for (let i = 0; i < chessPieces.length; i++) {
+            /** @type {HTMLElement} */
+            const chessPiece = chessPieces[i];
+
+            if (chessPiece.dataset.piece_faction == this.playerFactionName) {
+                chessPiece.addEventListener('mouseover', (evt) => {
+                    chessPiece.style.backgroundColor = "#00FF00";
+                });
+                chessPiece.addEventListener('mouseleave', (evt) => {
+                    chessPiece.style.backgroundColor = "transparent";
+                })
+            } else {
+                chessPiece.addEventListener('mouseover', (evt) => {
+                    if (this.selectedCells.cellElement1 != null) {
+                        chessPiece.addEventListener('mouseover', (evt) => {
+                            chessPiece.style.backgroundColor = "#FF0000";
+                        });
+                        chessPiece.addEventListener('mouseleave', (evt) => {
+                            chessPiece.style.backgroundColor = "transparent";
+                        })
+                    }
+                })
+            }
+        }
+
     }
 
     /**
@@ -54,7 +95,7 @@ class Chessboard {
 
         if (this.selectedCells.cellElement1 === null) {
             const selectedPiece = this.__getSelectedChessPiece(cellElement);
-            if (selectedPiece) {
+            if (selectedPiece && selectedPiece.dataset.piece_faction == this.playerFactionName) {
                 this.selectedCells.cellElement1 = cellElement;
                 console.log("Selected Piece at: " + JSON.stringify(selectedPiece.dataset));
             }

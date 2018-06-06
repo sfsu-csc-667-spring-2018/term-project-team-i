@@ -66,6 +66,7 @@ router.get('/:gameId', auths, (req, res, next) => {
                 renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.getGamePiecesAllOnBoard());
                 renderData.gameId = gameId;
                 renderData.playerName = playerName;
+                renderData.playerFaction = gameInstance.getPlayerFactionByID(playerId);
 
                 res.render('games',renderData);
             }

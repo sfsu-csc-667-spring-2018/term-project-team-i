@@ -64,6 +64,18 @@ class Game {
         
     }
 
+    getPlayerFactionByID (playerId) {
+        let playerFaction;
+
+        if (playerId == this.hostId) {
+            playerFaction = 'white';
+        } else {
+            playerFaction = 'black';
+        }
+
+        return playerFaction;
+    }
+
     /**
      * Retrieve the King Pieces of this game.
      * @param {Array[]} chessboard The chessboard containing all the current alive game Pieces.

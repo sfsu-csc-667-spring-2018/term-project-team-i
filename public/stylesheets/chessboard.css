@@ -27,7 +27,8 @@
 }
 
 .chesspiece:hover {
-    background-image: url('/images/green_bg.svg');
+    /** background-image: url('/images/green_bg.svg'); */
+    /** javascript is being used to manipulate these colors; */
 }
 
 .chessboard {
