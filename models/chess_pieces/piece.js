@@ -16,6 +16,21 @@ class Piece {
         this.alive = gamePieceRecord.alive;
     }
 
+    getGamePieceRecord() {
+        const gamePieceRecord = {};;
+
+        gamePieceRecord.gameid = this.gameId;
+        gamePieceRecord.userid = this.userId;
+        gamePieceRecord.pieceid = this.pieceId;
+        gamePieceRecord.name = this.name;
+        gamePieceRecord.faction = this.faction;
+        gamePieceRecord.raw_coordinate_x = this.raw_coordinate_x,
+        gamePieceRecord.raw_coordinate_y = this.raw_coordinate_y,
+        gamePieceRecord.alive = this.alive;
+
+        return gamePieceRecord;
+    }
+
     get coordinateXConverted() {
         return Piece.coordinateXConversion(this.raw_coordinate_x);
     }

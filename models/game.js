@@ -389,8 +389,8 @@ class Game {
             return kingCheckResult;
         }
 
-        const willMoveCheckCurrentPlayer = (currentPlayerFaction, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
-            const result = {check: false, checkmate: false, message: ""};
+        const willNextMoveCheckCurrentPlayer = (currentPlayerFaction, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
+            const result = {result: false, message: ""};
             const cbx = Piece.coordinateXConversion(raw_coordinate_x);
             const cby = Piece.coordinateYConversion(raw_coordinate_y);
             const dbx = Piece.coordinateXConversion(raw_destination_x);
@@ -411,10 +411,90 @@ class Game {
             selectedPiece.raw_coordinate_x = raw_coordinate_x;
             selectedPiece.raw_coordinate_y = raw_coordinate_y;
 
-            return kingCheckResult;
+            result.result = (kingCheckResult.check || kingCheckResult.checkmate);
+            result.message = (result.result) ? `Cannot move piece due to resulting ${this.turn} King check!` : "";
+
+            return result;
         }
 
-        const getMoveSelectedPieceTo = (gameId, movingPieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
+        const doesPawnNeedUpgradeCheck = (raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard, pawnUpgradeName) => {
+            const result = {result: false, message: ""};
+            const realChessboard = (chessboard) ? chessboard : this.chessboard;
+            const cbx = Piece.coordinateXConversion(raw_coordinate_x);
+            const cby = Piece.coordinateYConversion(raw_coordinate_y);
+            /** @type {Piece} */
+            const selectedPiece = realChessboard[cbx][cby];
+
+            // To Handle pawn reaching the final row.
+            const isPawnUpgradable = (selectedPiece.name == 'pawn' && selectedPiece.faction == 'white' && selectedPiece.raw_coordinate_y == '7' && raw_destination_y == '8')
+                                        || (selectedPiece.name == 'pawn' && selectedPiece.faction == 'black' && selectedPiece.raw_coordinate_y == '2' && raw_destination_y == '1');
+
+            const isPawnUpgradeGiven = (pawnUpgradeName);
+
+            if (isPawnUpgradable && !isPawnUpgradeGiven) {
+                result.result = true;
+                result.message = "Choose pawn upgrade!";
+                result.isUpgradingPawn = true;
+                console.log(" CAN UPGRADE PAWN! ");
+            }
+
+            return result;
+        }
+
+        const isMovingPieceAPawn = (raw_coordinate_x, raw_coordinate_y, chessboard) => {
+            let result = false;
+            const realChessboard = (chessboard) ? chessboard : this.chessboard;
+            const cbx = Piece.coordinateXConversion(raw_coordinate_x);
+            const cby = Piece.coordinateYConversion(raw_coordinate_y);
+            /** @type {Piece} */
+            const selectedPiece = realChessboard[cbx][cby];
+
+            result = (selectedPiece.name == 'pawn');
+
+            return result;
+        }
+
+        const doesPawnNeedUpgrade = (raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
+            let result = false;
+            const realChessboard = (chessboard) ? chessboard : this.chessboard;
+            const cbx = Piece.coordinateXConversion(raw_coordinate_x);
+            const cby = Piece.coordinateYConversion(raw_coordinate_y);
+            /** @type {Piece} */
+            const selectedPiece = realChessboard[cbx][cby];
+            // To Handle pawn reaching the final row.
+            const isPawnUpgradable = (selectedPiece.name == 'pawn' && selectedPiece.faction == 'white' && selectedPiece.raw_coordinate_y == '7' && raw_destination_y == '8')
+                                        || (selectedPiece.name == 'pawn' && selectedPiece.faction == 'black' && selectedPiece.raw_coordinate_y == '2' && raw_destination_y == '1');
+
+            
+            result = isPawnUpgradable;
+
+            return result;
+        }
+
+        const setUpgradePawn = (gameId, movingPlayerId, raw_coordinate_x, raw_coordinate_y, chessboard, pawnUpgradeName) => {
+            const result = false;
+            const realChessboard = (chessboard) ? chessboard : this.chessboard;
+            const cbx = Piece.coordinateXConversion(raw_coordinate_x);
+            const cby = Piece.coordinateYConversion(raw_coordinate_y);
+            const curPlayerFaction = this.getPlayerFactionByID(movingPlayerId);
+            /** @type {Piece} */
+            const selectedPiece = realChessboard[cbx][cby];
+
+            gamesDB.upgradePawn(gameId, movingPlayerId, selectedPiece.pieceId, raw_coordinate_x, raw_coordinate_y, pawnUpgradeName, curPlayerFaction, (upgradedPieceRecord) => {
+                //const upgradedPiece = this.createGamePieceInitByDBRecord(upgradedPieceRecord);
+            });
+
+            //the fix is to manually convert the piece to whatever desired..
+            const gamePieceRecord = selectedPiece.getGamePieceRecord();
+            gamePieceRecord.name = pawnUpgradeName;
+            const upgradedSelectedPiece = this.createGamePieceInitByDBRecord(gamePieceRecord);
+
+            realChessboard[cbx][cby] = upgradedSelectedPiece;
+
+            return;
+        }
+
+        const getMoveSelectedPieceTo = (gameId, movingPieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard, optionalData) => {
             const cbx = Piece.coordinateXConversion(raw_coordinate_x);
             const cby = Piece.coordinateYConversion(raw_coordinate_y);
             const dbx = Piece.coordinateXConversion(raw_destination_x);
@@ -429,6 +509,7 @@ class Game {
 
             selectedPiece.raw_coordinate_x = raw_destination_x;
             selectedPiece.raw_coordinate_y = raw_destination_y;
+
             if (destinationPiece) {
                 destinationPiece.alive = false;
                 destinationPiece.raw_coordinate_x = null;
@@ -465,6 +546,26 @@ class Game {
            return tempChessBoard;
         }
 
+        const finalizeMovement = (gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
+            const selectedPiece = getMoveSelectedPieceTo(gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard);
+            const nextTurn = getUpdateTurn(gameId, this.turn);
+            const isEnemyKingCheckmated = isFactionKingCheckedOrMated(nextTurn);
+
+            this.turn = nextTurn;
+
+            const result = {};
+            result.result = true;
+            result.message = `Successful move from [${raw_coordinate_x}][${raw_coordinate_y}] to [${raw_destination_x}][${raw_destination_y}]!`;
+
+            if (isEnemyKingCheckmated.checkmate) {
+                this.active = false;
+                this.setGameActiveState(false, () => {});
+                result.message += ` ${this.turn} CHECKMATED! GAME OVER!`;
+            }
+
+            return result;
+        }
+
         let result = isGameOver(this.active);
         if (!result.result) {
             result = isMovingPlayerTurn(movingPlayerId);
@@ -475,23 +576,24 @@ class Game {
                     if (result.result) {
                         result = canPieceMoveResult(raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y);
                         if (result.result) {
-                            result = willMoveCheckCurrentPlayer(this.turn, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y,  this.chessboard);
-                            if (result.check || result.checkmate) {
-                                result.result = false;
-                                result.message = `Cannot move piece due to resulting ${this.turn} King check!`;
-                            } else {
-                                const selectedPiece = getMoveSelectedPieceTo(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard);
-                                const nextTurn = getUpdateTurn(this.gameId, this.turn);
-                                const isEnemyKingCheckmated = isFactionKingCheckedOrMated(nextTurn);
-                                this.turn = nextTurn;
-
-                                result.result = true;
-                                result.message = `Successful move from [${raw_coordinate_x}][${raw_coordinate_y}] to [${raw_destination_x}][${raw_destination_y}]!`;
-
-                                if (isEnemyKingCheckmated.checkmate) {
-                                    this.active = false;
-                                    this.setGameActiveState(false, () => {});
-                                    result.message += ` ${this.turn} CHECKMATED! GAME OVER!`;
+                            result = willNextMoveCheckCurrentPlayer(this.turn, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y,  this.chessboard);
+                            if (!result.result) {
+                                //result = doesPawnNeedUpgradeCheck(raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard, optionalData.pawnUpgradeName);
+                                if (isMovingPieceAPawn(raw_coordinate_x, raw_coordinate_y)) {
+                                    if (doesPawnNeedUpgrade(raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard)) {
+                                        if (optionalData.pawnUpgradeName) {
+                                            setUpgradePawn(this.gameId, movingPlayerId, raw_coordinate_x, raw_coordinate_y, this.chessboard, optionalData.pawnUpgradeName);
+                                            result = finalizeMovement(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard);
+                                        } else {
+                                            result.result = false;
+                                            result.message = "Choose pawn upgrade!";
+                                            result.isUpgradingPawn = true;
+                                        }
+                                    } else {
+                                        result = finalizeMovement(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard);
+                                    }
+                                } else {
+                                    result = finalizeMovement(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard);
                                 }
                             }
                         }
