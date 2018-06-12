@@ -44,3 +44,19 @@
     height: 600px;
     overflow-y: scroll;
 }
+
+/*
+div.pawn-upgrade-option > input{
+    visibility: hidden;
+    position: absolute;
+}
+
+div.pawn-upgrade-option > input + img{ 
+    cursor:pointer;
+    border:2px solid transparent;
+}
+
+div.pawn-upgrade-option > input:checked + img{
+    border:2px solid #f00;
+}
+*/

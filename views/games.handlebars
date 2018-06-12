@@ -104,43 +104,89 @@
 
     </div>
 
-    <!--
+    
     <div class="container">
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-        Launch demo modal
+
+        <!--
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#gameModal">
+            Open modal
         </button>
+        -->
 
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
+        <div id="gameModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gameModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
-
+                    
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <h5 class="modal-title" id="gameModalTitle">Pawn Upgrade Options</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
-                    <div class="modal-body">
-
-                        ...
+                    <div id="gameModalBody" class="modal-body">
+                        <form id="upgradePawnForm" method="POST" action="/move-piece">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-check form-check-inline pawn-upgrade-option">
+                                        <input class="form-check-input" type="radio" name="pawnUpgradeOptions" id="pawnToQueen" value="queen" checked>
+                                        <label class="form-check-label pawn-upgrade-option" for="pawnToQueen">
+                                            <img src="images/{{playerFaction}}queen.png">
+                                            <p class="pl-3">Queen</p>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check form-check-inline pawn-upgrade-option">
+                                        <input class="form-check-input" type="radio" name="pawnUpgradeOptions" id="pawnToKnight" value="knight">
+                                        <label class="form-check-label" for="pawnToKnight">
+                                            <img src="images/{{playerFaction}}knight.png">
+                                            <p class="pl-3">Knight</p>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check form-check-inline pawn-upgrade-option">
+                                        <input class="form-check-input" type="radio" name="pawnUpgradeOptions" id="pawnToBishop" value="bishop">
+                                        <label class="form-check-label" for="pawnToBishop">
+                                            <img src="images/{{playerFaction}}bishop.png">
+                                            <p class="pl-3">Bishop</p>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check form-check-inline pawn-upgrade-option">
+                                        <input class="form-check-input" type="radio" name="pawnUpgradeOptions" id="pawnToRook" value="rook">
+                                        <label class="form-check-label pawn-upgrade-option" for="pawnToRook">
+                                            <img src="images/{{playerFaction}}rook.png" for="pawnToRook">
+                                            <p class="pl-3">Rook</p>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
+                        <button id="upgradePawnSubmitBtn" type="button" class="btn btn-primary">Submit</button>
                     </div>
+
                 </div>
             </div>
+
+            <div>
+
+            </div>
+
         </div>
         
     </div>
-    -->
+    
 
 </div>
 
 
-<script src="/js/handlers/chessboard.js"></script>
+<script src="/js/chessboard.js"></script>
 <script src="/js/chatSocket.js"></script>
 <script src="/js/gamesSocket.js"></script>
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
