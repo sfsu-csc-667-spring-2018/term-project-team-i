@@ -421,7 +421,9 @@ class GamesDB {
             })
     }
 
-    upgradePawn(gameId, userId, pieceId, pieceName, x, y, callbackFunction, dbx = db){
+    upgradePawn(gameId, userId, pieceId, x, y, pawnUpgradeName, pawnUpgradeFaction, callbackFunction, dbx = db){
+        const sqlGetPieces = `SELECT * FROM pieces`;
+
         const updatePawn = `UPDATE game_pieces
                             SET pieceid=($1)
                             WHERE gameid=${gameId} AND userid=${userId} AND
@@ -433,21 +435,62 @@ class GamesDB {
                                 WHERE gameid=${gameId} AND userid=${userId} AND
                                 pieceid=($1) AND coordinate_x='${x}' AND coordinate_y='${y}'`;
 
-        if(pieceId == 1 && pieceName == 'queen'){
-            dbx.any(updatePawn, [5])
-                .then(() => {
-                    dbx.one(getUpdatedPawn, [5])
-                        .then((gamePieceRecord) =>{
-                            callbackFunction(gamePieceRecord);
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        })
-                })
-                .catch(error => {
-                    console.log(error);
-                })
+        const isPieceIdAPawn = (pieceRecords, pieceId) => {
+            let isIdRefPawn = false;
+            for (let i = 0; i < pieceRecords.length; i++) {
+                const pieceRecord = pieceRecords[i];
+                const curPieceId = pieceRecord.id;
+                const curPieceName = pieceRecord.name;
+
+                if (curPieceId == pieceId && curPieceName == 'pawn') {
+                    isIdRefPawn = true;
+                    break;
+                }
+            }
+
+            return isIdRefPawn;
         }
+
+        const getUpgradeToPieceId = (pieceRecords, pawnUpgradeName, pawnUpgradeFaction) => {
+            let pawnUpgradePieceId = false;
+            for (let i = 0; i < pieceRecords.length; i++) {
+                const pieceRecord = pieceRecords[i];
+                const curPieceId = pieceRecord.id;
+                const curPieceName = pieceRecord.name;
+                const curPieceFaction = pieceRecord.faction;
+
+                if (curPieceName == pawnUpgradeName && curPieceFaction == curPieceFaction) {
+                    pawnUpgradePieceId = curPieceId;
+                    break;
+                }
+            }
+
+            return pawnUpgradePieceId;
+        }
+
+        dbx.any(sqlGetPieces)
+            .then((pieceRecords) => {
+                // the array is [{'id', 'pawn'}]; it is not key value
+                if (isPieceIdAPawn(pieceRecords, pieceId)) {
+                    const upgradePawnPieceId = getUpgradeToPieceId(pieceRecords, pawnUpgradeName, pawnUpgradeFaction);
+
+                    if (upgradePawnPieceId) {
+                        dbx.any(updatePawn, [upgradePawnPieceId])
+                            .then(() => {
+                                dbx.one(getUpdatedPawn, [upgradePawnPieceId])
+                                    .then((gamePieceRecord) =>{
+                                        callbackFunction(gamePieceRecord);
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                    })
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            })
+                    }
+                }
+            })
     }
 
     updateTurn(gameId, turn, callbackFunction, dbx = db){
