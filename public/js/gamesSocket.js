@@ -4,7 +4,7 @@ $(document).ready(function(){
     const gameSocket = io('/games/' + url);
     const gameUserSocket = io('/games/' + url + '/' + gameUsername);
     const $actionMessage = $('.chessactions-card-body');
-    const $gameForfeit = $('game-forfeit');
+    const $gameForfeit = $('#game-forfeit');
     const chessboard = new Chessboard();
     chessboard.initialize();
 
@@ -13,12 +13,11 @@ $(document).ready(function(){
         window.location = '/';
     })
 
-
-    gameSocket.on('game-chessboard-refresh', data => {
+    gameSocket.on('skt-chess-board-refresh', data => {
         $('.chesspiece').remove();  //Clear all previous chess pieces.
         const updatedChessPieces = data.updatedChessPieces;
         
-        for (let idx = 0; idx < updatedChessPieces.length; idx++) {
+        for (let idx = 0; idx < updatedChessPieces.length; idx++) { 
             const updatedChessPiece = updatedChessPieces[idx];
 
             if (updatedChessPiece.alive) {
@@ -33,9 +32,42 @@ $(document).ready(function(){
         }
     });
 
-    gameSocket.on('move-message', data=>{
+    gameSocket.on('skt-chess-move-piece-message', data => {
         $actionMessage.append('<p>' + data.message + '</p>' );
     });
+
+
+    gameSocket.on('skt-chess-upgrade-pawn', data => {
+        /**
+         * 1). server processes the move;
+         * 2). server determines it is a pawn and is a valid move to ending row.
+         * 3). server sends message to here to popup the modal. and user selection so client may send the data again.
+         * 4). client selects upgrade option and resend the move and upgrade option.
+         */
+        const $gameModal = $('#gameModal'); 
+        const $gameModalTitle = $('#gameModalTitle');
+        const $upgradePawnSubmitBtn = $('#upgradePawnSubmitBtn');   
+        const upgradePawnOptions = ['queen', 'bishop', 'knight', 'rook'];
+        console.log("PROMPT REACHED");
+        $gameModal.modal('show');
+        $gameModalTitle.html(`Upgrade Pawn`);
+        $upgradePawnSubmitBtn.click(() => {
+
+            $gameModal.modal('hide');
+            const movementData = {
+                pieceId: data.pieceId,
+                coordinate_x: data.raw_coordinate_x,
+                coordinate_y: data.raw_coordinate_y,
+                destination_x: data.raw_destination_x,
+                destination_y: data.raw_destination_y,
+                pawnUpgradeName: $('input[name="pawnUpgradeOptions"]:checked', '#upgradePawnForm').val()
+            }
+            console.log("Submitting upgrade: " + JSON.stringify(movementData));
+            chessboard.sendAjax('POST', movementData, '/move-piece');
+        
+        })
+    
+    })
 
     /*
     gameUserSocket.on('upgrade-pawn-prompt', data => {

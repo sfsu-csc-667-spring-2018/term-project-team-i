@@ -125,6 +125,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
     const raw_coordinate_y = req.body.coordinate_y;
     const raw_destination_x = req.body.destination_x;
     const raw_destination_y = req.body.destination_y;
+    const pawnUpgradeName = req.body.pawnUpgradeName;
 
     gameManager.getGameInstance(gameId, 
         (gameInstance) => {
@@ -138,27 +139,31 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 
                 if(game.opponentId === null ){
                     console.log("GAME NOT READY YET");
-                }
-                else {
+                } else {
 
-                    const moveResult = game.tryMovePieceToPosition(playerId, pieceId,
-                        raw_coordinate_x, raw_coordinate_y,
-                        raw_destination_x, raw_destination_y);
-                    
+                    const moveResult = game.tryMovePieceToPosition(playerId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, {pawnUpgradeName: pawnUpgradeName});
                     const gamePieces = game.getGamePiecesAllOnBoard();
                     const resStatusCode = (moveResult.result) ? 200 : 304;
 
                     res.statusCode = resStatusCode;
-                    res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces});
-                    //res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('move-message', {message: moveResult.message});
-                    res.app.get('io').of('/games/' + gameId).emit('move-message', {message: moveResult.message});
-                    console.log("UPGRADE PAWN " + (moveResult.upgradePawn));
-                    if (moveResult.upgradePawn === true) {
-                        res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('upgrade-pawn-prompt', {
+                    res.app.get('io').of('/games/' + gameId).emit('skt-chess-board-refresh', {updatedChessPieces: gamePieces});
+                    //res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('skt-chess-move-piece-message', {message: moveResult.message});
+                    res.app.get('io').of('/games/' + gameId).emit('skt-chess-move-piece-message', {message: moveResult.message});
+                    console.log("Message is: " + moveResult.message);
+                    console.log("UPGRADE PAWN " + (moveResult.isUpgradingPawn));
+
+                    if (moveResult.isUpgradingPawn == true) {
+                        console.log("SERVER: Sending upgrade pawn message to client!");
+                        //TODO: Need to create socket for specific player only.
+                        res.app.get('io').of('/games/' + gameId).emit('skt-chess-upgrade-pawn', {
                             playerName: playerName,
                             pieceId: pieceId,
-                            x: raw_destination_x,
-                            y: raw_destination_y
+                            raw_coordinate_x: raw_coordinate_x,
+                            raw_coordinate_y: raw_coordinate_y,
+                            raw_destination_x: raw_destination_x,
+                            raw_destination_y: raw_destination_y
+                            //x: raw_destination_x,
+                            //y: raw_destination_y
                         });
                     }
                     res.end(moveResult.message);
@@ -176,6 +181,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 
 });
 
+/*
 router.post('/:gameId/upgrade-pawn', (req, res, next) =>{
     const gameId =  Number(req.params.gameId);
     const userId = req.user.id;
@@ -197,7 +203,7 @@ router.post('/:gameId/upgrade-pawn', (req, res, next) =>{
             const gamePieces = game.gamePiecesObjects;
             const resStatusCode = 200;
             res.statusCode = resStatusCode;
-            res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces})
+            res.app.get('io').of('/games/' + gameId).emit('skt-chess-board-refresh', {updatedChessPieces: gamePieces})
             res.end("Successfully updated pawn piece: " + pieceName);
         },
         (failure) => {
@@ -209,6 +215,7 @@ router.post('/:gameId/upgrade-pawn', (req, res, next) =>{
     //res.app.get('io').of('/games/'+ gameId + '/' + playerName).on('upgrade-pawn-response', )
     console.log("POSTed "  + " " + (JSON.stringify(req.body.pieceId)) + " " + (JSON.stringify(req.body.x)));
 });
+*/
 
 const removeQuotes = (str) =>{
     return str.replace(/['"]+/g, '');
