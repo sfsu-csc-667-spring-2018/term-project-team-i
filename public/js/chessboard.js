@@ -5,7 +5,7 @@ class Chessboard {
             cellElement1: null,
             cellElement2: null
         };
-
+        
         /* Element Class and ID names */
         this.playerNameID = 'hiddenName';
         this.playerFactionID = 'hiddenFaction';
