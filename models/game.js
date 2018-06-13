@@ -471,7 +471,7 @@ class Game {
             return result;
         }
 
-        const setUpgradePawn = (gameId, movingPlayerId, raw_coordinate_x, raw_coordinate_y, chessboard, pawnUpgradeName) => {
+        const setUpgradePawnServerSide = (gameId, movingPlayerId, raw_coordinate_x, raw_coordinate_y, chessboard, pawnUpgradeName) => {
             const result = false;
             const realChessboard = (chessboard) ? chessboard : this.chessboard;
             const cbx = Piece.coordinateXConversion(raw_coordinate_x);
@@ -480,9 +480,9 @@ class Game {
             /** @type {Piece} */
             const selectedPiece = realChessboard[cbx][cby];
 
-            gamesDB.upgradePawn(gameId, movingPlayerId, selectedPiece.pieceId, raw_coordinate_x, raw_coordinate_y, pawnUpgradeName, curPlayerFaction, (upgradedPieceRecord) => {
+            //gamesDB.upgradePawn(gameId, movingPlayerId, selectedPiece.pieceId, raw_coordinate_x, raw_coordinate_y, pawnUpgradeName, curPlayerFaction, (upgradedPieceRecord) => {
                 //const upgradedPiece = this.createGamePieceInitByDBRecord(upgradedPieceRecord);
-            });
+            //});
 
             //the fix is to manually convert the piece to whatever desired..
             const gamePieceRecord = selectedPiece.getGamePieceRecord();
@@ -516,7 +516,7 @@ class Game {
                 destinationPiece.raw_coordinate_y = null;
             }
 
-            gamesDB.setGamePieceCoordinates(gameId, movingPieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
+            //gamesDB.setGamePieceCoordinates(gameId, movingPieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
 
             return selectedPiece;
         }
@@ -566,6 +566,7 @@ class Game {
             return result;
         }
 
+
         let result = isGameOver(this.active);
         if (!result.result) {
             result = isMovingPlayerTurn(movingPlayerId);
@@ -582,8 +583,10 @@ class Game {
                                 if (isMovingPieceAPawn(raw_coordinate_x, raw_coordinate_y)) {
                                     if (doesPawnNeedUpgrade(raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard)) {
                                         if (optionalData.pawnUpgradeName) {
-                                            setUpgradePawn(this.gameId, movingPlayerId, raw_coordinate_x, raw_coordinate_y, this.chessboard, optionalData.pawnUpgradeName);
+                                            setUpgradePawnServerSide(this.gameId, movingPlayerId, raw_coordinate_x, raw_coordinate_y, this.chessboard, optionalData.pawnUpgradeName);
+                                            gamesDB.setGamePieceUpgradeAndCoordinates(this.gameId, movingPlayerId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData.pawnUpgradeName, this.getPlayerFactionByID(movingPlayerId), () => {});
                                             result = finalizeMovement(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard);
+
                                         } else {
                                             result.result = false;
                                             result.message = "Choose pawn upgrade!";
@@ -591,9 +594,11 @@ class Game {
                                         }
                                     } else {
                                         result = finalizeMovement(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard);
+                                        gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
                                     }
                                 } else {
                                     result = finalizeMovement(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard);
+                                    gamesDB.setGamePieceCoordinates(this.gameId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, () => {});
                                 }
                             }
                         }
