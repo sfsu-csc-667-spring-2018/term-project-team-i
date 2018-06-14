@@ -14,7 +14,6 @@ class Chessboard {
         this.movepieceRoute = '/move-piece';
 
         this.playerFactionName = document.querySelector(`#${this.playerFactionID}`).innerHTML;
-        console.log("You are " + this.playerFactionName);
     }
 
     initialize() {
@@ -135,11 +134,10 @@ class Chessboard {
         xml.onreadystatechange = () => {
             if (xml.readyState == 4) {
                 // Using to handle response.
-                console.log(xml.responseText);
+                //console.log(xml.responseText);
             }
         }
 
-        console.log("Sent: " + JSON.stringify(httpJSONBody));
         xml.send(JSON.stringify(httpJSONBody));
         this.clearSelection();
     }

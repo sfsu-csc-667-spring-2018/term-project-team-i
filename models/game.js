@@ -435,7 +435,6 @@ class Game {
                 result.result = true;
                 result.message = "Choose pawn upgrade!";
                 result.isUpgradingPawn = true;
-                console.log(" CAN UPGRADE PAWN! ");
             }
 
             return result;
