@@ -262,12 +262,10 @@ class King extends Piece{
                 result.message = `${this.faction} King is CHECKED! You may move the King to one of these positions to escape: ${JSON.stringify(safePositionsAroundKing)}`;
             } else {
                 const kingSavingPieces = this.__getPiecesThatCanSaveKingFrom(enemyCheckingPiece, chessboard);
-
-                if (kingSavingPieces > 0) {
-
+                if (kingSavingPieces.length > 0) {
                     result.check = true;
                     result.checkmate = false;
-                    result.message = `${this.faction} King CHECKED! ${kspName}; `;
+                    result.message = `${this.faction} King CHECKED! `;
 
                     for (let i = 0; i < kingSavingPieces.length; i++) {
                         let kingSavingPiece = kingSavingPieces[i];
@@ -276,7 +274,7 @@ class King extends Piece{
                         const ksp_rawX = kingSavingPiece.raw_coordinate_x;
                         const ksp_rawY = kingSavingPiece.raw_coordinate_y;
 
-                        result.message += `Piece at [${ksp_rawX}][${ksp_rawY}] can save the King!`
+                        result.message += `${kspName} at [${ksp_rawX}][${ksp_rawY}] can save the King!`
                     }
                 } else {
                     result.check = false;

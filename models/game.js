@@ -406,35 +406,15 @@ class Game {
             /** @type {King} */
             const king = this.kings[currentPlayerFaction];
             const kingCheckResult = king.isKingCheckedOrMated(duplChessboard);
+            king.
 
             // Reset the internal king values.
             selectedPiece.raw_coordinate_x = raw_coordinate_x;
             selectedPiece.raw_coordinate_y = raw_coordinate_y;
 
-            result.result = (kingCheckResult.check || kingCheckResult.checkmate);
-            result.message = (result.result) ? `Cannot move piece due to resulting ${this.turn} King check!` : "";
-
-            return result;
-        }
-
-        const doesPawnNeedUpgradeCheck = (raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard, pawnUpgradeName) => {
-            const result = {result: false, message: ""};
-            const realChessboard = (chessboard) ? chessboard : this.chessboard;
-            const cbx = Piece.coordinateXConversion(raw_coordinate_x);
-            const cby = Piece.coordinateYConversion(raw_coordinate_y);
-            /** @type {Piece} */
-            const selectedPiece = realChessboard[cbx][cby];
-
-            // To Handle pawn reaching the final row.
-            const isPawnUpgradable = (selectedPiece.name == 'pawn' && selectedPiece.faction == 'white' && selectedPiece.raw_coordinate_y == '7' && raw_destination_y == '8')
-                                        || (selectedPiece.name == 'pawn' && selectedPiece.faction == 'black' && selectedPiece.raw_coordinate_y == '2' && raw_destination_y == '1');
-
-            const isPawnUpgradeGiven = (pawnUpgradeName);
-
-            if (isPawnUpgradable && !isPawnUpgradeGiven) {
+            if (kingCheckResult.check || kingCheckResult.checkmate) {
                 result.result = true;
-                result.message = "Choose pawn upgrade!";
-                result.isUpgradingPawn = true;
+                result.message = `Cannot move piece due to resulting ${this.turn} King check!`
             }
 
             return result;
@@ -578,7 +558,6 @@ class Game {
                         if (result.result) {
                             result = willNextMoveCheckCurrentPlayer(this.turn, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y,  this.chessboard);
                             if (!result.result) {
-                                //result = doesPawnNeedUpgradeCheck(raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard, optionalData.pawnUpgradeName);
                                 if (isMovingPieceAPawn(raw_coordinate_x, raw_coordinate_y)) {
                                     if (doesPawnNeedUpgrade(raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, this.chessboard)) {
                                         if (optionalData.pawnUpgradeName) {
