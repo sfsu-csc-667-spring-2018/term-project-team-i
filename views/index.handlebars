@@ -2,65 +2,76 @@
 
 <div class="container-fluid">
     <div class="row">
+        <div class="sidebar-sticky col-12 col-sm-12 col-md-5 col-lg-4 col-xl-3 d-none d-md-block bg-light" style="padding-top: 64px;">
 
-        <div class="sidebar-sticky col-md-2 d-none d-md-block bg-light" style="position: fixed">
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">
-                    <span data-feather="home"></span>
-                    Dashboard <span class="sr-only">(current)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                    <span data-feather="file"></span>
-                    Orders
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                    <span data-feather="shopping-cart"></span>
-                    Products
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                    <span data-feather="users"></span>
-                    Customers
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                    <span data-feather="bar-chart-2"></span>
-                    Reports
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                    <span data-feather="layers"></span>
-                    Integrations
-                    </a>
-                </li>
-            </ul>
+            <div class="card h-100">
+                <div class="card-header">
+                    <p>Header</p>
+                </div>
+                <div class="card-body" style="overflow-y: scroll">
+                    <!--<h5 class="card-title">Dark card title</h5>-->
+                    <p id="hiddenName" hidden>{{playerName}}</p>
+                    <p id="hiddenFaction" hidden>{{playerFaction}}</p>
+                    <div>
+                        <div id="chatDisplay">
 
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <form class="send-message" id="chatMessageForm" method="post" action="/message">
+                        <div class="input-group">
+                            <label for="message"></label>
+                            <input type="text" class="form-control" id="chatMessage"
+                                placeholder="enter message here..." name="chatMessage" autocomplete="off">
+                            <button type="submit" class="btn btn-primary" value="Send">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
         </div>
-
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4" style="height: 100%; overflow-y: scroll">
+        
+        <main role="main" class="col ml-sm-auto px-4" style="padding-top: 64px;">
+            <div class="row">
+                <h5> Hello <strong>{{username}}!</strong></h5>
+            </div>
 
             <div class="row" style="min-width: 540px;"> 
 
                 <div class="col-12 col-md-7">
                     <div class="card border-dark mx-auto text-center">
-                        <div class="card-header">Games</div>
+                        <div class="card-header">
+                            <p>Games</p>
+                        </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-6">
                                     <h5 class="card-title">Dark card title</h5>
                                     <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                    <div class="games-list">
+                                        {{#each rejoin}}
+                                            <form method="get" action="/games/{{id}}">
+                                                <div class="list">Game #{{id}}
+                                                    <input type="submit" class="btn btn-info" value="Rejoin"/>
+                                                </div>
+                                            </form>
+                                        {{/each}}
+                                    </div>
                                 </div>
                                 <div class="col-6">
                                     <h5 class="card-title">Dark card title</h5>
                                     <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                    <div class="games-list">
+                                        {{#each game}}
+                                            <form method="get" action="/games/{{id}}">
+                                                <div class="list">Game #{{id}}
+                                                    <input type="submit" class="btn btn-primary" value="Join"/>
+                                                </div>
+                                            </form>
+                                        {{/each}}
+                                        <div class="list" id="gamesList"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -68,6 +79,7 @@
                     </div>
                 </div>
 
+                
                 <div class="col-12 col-md-5">
                     <div class="card border-dark mx-auto text-center">
                         <div class="card-header">Header</div>
@@ -77,50 +89,11 @@
                         </div>
                     </div>
                 </div>
+                
             </div>
 
         </main>
         
-        <div id="chat" class="card border-dark text-center" style="position: fixed; bottom: 0px; right: 0px;">
-
-            <div class="card-header">
-                <div class="row">
-                    <div class="col-9">
-                        <p class="offset-md-1">Lobby Chat</p>
-                    </div>
-                    <div class="col-1">
-                        <a class="btn btn-primary" data-toggle="collapse" href="#chatboxCollapse" role="button" aria-expanded="false" aria-controls="chatboxCollapse">
-                            <i class="fas fa-window-minimize"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div id="chatboxCollapse" class="collapse show">
-                <div class="card-body" style="height: 400px">
-                    <!--<h5 class="card-title">Dark card title</h5>-->
-                    <p id="hiddenName" hidden>{{playerName}}</p>
-                    <div>
-                        <div id="chatDisplay" class="card-text message text-left" style="max-width:250px; height: 370px; overflow-y: scroll">
-                            <!-- Chat messages to display here.-->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-footer">
-                <form class="send-message" id="chatMessageForm" method="post" action="/message">
-                    <div class="input-group">
-                        <label for="message"></label>
-                        <input type="text" class="form-control" id="chatMessage"
-                            placeholder="enter message here..." name="chatMessage" autocomplete="off">
-                        <button type="submit" class="btn btn-primary" value="Send">Send</button>
-                    </div>
-                </form>
-            </div>
-
-        </div>
-
     </div>
     
     
@@ -128,6 +101,5 @@
 </div>
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
-<link rel="stylesheet" href="/stylesheets/sidebar.css"/>
 <link rel="stylesheet" href="/stylesheets/chat.css"/>
 <script src="/js/chatSocket.js"></script>
