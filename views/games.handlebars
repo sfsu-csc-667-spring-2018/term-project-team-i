@@ -1,110 +1,100 @@
-<div class="container">
+<div class="container-fluid">
     <div class="row">
-        <!--<div class="col-12 col-sm-12 col-md-10 col-lg-7 col-xl-6"></div>-->
-        <div class="col justify-content-center">
-            <table class="table table-dark table-bordered pb-1 border chessboard">
-                <!--[ |A|B|C|D|...| ] -->
-                <thead>
-                    
-                    <th scope="col">#</th>
-                    {{#chessboard_setupBorderAscii 65 1 7}}
-                        <th scope="col" class="chessborder">{{this}}</td>
-                    {{/chessboard_setupBorderAscii}}
-                    <th scope="col">#</th>
-                    
-                </thead>
-                <tbody>
-                    {{#chessboard_setupBorderAscii 56 -1 7}}
-                        <tr>
-                            <th scope="row" class="chessborder">{{this}}</td>
-                            
-                            {{#chessboard_setupBorderAscii 97 1 7}}
-                            <td data-coordinate_x="{{this}}" data-coordinate_y="{{../this}}" class="{{chessboard_setupBlackOrWhiteClass 'chesscell-squareB' 'chesscell-squareW' this ../this }} chesscell">
-                                {{#with (lookup @root.gamePieces (chessboard_appendTwoStr this ../this)) as |gamePiece|}}
-                                    <img data-piece_id="{{gamePiece.pieceId}}" data-piece_name="{{gamePiece.name}}" data-piece_faction="{{gamePiece.faction}}" class="chesspiece h-100 w-100" src="images/{{gamePiece.faction}}{{gamePiece.name}}.png">
-                                {{/with}}
-                            </td>
-                            {{/chessboard_setupBorderAscii}}
-                            
-                            <td scope="row" class="chessborder">{{this}}</td>
-                        </tr>
-                    {{/chessboard_setupBorderAscii}}
-                </tbody>
-                <tfoot>
-                    <!--[ |A|B|C|D|...| ] -->
-                    <th scope="col">#</th>
-                    {{#chessboard_setupBorderAscii 65 1 7}}
-                        <th scope="col" class="chessborder">{{this}}</td>
-                    {{/chessboard_setupBorderAscii}}
-                    <th scope="col">#</th>
-
-                </tfoot>
-            </table>
-        </div>
-
-        <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-4 justify-content-center">
-            <div class="card chessactions-card">
+        <div class="sidebar-sticky col-12 col-sm-12 col-md-5 col-lg-4 col-xl-3 d-none d-md-block bg-light" style="padding-top: 64px;">
+            <!-- CHAT BOX -->
+            <div class="card h-100">
                 <div class="card-header">
-                    <p>Game Actions / Events</p>
+                    <p>Game Room Chat</p>
                 </div>
+                <div class="card-body" style="overflow-y: scroll">
+                    <!--<h5 class="card-title">Dark card title</h5>-->
+                    <p id="hiddenName" hidden>{{playerName}}</p>
+                    <p id="hiddenFaction" hidden>{{playerFaction}}</p>
+                    <div>
+                        <div id="chatDisplay">
 
-                <div class="card-body">
-                    <div class="chessactions-card-body">
-                        <!--  -->
-                        <p>Event: pawn[A][5] moved to position [A][6]</p>
+                        </div>
                     </div>
                 </div>
-
                 <div class="card-footer">
-                    <p></p>
+                    <form class="send-message" id="chatMessageForm" method="post" action="/message">
+                        <div class="input-group">
+                            <label for="message"></label>
+                            <input type="text" class="form-control" id="chatMessage"
+                                placeholder="enter message here..." name="chatMessage" autocomplete="off">
+                            <button type="submit" class="btn btn-primary" value="Send">Send</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
-    
-    
-    <div id="chat" class="card border-dark text-center" style="position: fixed; bottom: 0px; right: 0px;">
 
-        <div class="card-header">
+        <!-- MAIN CONTENT -->
+        <main role="main" style="padding-top: 64px;">
+            <!--<div class="col-12 col-sm-12 col-md-10 col-lg-7 col-xl-6"></div>-->
             <div class="row">
-                <div class="col-9">
-                    <p class="offset-md-1">Chat</p>
-                </div>
-                <div class="col-1">
-                    <a class="btn btn-primary" data-toggle="collapse" href="#chatboxCollapse" role="button" aria-expanded="false" aria-controls="chatboxCollapse">
-                        <i class="fas fa-window-minimize"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
+                <div class="col-12 col-sm-12 col-md-12 col-lg-8 col-xl-8">
+                    <table class="table table-dark table-bordered pb-1 border chessboard">
+                        <!--[ |A|B|C|D|...| ] -->
+                        <thead>
+                            
+                            <th scope="col">#</th>
+                            {{#chessboard_setupBorderAscii 65 1 7}}
+                                <th scope="col" class="chessborder">{{this}}</td>
+                            {{/chessboard_setupBorderAscii}}
+                            <th scope="col">#</th>
+                            
+                        </thead>
+                        <tbody>
+                            {{#chessboard_setupBorderAscii 56 -1 7}}
+                                <tr>
+                                    <th scope="row" class="chessborder">{{this}}</td>
+                                    
+                                    {{#chessboard_setupBorderAscii 97 1 7}}
+                                    <td data-coordinate_x="{{this}}" data-coordinate_y="{{../this}}" class="{{chessboard_setupBlackOrWhiteClass 'chesscell-squareB' 'chesscell-squareW' this ../this }} chesscell">
+                                        {{#with (lookup @root.gamePieces (chessboard_appendTwoStr this ../this)) as |gamePiece|}}
+                                            <img data-piece_id="{{gamePiece.pieceId}}" data-piece_name="{{gamePiece.name}}" data-piece_faction="{{gamePiece.faction}}" class="chesspiece h-100 w-100" src="images/{{gamePiece.faction}}{{gamePiece.name}}.png">
+                                        {{/with}}
+                                    </td>
+                                    {{/chessboard_setupBorderAscii}}
+                                    
+                                    <td scope="row" class="chessborder">{{this}}</td>
+                                </tr>
+                            {{/chessboard_setupBorderAscii}}
+                        </tbody>
+                        <tfoot>
+                            <!--[ |A|B|C|D|...| ] -->
+                            <th scope="col">#</th>
+                            {{#chessboard_setupBorderAscii 65 1 7}}
+                                <th scope="col" class="chessborder">{{this}}</td>
+                            {{/chessboard_setupBorderAscii}}
+                            <th scope="col">#</th>
 
-        <div id="chatboxCollapse" class="collapse show">
-            <div class="card-body" style="height: 400px">
-                <!--<h5 class="card-title">Dark card title</h5>-->
-                <p id="hiddenName" hidden>{{playerName}}</p>
-                <p id="hiddenFaction" hidden>{{playerFaction}}</p>
-                <div>
-                    <div id="chatDisplay" class="card-text message text-left" style="max-width:250px; height: 370px; overflow-y: scroll">
-                        <!-- Chat messages to display here.-->
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="col-12 col-sm-12 col-md-11 col-lg-9 col-xl-9">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <p>Game Actions / Events</p>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="chessactions-card-body">
+                                <!-- Display game events here -->
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <p>Footer</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="card-footer">
-            <form class="send-message" id="chatMessageForm" method="post" action="/message">
-                <div class="input-group">
-                    <label for="message"></label>
-                    <input type="text" class="form-control" id="chatMessage"
-                        placeholder="enter message here..." name="chatMessage" autocomplete="off">
-                    <button type="submit" class="btn btn-primary" value="Send">Send</button>
-                </div>
-            </form>
-        </div>
-
+        </main>
     </div>
 
-    
     <div class="container">
 
         <!--
@@ -166,29 +156,21 @@
                             </div>
                         </form>
                     </div>
-
                     <div class="modal-footer">
                         <button id="upgradePawnSubmitBtn" type="button" class="btn btn-primary">Submit</button>
                     </div>
-
                 </div>
             </div>
-
-            <div>
-
-            </div>
-
         </div>
-        
     </div>
     
-
 </div>
 
 
 <script src="/js/chessboard.js"></script>
 <script src="/js/chatSocket.js"></script>
 <script src="/js/gamesSocket.js"></script>
+<link rel="stylesheet" href="/stylesheets/chat.css"/>
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
 <script>
