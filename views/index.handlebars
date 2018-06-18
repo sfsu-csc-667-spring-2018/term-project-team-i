@@ -4,6 +4,7 @@
     <div class="row">
         <div class="sidebar-sticky col-12 col-sm-12 col-md-5 col-lg-4 col-xl-3 d-none d-md-block bg-light" style="padding-top: 64px;">
 
+            <!-- CHAT BOX -->
             <div class="card h-100">
                 <div class="card-header">
                     <p>Header</p>
@@ -32,72 +33,65 @@
             
         </div>
         
+        <!-- MAIN CONTENT -->
         <main role="main" class="col ml-sm-auto px-4" style="padding-top: 64px;">
             <div class="row">
-                <h5> Hello <strong>{{username}}!</strong></h5>
+                <div class="col">
+                    <h1 class="text-center font-weight-bold">Available Games</h1>
+                </div>
             </div>
-
-            <div class="row" style="min-width: 540px;"> 
-
-                <div class="col-12 col-md-7">
-                    <div class="card border-dark mx-auto text-center">
-                        <div class="card-header">
-                            <p>Games</p>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <h5 class="card-title">Dark card title</h5>
-                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                    <div class="games-list">
-                                        {{#each rejoin}}
-                                            <form method="get" action="/games/{{id}}">
-                                                <div class="list">Game #{{id}}
-                                                    <input type="submit" class="btn btn-info" value="Rejoin"/>
-                                                </div>
-                                            </form>
-                                        {{/each}}
-                                    </div>
+            
+            <div class="row">
+                <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
+                    <div class="row">
+                        {{#each rejoinableGames}}
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <p>Game #{{id}}</p>
                                 </div>
-                                <div class="col-6">
-                                    <h5 class="card-title">Dark card title</h5>
-                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                    <div class="games-list">
-                                        {{#each game}}
-                                            <form method="get" action="/games/{{id}}">
-                                                <div class="list">Game #{{id}}
-                                                    <input type="submit" class="btn btn-primary" value="Join"/>
-                                                </div>
-                                            </form>
-                                        {{/each}}
-                                        <div class="list" id="gamesList"></div>
-                                    </div>
+                                <div class="card-body">
+
+                                </div>
+                                <div class="card-footer">
+                                    <form method="get" action="/games/{{id}}">
+                                        <div class="list">Game #{{id}}
+                                            <input type="submit" class="btn btn-info" value="Rejoin"/>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-                        
+                        {{/each}}
                     </div>
                 </div>
 
-                
-                <div class="col-12 col-md-5">
-                    <div class="card border-dark mx-auto text-center">
-                        <div class="card-header">Header</div>
-                        <div class="card-body">
-                            <h5 class="card-title">Dark card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <div class="col-xl-4 col-lg-4 col">
+                    <div class="row">
+                        {{#each idleGames}}
+                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <p>Game #{{id}}</p>
+                                </div>
+                                <div class="card-body">
+
+                                </div>
+                                <div class="card-footer">
+                                    <form method="get" action="/games/{{id}}">
+                                        <div class="list">Game #{{id}}
+                                            <input type="submit" class="btn btn-primary" value="Join"/>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
+                        {{/each}}
                     </div>
                 </div>
-                
             </div>
-
-        </main>
-        
+        </main>     
     </div>
-    
-    
-
 </div>
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
