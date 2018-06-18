@@ -406,7 +406,6 @@ class Game {
             /** @type {King} */
             const king = this.kings[currentPlayerFaction];
             const kingCheckResult = king.isKingCheckedOrMated(duplChessboard);
-            king.
 
             // Reset the internal king values.
             selectedPiece.raw_coordinate_x = raw_coordinate_x;
