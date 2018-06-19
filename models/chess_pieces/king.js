@@ -214,7 +214,7 @@ class King extends Piece{
 
    
     isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions){
-        const result = {valid: false, message: ""};
+        const result = {valid: false, message: []};
         const xDestDiff = idx_destination_x - this.coordinateXConverted;
         const yDestDiff = idx_destination_y - this.coordinateYConverted;
 
@@ -236,19 +236,19 @@ class King extends Piece{
         const results = {result: false, checkingPiece: undefined};
         const hitPieces = this.__getPiecesInSightFrom(this.coordinateXConverted, this.coordinateYConverted, chessboard);
         const kingCheckingPiece = this.__getPieceThatsCheckingKing(this.coordinateXConverted, this.coordinateYConverted, hitPieces, chessboard);
-        
+
         return kingCheckingPiece;
     }
 
     /**
      * Determines whether or not the is checked or checkmated.
      * @param {Array[]} chessboard The chessboard containing all the Pieces that are alive.
-     * @return {{check: boolean, checkmate: boolean, message: string}} An object determining if the King
+     * @return {{check: boolean, checkmate: boolean, message: string[]}} An object determining if the King
      * is checked or checkmated and a corresponding message indicating the status.
      */
     isKingCheckedOrMated(chessboard = []){
 
-        let result = {check: false, checkmate: false, message: ""};
+        let result = {check: false, checkmate: false, message: []};
         const isKingChecked = this.isKingChecked(chessboard);
 
         if (isKingChecked) {
@@ -259,13 +259,13 @@ class King extends Piece{
             if (safePositionsAroundKing.length > 0) {
                 result.check = true;
                 result.checkmate = false;
-                result.message = `${this.faction} King is CHECKED! You may move the King to one of these positions to escape: ${JSON.stringify(safePositionsAroundKing)}`;
+                result.message.push(`${this.faction} King is CHECKED! You may move the King to one of these positions to escape: ${JSON.stringify(safePositionsAroundKing)}`);
             } else {
                 const kingSavingPieces = this.__getPiecesThatCanSaveKingFrom(enemyCheckingPiece, chessboard);
                 if (kingSavingPieces.length > 0) {
                     result.check = true;
                     result.checkmate = false;
-                    result.message = `${this.faction} King CHECKED! `;
+                    result.message.push(`${this.faction} King CHECKED! `);
 
                     for (let i = 0; i < kingSavingPieces.length; i++) {
                         let kingSavingPiece = kingSavingPieces[i];
@@ -274,12 +274,12 @@ class King extends Piece{
                         const ksp_rawX = kingSavingPiece.raw_coordinate_x;
                         const ksp_rawY = kingSavingPiece.raw_coordinate_y;
 
-                        result.message += `${kspName} at [${ksp_rawX}][${ksp_rawY}] can save the King!`
+                        result.message.push(`${kspName} at [${ksp_rawX}][${ksp_rawY}] can save the King!`);
                     }
                 } else {
                     result.check = false;
                     result.checkmate = true;
-                    result.message = `${this.faction} CHECKMATED! ${enemyCheckingPiece.faction} WINS!`;
+                    result.message.push(`${this.faction} CHECKMATED! ${enemyCheckingPiece.faction} WINS!`);
                 }
             }
         }

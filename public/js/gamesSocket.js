@@ -33,7 +33,9 @@ $(document).ready(function(){
     });
 
     gameUserSocket.on('skt-chess-move-piece-message', data => {
-        $actionMessage.append('<p>' + data.message + '</p>' );
+        for (let i = 0; i < data.message.length; i++) {
+            $actionMessage.append('<p>' + data.message[i] + '</p>' );
+        }
     });
 
 

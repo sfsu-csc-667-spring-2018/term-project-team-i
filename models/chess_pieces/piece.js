@@ -46,10 +46,10 @@ class Piece {
      * This value must be determined by this method's caller, which is unique to different Piece types.
      * @param {Number} idx_destination_x The destination x-coordinate.
      * @param {Number} idx_destination_y The destination y-coordinate.
-     * @return {{valid: boolean, message: string}} An object with data determining if the movement passed general failure checks.
+     * @return {{valid: boolean, message: string[]}} An object with data determining if the movement passed general failure checks.
      */
     __movementLinearHandler(isMovingLegitCheck, idx_destination_x, idx_destination_y, chessboard, chessboardSize = 8) {
-        const result = {result: true, message: `Successful move to {${Piece.coordinateXAsRaw(idx_destination_x)}, ${Piece.coordinateYAsRaw(idx_destination_y)}}`};
+        const result = {result: true, message: []};
         
         const isOutOfBounds = ((idx_destination_x < 0 || idx_destination_x >= chessboard.length) 
                                         || (idx_destination_y < 0 || idx_destination_y >= chessboard.length));
@@ -64,10 +64,10 @@ class Piece {
         // Begin checking for movement issues.                                                                        
         if (!isMovingLegitCheck) {
             result.result = false;
-            result.message = `Invalid movement pattern to [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`;
+            result.message.push(`Invalid movement pattern to [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`);
         } else if (isOutOfBounds) {
             result.result = false;
-            result.message = `Cannot move out of bounds [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`;
+            result.message.push(`Cannot move out of bounds [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`);
         } else if (hitPiece) {
 
             const isMovementBlocked = Piece.isOtherPieceBlocking(this, hitPiece, idx_destination_x, idx_destination_y);
@@ -77,11 +77,14 @@ class Piece {
 
             if (isMovementBlocked) {
                 result.result = false;
-                result.message = `Movement to {${idx_destination_x}, ${idx_destination_y}} is blocked by ${hitPiece.name} at [${hitPiece.raw_coordinate_x}][${hitPiece.raw_coordinate_y}]!`;
+                result.message.push(`Movement to {${idx_destination_x}, ${idx_destination_y}} is blocked by ${hitPiece.name} at [${hitPiece.raw_coordinate_x}][${hitPiece.raw_coordinate_y}]!`);
             } else if (!isMovementBlocked && isHitPieceAtDestination && isHitPieceAlly) {
                 result.result = false;
-                result.message = `Cannot capture pieces of the same faction!`;
+                result.message.push(`Cannot capture pieces of the same faction!`);
             }
+        } else {
+            result.result = true;
+            result.message.push(`Successful move to {${Piece.coordinateXAsRaw(idx_destination_x)}, ${Piece.coordinateYAsRaw(idx_destination_y)}}`);
         }
 
         return result;
@@ -96,7 +99,7 @@ class Piece {
      * @param {Number} idx_destination_y The y coordinate destination in NUMBER form (0 to 7).
      * @param {Array} chessboard The array containing all the active game pieces currently on the chessboard.
      * @param {Object} otherConditions Optional conditions for special pieces just in case.
-     * @return {{result: boolean, message: String}} An object containing the result and corresponding message.
+     * @return {{result: boolean, message: string[]}} An object containing the result and corresponding message.
      */
     isValidMovement(idx_destination_x, idx_destination_y, chessboard = [], otherConditions) {
         throw new Error(this.isValidMovement.name + " is abstract and must be implemented.");

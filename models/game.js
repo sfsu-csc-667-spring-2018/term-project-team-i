@@ -223,7 +223,7 @@ class Game {
      * @param {Function} failureCB The callback fucntion to call should the upgrade result in failure.
      */
     setPawnUpgrade(userId, target_pieceId, target_raw_coordinate_x, target_raw_coordinate_y, pieceNameToUpgradeTo, successfulCB, failureCB) {
-        const result = {result: false, message: "", chessboardPieces: {}};
+        const result = {result: false, message: [], chessboardPieces: {}};
         const tPieceId = target_pieceId;
         const tRawX = target_raw_coordinate_x;
         const tRawY = target_raw_coordinate_y;
@@ -237,14 +237,14 @@ class Game {
                 this.setGamePieceOnChessboard(newPiece);
 
                 result.result = true;
-                result.message = "Successful upgrade!";
+                result.message.push("Successful upgrade!");
                 result.chessboardPieces = this.getGamePiecesAllOnBoard();
 
                 successfulCB(result);
             });
         } else {
             result.result = false;
-            result.message = "Unsuccessful upgrade!";
+            result.message.push("Unsuccessful upgrade!");
             result.chessboardPieces = this.getGamePiecesAllOnBoard();
 
             failureCB(result);
@@ -299,31 +299,33 @@ class Game {
     tryMovePieceToPosition(movingPlayerId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, optionalData) {
 
         const isGameOver = (currentGameState) => {
-            const result = {result: false, message: ""};
+            const result = {result: false, message: []};
             result.result = (!currentGameState);
-            result.message = (!currentGameState) ? `GAME IS OVER!` : ``;
+            if (!currentGameState) {
+                result.message.push(`GAME IS OVER!`);
+            }
 
             return result;
         }
 
         const isMovingPlayerTurn = (movingPlayerId) => {
-            const result = {result: false, message: ""};
+            const result = {result: false, message: []};
             const isWhitesTurn = (this.turn == 'white' && movingPlayerId == this.hostId);
             const isBlacksTurn = (this.turn == 'black' && movingPlayerId == this.opponentId);
 
             if ((isWhitesTurn && !isBlacksTurn) || (!isWhitesTurn && isBlacksTurn)) {
                 result.result = true;
-                result.message = "";
+                result.message.push("");
             } else {
                 result.result = false;
-                result.message = `${this.turn}: not your turn!`;
+                result.message.push(`${this.turn}: not your turn!`);
             }
 
             return result;
         }
 
         const isMovingPieceSelectable = (movingPlayerId, raw_coordinate_x, raw_coordinate_y, chessboard) => {
-            const result = {result: false, message: ""};
+            const result = {result: false, message: []};
             const realChessboard = (chessboard) ? chessboard : this.chessboard;
             const cbx = Piece.coordinateXConversion(raw_coordinate_x);
             const cby = Piece.coordinateYConversion(raw_coordinate_y);
@@ -337,37 +339,37 @@ class Game {
                 if (selectedPiece) {
                     if (selectedPiece.faction == movingPlayerFaction) {
                         result.result = true;
-                        result.message = ``;
+                        result.message.push(``);
                     } else {
                         result.result = false;
-                        result.message = `Selected ${selectedPiece.name} at [${raw_coordinate_x}][${raw_coordinate_y}] is not of your faction!`
+                        result.message.push(`Selected ${selectedPiece.name} at [${raw_coordinate_x}][${raw_coordinate_y}] is not of your faction!`);
                     }
                 } else {
                     result.result = false;
-                    result.message = `Selection {${raw_coordinate_x}, ${raw_coordinate_y}} refers to nothing!`;
+                    result.message.push(`Selection {${raw_coordinate_x}, ${raw_coordinate_y}} refers to nothing!`);
                 }
             } else {
                 result.result = false;
-                result.message = `Selected coordinates [${raw_coordinate_x}][${raw_coordinate_y}] is out of bounds!`
+                result.message.push(`Selected coordinates [${raw_coordinate_x}][${raw_coordinate_y}] is out of bounds!`);
             }
 
             return result;
         }
 
         const isDestinationInBounds = (destination_x, destination_y) => {
-            const result = {result: false, message: ""};
+            const result = {result: false, message: []};
             const dbx = Piece.coordinateXConversion(raw_destination_x);
             const dby = Piece.coordinateYConversion(raw_destination_y);
             const isDestinationInBounds = (dbx >= 0 && dbx <= 7) && (dby >= 0 && dby <= 7);
 
             result.result = isDestinationInBounds;
-            result.message = (!isDestinationInBounds) ? `Destination [${raw_coordinate_x}][${raw_coordinate_y}] is out of bounds!` : "";
+            result.message.push((!isDestinationInBounds) ? `Destination [${raw_coordinate_x}][${raw_coordinate_y}] is out of bounds!` : "");
 
             return result;
         }
 
         const canPieceMoveResult = (raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
-            const result = {result: false, message: ""};
+            const result = {result: false, message: []};
             const realChessboard = (chessboard) ? chessboard : this.chessboard;
             const cbx = Piece.coordinateXConversion(raw_coordinate_x);
             const cby = Piece.coordinateYConversion(raw_coordinate_y);
@@ -380,7 +382,7 @@ class Game {
         }
 
         const isFactionKingCheckedOrMated = (currentPlayerFaction, chessboard) => {
-            const result = {check: false, checkmate: false, message: ""};
+            const result = {check: false, checkmate: false, message: []};
             const realChessboard = (chessboard) ? chessboard : this.chessboard;
             /** @type {King} */
             const king = this.kings[currentPlayerFaction];
@@ -390,7 +392,7 @@ class Game {
         }
 
         const willNextMoveCheckCurrentPlayer = (currentPlayerFaction, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, chessboard) => {
-            const result = {result: false, message: ""};
+            const result = {result: false, message: []};
             const cbx = Piece.coordinateXConversion(raw_coordinate_x);
             const cby = Piece.coordinateYConversion(raw_coordinate_y);
             const dbx = Piece.coordinateXConversion(raw_destination_x);
@@ -405,15 +407,15 @@ class Game {
 
             /** @type {King} */
             const king = this.kings[currentPlayerFaction];
-            const kingCheckResult = king.isKingCheckedOrMated(duplChessboard);
+            const kingCheckResult = king.isKingChecked(duplChessboard);
 
             // Reset the internal king values.
             selectedPiece.raw_coordinate_x = raw_coordinate_x;
             selectedPiece.raw_coordinate_y = raw_coordinate_y;
 
-            if (kingCheckResult.check || kingCheckResult.checkmate) {
+            if (kingCheckResult) {
                 result.result = true;
-                result.message = `Cannot move piece due to resulting ${this.turn} King check!`
+                result.message.push(`Cannot move piece because the ${kingCheckResult.faction} ${kingCheckResult.name} at [${kingCheckResult.raw_coordinate_x}][${kingCheckResult.raw_coordinate_y}] will check your King!`);
             }
 
             return result;
@@ -531,19 +533,21 @@ class Game {
 
             this.turn = nextTurn;
 
-            const result = {};
+            const result = {result: true, message: []};
             result.result = true;
-            result.message = `Successful move from [${raw_coordinate_x}][${raw_coordinate_y}] to [${raw_destination_x}][${raw_destination_y}]!`;
+            result.message.push(`Successful move from [${raw_coordinate_x}][${raw_coordinate_y}] to [${raw_destination_x}][${raw_destination_y}]!`);
 
             if (isEnemyKingCheckmated.checkmate) {
                 this.active = false;
                 this.setGameActiveState(false, () => {});
-                result.message += ` ${this.turn} CHECKMATED! GAME OVER!`;
+                result.message.push(` ${this.turn} CHECKMATED! GAME OVER!`);
             }
 
             return result;
         }
 
+        const ttlResult = {};
+        ttlResult.message = [];
 
         let result = isGameOver(this.active);
         if (!result.result) {
@@ -566,7 +570,7 @@ class Game {
 
                                         } else {
                                             result.result = false;
-                                            result.message = "Choose pawn upgrade!";
+                                            result.message.push("Choose pawn upgrade!");
                                             result.isUpgradingPawn = true;
                                         }
                                     } else {

@@ -100,7 +100,7 @@ const stripHTML = (text) =>{
 
 // Sends a message in the Game Room.
 router.post('/:gameId/message', auths, (req, res, next) => {
-    // {playerId: int, message: string}
+    // {playerId: int, message: string[]}
     const gameId = req.params.gameId;
 
     const message = req.body.message;
@@ -159,7 +159,8 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
                             raw_destination_y: raw_destination_y
                         });
                     }
-                    res.end(moveResult.message);
+                    //res.end(moveResult.message);
+                    res.end("Success");
                 }
             } else {
                 // GAME OVER CODE
