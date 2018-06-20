@@ -34,44 +34,55 @@
             <!--<div class="col-12 col-sm-12 col-md-10 col-lg-7 col-xl-6"></div>-->
             <div class="row">
                 <div class="col-12 col-sm-12 col-md-12 col-lg-8 col-xl-8">
-                    <table class="table table-dark table-bordered pb-1 border chessboard">
-                        <!--[ |A|B|C|D|...| ] -->
-                        <thead>
-                            
-                            <th scope="col">#</th>
-                            {{#chessboard_setupBorderAscii 65 1 7}}
-                                <th scope="col" class="chessborder">{{this}}</td>
-                            {{/chessboard_setupBorderAscii}}
-                            <th scope="col">#</th>
-                            
-                        </thead>
-                        <tbody>
-                            {{#chessboard_setupBorderAscii 56 -1 7}}
-                                <tr>
-                                    <th scope="row" class="chessborder">{{this}}</td>
+                    <div class="card">
+                        <div class="card-body" style="width: 1000px">
+                            <table class="table table-dark table-bordered pb-1 border chessboard">
+                                <!--[ |A|B|C|D|...| ] -->
+                                <thead>
                                     
-                                    {{#chessboard_setupBorderAscii 97 1 7}}
-                                    <td data-coordinate_x="{{this}}" data-coordinate_y="{{../this}}" class="{{chessboard_setupBlackOrWhiteClass 'chesscell-squareB' 'chesscell-squareW' this ../this }} chesscell">
-                                        {{#with (lookup @root.gamePieces (chessboard_appendTwoStr this ../this)) as |gamePiece|}}
-                                            <img data-piece_id="{{gamePiece.pieceId}}" data-piece_name="{{gamePiece.name}}" data-piece_faction="{{gamePiece.faction}}" class="chesspiece h-100 w-100" src="images/{{gamePiece.faction}}{{gamePiece.name}}.png">
-                                        {{/with}}
-                                    </td>
+                                    <th scope="col">#</th>
+                                    {{#chessboard_setupBorderAscii 65 1 7}}
+                                        <th scope="col" class="chessborder">{{this}}</td>
                                     {{/chessboard_setupBorderAscii}}
+                                    <th scope="col">#</th>
                                     
-                                    <td scope="row" class="chessborder">{{this}}</td>
-                                </tr>
-                            {{/chessboard_setupBorderAscii}}
-                        </tbody>
-                        <tfoot>
-                            <!--[ |A|B|C|D|...| ] -->
-                            <th scope="col">#</th>
-                            {{#chessboard_setupBorderAscii 65 1 7}}
-                                <th scope="col" class="chessborder">{{this}}</td>
-                            {{/chessboard_setupBorderAscii}}
-                            <th scope="col">#</th>
+                                </thead>
+                                <tbody>
+                                    {{#chessboard_setupBorderAscii 56 -1 7}}
+                                        <tr>
+                                            <th scope="row" class="chessborder">{{this}}</td>
+                                            
+                                            {{#chessboard_setupBorderAscii 97 1 7}}
+                                            <td data-coordinate_x="{{this}}" data-coordinate_y="{{../this}}" class="{{chessboard_setupBlackOrWhiteClass 'chesscell-squareB' 'chesscell-squareW' this ../this }} chesscell">
+                                                {{#with (lookup @root.gamePieces (chessboard_appendTwoStr this ../this)) as |gamePiece|}}
+                                                    <img data-piece_id="{{gamePiece.pieceId}}" data-piece_name="{{gamePiece.name}}" data-piece_faction="{{gamePiece.faction}}" class="chesspiece h-100 w-100" src="images/{{gamePiece.faction}}{{gamePiece.name}}.png">
+                                                {{/with}}
+                                            </td>
+                                            {{/chessboard_setupBorderAscii}}
+                                            
+                                            <td scope="row" class="chessborder">{{this}}</td>
+                                        </tr>
+                                    {{/chessboard_setupBorderAscii}}
+                                </tbody>
+                                <tfoot>
+                                    <!--[ |A|B|C|D|...| ] -->
+                                    <th scope="col">#</th>
+                                    {{#chessboard_setupBorderAscii 65 1 7}}
+                                        <th scope="col" class="chessborder">{{this}}</td>
+                                    {{/chessboard_setupBorderAscii}}
+                                    <th scope="col">#</th>
 
-                        </tfoot>
-                    </table>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <form id="game-forfeit" method="POST" action="">
+                                <div class="input-group">
+                                    <button type="submit" class="btn btn-danger btn-md" value="">Forfeit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-12 col-sm-12 col-md-11 col-lg-9 col-xl-9">

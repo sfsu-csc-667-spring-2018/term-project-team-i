@@ -178,6 +178,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 router.post('/:gameId/forfeit', (req, res, next) => {
     // {playerId: int, forfeit: boolean}
     const gameId =  Number(req.params.gameId);
+    const gameUsername = req.body.gameUsername;
 
     gameManager.getGameInstance(gameId,
         (gameInstance) => {
@@ -186,7 +187,7 @@ router.post('/:gameId/forfeit', (req, res, next) => {
 
             game.setGameActiveState(false, () => {
                 // GAME OVER CODE
-                res.app.get('io').of('/games/' + gameId).emit('game-ended', {data: "GAME OVER"});
+                res.app.get('io').of('/games/' + gameId).emit('game-ended', {data: `Game Over! ${gameUsername} has forfeited!`});
                 res.end();
             })
         },  

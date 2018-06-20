@@ -8,6 +8,13 @@ $(document).ready(function(){
     const chessboard = new Chessboard();
     chessboard.initialize();
 
+    $gameForfeit.submit((evt) => {
+        evt.preventDefault();
+        $.post(`${url}/forfeit`, {gameUsername: gameUsername}, (returnData) => {
+            //alert(returnData.data);
+        });
+    })
+
     gameSocket.on('game-ended', data => {
         window.alert(data.data);
         window.location = '/';
