@@ -76,11 +76,19 @@ router.get('/:gameId', auths, (req, res, next) => {
                 res.redirect('/');
             }
 
+            if (gameHostId == playerId) {
+                gameInstance.setHostName(playerName);
+            }
+
+            if (gameOpponentId == playerId) {
+                gameInstance.setOpponentName(playerName);
+            }
 
             if (gameHostId == playerId || gameOpponentId == playerId) {
                 funcSuccess();
             } else if (gameHostId != playerId && gameOpponentId == null) {
                 gameInstance.setOpponentID(playerId, funcSuccess, funcFailure);
+                gameInstance.setOpponentName(playerName);
             } else {
                 funcFailure();
             }
@@ -200,10 +208,51 @@ router.post('/:gameId/forfeit', (req, res, next) => {
 
 router.post('/:gameId/draw-request', (req, res, next) => {
     // {playerId: int, draw-request: boolean}
+    
+    const playerId = req.user.id;
+    const playerName = req.user.username;
+    const gameId = req.params.gameId;
+    
+    gameManager.getGameInstance(gameId, (gameInstance) => {
+        /** @type {Game} */
+        const game = gameInstance;
+        const otherPlayerName = game.getOtherPlayerByName(playerName);
+
+        res.app.get('io').of('/games/' + gameId + '/' + otherPlayerName).emit('skt-chess-opponent-draw-request');
+        res.end();
+    },
+    () => {
+        res.end();
+    });
 });
 
 router.post('/:gameId/draw-response', (req, res, next) => {
     // {playerId: int, draw-response: boolean}
+
+    const playerName = req.user.username;
+    const gameId = req.params.gameId;
+    const drawResponse = req.body.response;
+
+    gameManager.getGameInstance(gameId, (gameInstance) => {
+        /** @type {Game} */
+        const game = gameInstance;
+        const otherPlayerName = game.getOtherPlayerByName(playerName);
+
+        if (drawResponse == 'true') {
+            game.setGameActiveState(false, () => {
+                res.app.get('io').of('/games/' + gameId + '/' + otherPlayerName).emit('skt-chess-opponent-draw-response', {response: drawResponse});
+                res.end();      
+            })
+        } else {
+            res.app.get('io').of('/games/' + gameId + '/' + otherPlayerName).emit('skt-chess-opponent-draw-response', {response: drawResponse});
+            res.end();
+        }
+
+    },
+    () => {
+        res.app.get('io').of('/games/' + gameId + '/' + otherPlayerName).emit('skt-chess-opponent-draw-response', {response: false});
+        res.end();
+    });
 });
 
 module.exports = router;
