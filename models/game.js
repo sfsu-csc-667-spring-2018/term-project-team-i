@@ -23,8 +23,10 @@ class Game {
     constructor (gameData, gamePiecesRecords) {
         this.gameId = gameData.gameid;
         this.hostId = gameData.userid;
+        this.hostName = "";
         this.active = gameData.active;
         this.opponentId = gameData.opponentid;
+        this.opponentName = "";
         this.turn = gameData.turn;
         this.__initialize(gamePiecesRecords);
         this.kings = this.getKings(this.chessboard);
@@ -62,6 +64,34 @@ class Game {
             }
         }
         
+    }
+
+    setHostName(hostName) {
+        this.hostName = hostName;
+    }
+
+    setOpponentName(opponentName) {
+        this.opponentName = opponentName;
+    }
+
+    getHostName() {
+        return this.hostName;
+    }
+
+    getOpponentName() {
+        return this.opponentName;
+    }
+
+    getOtherPlayerByName(myName) {
+        let otherPlayerName = undefined;
+        
+        if (myName == this.hostName) {
+            otherPlayerName = this.opponentName;
+        } else {
+            otherPlayerName = this.hostName;
+        }
+
+        return otherPlayerName;
     }
 
     getPlayerFactionByID (playerId) {

@@ -76,6 +76,11 @@
                             </table>
                         </div>
                         <div class="card-footer">
+                            <form id="form-draw-request" method="POST" action="">
+                                <div class="input-group">
+                                    <button type="submit" class="btn btn-danger btn-md" value="">Draw</button>
+                                </div>
+                            </form>
                             <form id="game-forfeit" method="POST" action="">
                                 <div class="input-group">
                                     <button type="submit" class="btn btn-danger btn-md" value="">Forfeit</button>
@@ -109,10 +114,27 @@
     <div class="container">
 
         <!--
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#gameModal">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#drawModal">
             Open modal
         </button>
         -->
+
+        <div id="drawModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="drawModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="drawModalTitle">Opponent has requested a draw!</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btn-draw-accept" type="button" class="btn btn-primary">Accept</button>
+                        <button id="btn-draw-decline" type="button" class="btn btn-primary">Decline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div id="gameModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gameModalTitle" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">

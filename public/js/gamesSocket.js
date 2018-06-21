@@ -5,8 +5,16 @@ $(document).ready(function(){
     const gameUserSocket = io('/games/' + url + '/' + gameUsername);
     const $actionMessage = $('.chessactions-card-body');
     const $gameForfeit = $('#game-forfeit');
+    const $drawRequestForm = $('#form-draw-request');
     const chessboard = new Chessboard();
     chessboard.initialize();
+
+    $drawRequestForm.submit((evt) => {
+        evt.preventDefault();
+        $.post(`${url}/draw-request`, {response: true}, (responseData) => {
+            alert("Draw Request Sent!");
+        });
+    })
 
     $gameForfeit.submit((evt) => {
         evt.preventDefault();
@@ -71,6 +79,41 @@ $(document).ready(function(){
         })
     
     })
+
+    // Responding to opponent's draw request.
+    gameUserSocket.on('skt-chess-opponent-draw-request', data => {
+        const $drawModal = $('#drawModal');
+        const $drawAcceptBtn = $('#btn-draw-accept');
+        const $drawDeclineBtn = $('#btn-draw-decline');
+        
+        $drawModal.modal('show');
+        $drawAcceptBtn.click(() => {
+            $drawModal.modal('hide');
+            $.post(`${url}/draw-response`, {response: true}, (responseData) => {
+                alert('You have accepted the draw!');
+                window.location = '/';
+            });
+        })
+
+        $drawDeclineBtn.click(() => {
+            $drawModal.modal('hide');
+            $.post(`${url}/draw-response`, {response: false}, (responseData) => {
+                console.log("Draw Declined!");
+            });
+        })
+    })
+
+    // Receiving opponent's draw response
+    gameUserSocket.on('skt-chess-opponent-draw-response', data => {
+
+        if (data.response === 'true') {
+            alert("Opponent has accepted the draw!");
+            window.location = '/';
+        } else {
+            alert('Opponent has declined the draw!');
+            $drawRequestForm.find('button').html('Draw');
+        }
+    });
 
     /*
     gameUserSocket.on('upgrade-pawn-prompt', data => {
