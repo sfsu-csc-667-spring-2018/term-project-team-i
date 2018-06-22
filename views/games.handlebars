@@ -1,13 +1,12 @@
 <div class="container-fluid">
     <div class="row">
+        <!--
         <div class="sidebar-sticky col-12 col-sm-12 col-md-5 col-lg-4 col-xl-3 d-none d-md-block bg-light" style="padding-top: 64px;">
-            <!-- CHAT BOX -->
             <div class="card h-100">
                 <div class="card-header">
                     <p>Game Room Chat</p>
                 </div>
                 <div class="card-body" style="overflow-y: scroll">
-                    <!--<h5 class="card-title">Dark card title</h5>-->
                     <p id="hiddenName" hidden>{{playerName}}</p>
                     <p id="hiddenFaction" hidden>{{playerFaction}}</p>
                     <div>
@@ -28,7 +27,7 @@
                 </div>
             </div>
         </div>
-
+        -->
         <!-- MAIN CONTENT -->
         <main role="main" style="padding-top: 64px;">
             <!--<div class="col-12 col-sm-12 col-md-10 col-lg-7 col-xl-6"></div>-->
@@ -116,6 +115,47 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <div id="chat" class="card border-dark text-center" style="position: fixed; bottom: 0px; right: 0px;">
+
+        <div class="card-header">
+            <div class="row">
+                <div class="col-9">
+                    <p class="offset-md-1">Chat</p>
+                </div>
+                <div class="col-1">
+                    <a class="btn btn-primary" data-toggle="collapse" href="#chatboxCollapse" role="button" aria-expanded="false" aria-controls="chatboxCollapse">
+                        <i class="fas fa-window-minimize"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="chatboxCollapse" class="collapse show">
+            <div class="card-body" style="height: 400px">
+                <!--<h5 class="card-title">Dark card title</h5>-->
+                <p id="hiddenName" hidden>{{playerName}}</p>
+                <p id="hiddenFaction" hidden>{{playerFaction}}</p>
+                <div>
+                    <div id="chatDisplay" class="card-text message text-left" style="height: 370px; overflow-y: scroll">
+                        <!-- Chat messages to display here.-->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <form class="send-message" id="chatMessageForm" method="post" action="/message">
+                <div class="input-group">
+                    <label for="message"></label>
+                    <input type="text" class="form-control" id="chatMessage"
+                        placeholder="enter message here..." name="chatMessage" autocomplete="off">
+                    <button type="submit" class="btn btn-primary" value="Send">Send</button>
+                </div>
+            </form>
+        </div>
+
     </div>
 
     <div class="container">
