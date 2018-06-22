@@ -41,50 +41,64 @@
             
             <div class="row">
                 <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
-                    <div class="row">
-                        {{#each rejoinableGames}}
-                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <p>Game #{{id}}</p>
-                                </div>
-                                <div class="card-body">
-
-                                </div>
-                                <div class="card-footer">
-                                    <form method="get" action="/games/{{id}}">
-                                        <div class="list">Game #{{id}}
-                                            <input type="submit" class="btn btn-info" value="Rejoin"/>
+                    <div class="card">
+                        <div class="card-header bg-transparent">
+                            <h2 class="text-center">Rejoin</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {{#each rejoinableGames}}
+                                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <p>Game #{{id}}</p>
                                         </div>
-                                    </form>
+                                        <div class="card-body">
+
+                                        </div>
+                                        <div class="card-footer">
+                                            <form method="get" action="/games/{{id}}">
+                                                <div class="list">Game #{{id}}
+                                                    <input type="submit" class="btn btn-info" value="Rejoin"/>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
+                                {{/each}}
                             </div>
                         </div>
-                        {{/each}}
                     </div>
                 </div>
 
                 <div class="col-xl-4 col-lg-4 col">
-                    <div class="row">
-                        {{#each idleGames}}
-                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <p>Game #{{id}}</p>
-                                </div>
-                                <div class="card-body">
-
-                                </div>
-                                <div class="card-footer">
-                                    <form method="get" action="/games/{{id}}">
-                                        <div class="list">Game #{{id}}
-                                            <input type="submit" class="btn btn-primary" value="Join"/>
+                    <div class="card">
+                        <div class="card-header bg-transparent">
+                            <h2 class="text-center">Join</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {{#each idleGames}}
+                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <p>Game #{{id}}</p>
                                         </div>
-                                    </form>
+                                        <div class="card-body">
+
+                                        </div>
+                                        <div class="card-footer">
+                                            <form method="get" action="/games/{{id}}">
+                                                <div class="list">Game #{{id}}
+                                                    <input type="submit" class="btn btn-primary" value="Join"/>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
+                                {{/each}}
                             </div>
                         </div>
-                        {{/each}}
                     </div>
                 </div>
             </div>
