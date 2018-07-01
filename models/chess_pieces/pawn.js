@@ -57,7 +57,7 @@ class Pawn extends Piece {
         }
 
         
-        const result = {result: false, message: ""};
+        const result = {result: false, message: []};
         
         const isDestinationDiagRight = ( (idx_destination_x == (this.coordinateXConverted + 1)) && (idx_destination_y == (this.coordinateYConverted + 1*(directionContraint))) );
         const theresEnemyDiagRight = funcNoPiecePresenceCheck(1, 1*directionContraint, chessboard, true);
@@ -76,19 +76,19 @@ class Pawn extends Piece {
         result.result  = (isMovingRight || isMovingLeft || isMovingUpOne || isMovingUpTwo);    
         // Error messages
         if (!result.result && ((isDestinationDiagRight && !theresEnemyDiagRight) || (isDestinationDiagLeft && !theresEnemyDiagLeft))) {
-            result.message = `Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] without an opposing piece to capture!`;
+            result.message.push(`Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] without an opposing piece to capture!`);
         } else if (!result.result && isDestinationForwardOne && !theresNoPieceAtForwardOne) {
-            result.message = `Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] due to a blocking Piece!`;
+            result.message.push(`Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] due to a blocking Piece!`);
         } else if (!result.result && isDestinationForwardTwo) {
             if (!this.isInitialMove) {
-                result.message = `Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] due to out of range.`;
+                result.message.push(`Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] due to out of range.`);
             } else if (this.isInitialMove && (theresNoPieceAtForwardOne || theresNoPieceAtForwardTwo)){
-                result.message = `Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] due to a blocking Piece!`;
+                result.message.push(`Cannot move ${this.name} to [${idx_destination_x}][${idx_destination_y}] due to a blocking Piece!`);
             }
         } else if (!result.result) {
-            result.message = `Invalid movement pattern to [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`;
+            result.message.push(`Invalid movement pattern to [${Piece.coordinateXAsRaw(idx_destination_x)}][${Piece.coordinateYAsRaw(idx_destination_y)}]`);
         } else {
-            result.message = `Successful move to {${Piece.coordinateXAsRaw(idx_destination_x)}, ${Piece.coordinateYAsRaw(idx_destination_y)}}`;
+            result.message.push(`Successful move to {${Piece.coordinateXAsRaw(idx_destination_x)}, ${Piece.coordinateYAsRaw(idx_destination_y)}}`);
         }
 
         return result;
@@ -109,7 +109,7 @@ class Pawn extends Piece {
             throw new Error(this.name + ": expecting destination x and y coordinates in Number form.");
         }
 
-        let result = {result: false, message: ""};
+        let result = {result: false, message: []};
 
         if (this.faction === this.name_white) {
             result = this.__isValidMovement(idx_destination_x, idx_destination_y, 1, chessboard);

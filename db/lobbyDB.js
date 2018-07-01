@@ -9,9 +9,9 @@ module.exports = (id, response) =>{
         return t.batch([user, games, rejoin]);
     }).then( data =>{
         let obj = JSON.parse(JSON.stringify(data[0]));
-        let game = JSON.parse(JSON.stringify(data[1]));
-        let rejoin = JSON.parse(JSON.stringify(data[2]));
-        response.render('index', {username: obj.username, game: game, rejoin: rejoin,layout: 'auth_layout.handlebars'});
+        let idleGames = JSON.parse(JSON.stringify(data[1]));
+        let rejoinableGames = JSON.parse(JSON.stringify(data[2]));
+        response.render('index', {username: obj.username, idleGames: idleGames, rejoinableGames: rejoinableGames,layout: 'auth_layout.handlebars'});
     }).catch(error => {
         console.log(error);
         response.render('index');

@@ -12,6 +12,14 @@ const gameAuth = require('../auth/gameAuth');
 
 const activeGames = new Map();
 
+router.get('/', auths, (req, res, next) => {
+    const playerId = req.user.id;
+
+    gameManager.createGameInstance(playerId, 'white', (gameId) => {
+        res.redirect('/games/'+gameId);
+    });
+})
+
 // Create new game room. req.body = {playerId: int}
 router.post('/', auths, (req, res, next) => {
     const playerId = req.user.id;
@@ -38,7 +46,7 @@ router.get('/:gameId', auths, (req, res, next) => {
             const funcSocketProtocols = (res, gameId) => {
                 res.app.get('io').of('/games/' + gameId).on('connection',socket =>{
                     socket.on('disconnect', () => {
-                        console.log("Player left + " + playerId);
+                        //console.log("Player left + " + playerId);
                     });
                 });
             }
@@ -46,7 +54,7 @@ router.get('/:gameId', auths, (req, res, next) => {
             const individualFuncSocketProtocol = (res, gameId) =>{
                 res.app.get('io').of('/games/' + gameId + '/' + playerName).on('connection',socket =>{
                     socket.on('disconnect', () => {
-                        console.log("Player left + " + playerName);
+                        //console.log("Player left + " + playerName);
                     });
                 });
             }
@@ -58,6 +66,7 @@ router.get('/:gameId', auths, (req, res, next) => {
                 renderData.gamePieces = GamesHbsHelpers.toCellGamePieceObject(gameInstance.getGamePiecesAllOnBoard());
                 renderData.gameId = gameId;
                 renderData.playerName = playerName;
+                renderData.playerFaction = gameInstance.getPlayerFactionByID(playerId);
 
                 res.render('games',renderData);
             }
@@ -67,11 +76,19 @@ router.get('/:gameId', auths, (req, res, next) => {
                 res.redirect('/');
             }
 
+            if (gameHostId == playerId) {
+                gameInstance.setHostName(playerName);
+            }
+
+            if (gameOpponentId == playerId) {
+                gameInstance.setOpponentName(playerName);
+            }
 
             if (gameHostId == playerId || gameOpponentId == playerId) {
                 funcSuccess();
             } else if (gameHostId != playerId && gameOpponentId == null) {
                 gameInstance.setOpponentID(playerId, funcSuccess, funcFailure);
+                gameInstance.setOpponentName(playerName);
             } else {
                 funcFailure();
             }
@@ -91,14 +108,14 @@ const stripHTML = (text) =>{
 
 // Sends a message in the Game Room.
 router.post('/:gameId/message', auths, (req, res, next) => {
-    // {playerId: int, message: string}
+    // {playerId: int, message: string[]}
     const gameId = req.params.gameId;
 
-    const message = req.body.gameMessage;
+    const message = req.body.message;
     const user = req.user.username;
-
-    res.app.get('io').of('/games/' + gameId).emit('game-new-message',
-       {gameUser: stripHTML(user), gameMsg: stripHTML(message)});
+    
+    res.app.get('io').of('/games/' + gameId).emit('socket-chat-message',
+    {chatUser: stripHTML(user), chatMessage: stripHTML(message)});
 
     res.statusCode = 200;
     res.end();
@@ -116,6 +133,7 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
     const raw_coordinate_y = req.body.coordinate_y;
     const raw_destination_x = req.body.destination_x;
     const raw_destination_y = req.body.destination_y;
+    const pawnUpgradeName = req.body.pawnUpgradeName;
 
     gameManager.getGameInstance(gameId, 
         (gameInstance) => {
@@ -129,30 +147,28 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 
                 if(game.opponentId === null ){
                     console.log("GAME NOT READY YET");
-                }
-                else {
+                } else {
 
-                    const moveResult = game.tryMovePieceToPosition(playerId, pieceId,
-                        raw_coordinate_x, raw_coordinate_y,
-                        raw_destination_x, raw_destination_y);
-                    console.log('the current turn is ' + game.turn);
+                    const moveResult = game.tryMovePieceToPosition(playerId, pieceId, raw_coordinate_x, raw_coordinate_y, raw_destination_x, raw_destination_y, {pawnUpgradeName: pawnUpgradeName});
                     const gamePieces = game.getGamePiecesAllOnBoard();
                     const resStatusCode = (moveResult.result) ? 200 : 304;
 
                     res.statusCode = resStatusCode;
-                    res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces});
-                    //res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('move-message', {message: moveResult.message});
-                    res.app.get('io').of('/games/' + gameId).emit('move-message', {message: moveResult.message});
-                    console.log("UPGRADE PAWN " + (moveResult.upgradePawn));
-                    if (moveResult.upgradePawn === true) {
-                        res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('upgrade-pawn-prompt', {
+                    res.app.get('io').of('/games/' + gameId).emit('skt-chess-board-refresh', {updatedChessPieces: gamePieces});
+                    res.app.get('io').of('/games/' + gameId + '/' + playerName).emit('skt-chess-move-piece-message', {message: moveResult.message});
+
+                    if (moveResult.isUpgradingPawn == true) {
+                        res.app.get('io').of('/games/' + gameId + "/" + playerName).emit('skt-chess-upgrade-pawn', {
                             playerName: playerName,
                             pieceId: pieceId,
-                            x: raw_destination_x,
-                            y: raw_destination_y
+                            raw_coordinate_x: raw_coordinate_x,
+                            raw_coordinate_y: raw_coordinate_y,
+                            raw_destination_x: raw_destination_x,
+                            raw_destination_y: raw_destination_y
                         });
                     }
-                    res.end(moveResult.message);
+                    //res.end(moveResult.message);
+                    res.end("Success");
                 }
             } else {
                 // GAME OVER CODE
@@ -167,46 +183,10 @@ router.post('/:gameId/move-piece', auths, (req, res, next) => {
 
 });
 
-router.post('/:gameId/upgrade-pawn', (req, res, next) =>{
-    const gameId =  Number(req.params.gameId);
-    const userId = req.user.id;
-    const pieceId = Number(removeQuotes(JSON.stringify(req.body.pieceId)));
-    const pieceName = removeQuotes(JSON.stringify(req.body.pieceName));
-    const xCoord = removeQuotes(JSON.stringify(req.body.x));
-    const yCoord = removeQuotes(JSON.stringify(req.body.y));
-
-    console.log("gameid is " + gameId+ " pieceName is" + pieceName + " PIECE ID IS "+ pieceId + " userid is " + userId + " xcoord is "+ xCoord + " ycoord is " + yCoord);
-    console.log("gameid is " + typeof gameId + " pieceName is" + typeof pieceName + " PIECE ID IS "+ typeof pieceId + " userid is " + typeof userId + " xcoord is "+ typeof xCoord + " ycoord is " + typeof yCoord);
-    gamesDB.upgradePawn(gameId, userId, pieceId, pieceName, xCoord, yCoord,(updatedPieceRecord) =>{
-        gameManager.getGameInstance(gameId,
-        (gameInstance) => {
-            console.log("1.GOT HERE IN GAMES UPDATE PIECE");
-            const game = gameInstance;
-            const updatedGamePiece = game.createGamePieceInitByDBRecord(updatedPieceRecord);
-            console.log(`This should be a queen: ${JSON.stringify(updatedGamePiece)}`);
-            game.setGamePieceOnChessboard(updatedGamePiece);
-            const gamePieces = game.gamePiecesObjects;
-            const resStatusCode = 200;
-            res.statusCode = resStatusCode;
-            res.app.get('io').of('/games/' + gameId).emit('game-chessboard-refresh', {updatedChessPieces: gamePieces})
-            res.end("Successfully updated pawn piece: " + pieceName);
-        },
-        (failure) => {
-
-        });
-    });
-
-    const playerName = req.user.username;
-    //res.app.get('io').of('/games/'+ gameId + '/' + playerName).on('upgrade-pawn-response', )
-    console.log("POSTed "  + " " + (JSON.stringify(req.body.pieceId)) + " " + (JSON.stringify(req.body.x)));
-});
-
-const removeQuotes = (str) =>{
-    return str.replace(/['"]+/g, '');
-}
 router.post('/:gameId/forfeit', (req, res, next) => {
     // {playerId: int, forfeit: boolean}
     const gameId =  Number(req.params.gameId);
+    const gameUsername = req.body.gameUsername;
 
     gameManager.getGameInstance(gameId,
         (gameInstance) => {
@@ -215,7 +195,7 @@ router.post('/:gameId/forfeit', (req, res, next) => {
 
             game.setGameActiveState(false, () => {
                 // GAME OVER CODE
-                res.app.get('io').of('/games/' + gameId).emit('game-ended', {data: "GAME OVER"});
+                res.app.get('io').of('/games/' + gameId).emit('game-ended', {data: `Game Over! ${gameUsername} has forfeited!`});
                 res.end();
             })
         },  
@@ -225,13 +205,54 @@ router.post('/:gameId/forfeit', (req, res, next) => {
     )
 });
 
-/*
+
 router.post('/:gameId/draw-request', (req, res, next) => {
     // {playerId: int, draw-request: boolean}
+    
+    const playerId = req.user.id;
+    const playerName = req.user.username;
+    const gameId = req.params.gameId;
+    
+    gameManager.getGameInstance(gameId, (gameInstance) => {
+        /** @type {Game} */
+        const game = gameInstance;
+        const otherPlayerName = game.getOtherPlayerByName(playerName);
+
+        res.app.get('io').of('/games/' + gameId + '/' + otherPlayerName).emit('skt-chess-opponent-draw-request');
+        res.end();
+    },
+    () => {
+        res.end();
+    });
 });
 
 router.post('/:gameId/draw-response', (req, res, next) => {
     // {playerId: int, draw-response: boolean}
+
+    const playerName = req.user.username;
+    const gameId = req.params.gameId;
+    const drawResponse = req.body.response;
+
+    gameManager.getGameInstance(gameId, (gameInstance) => {
+        /** @type {Game} */
+        const game = gameInstance;
+        const otherPlayerName = game.getOtherPlayerByName(playerName);
+
+        if (drawResponse == 'true') {
+            game.setGameActiveState(false, () => {
+                res.app.get('io').of('/games/' + gameId + '/' + otherPlayerName).emit('skt-chess-opponent-draw-response', {response: drawResponse});
+                res.end();      
+            })
+        } else {
+            res.app.get('io').of('/games/' + gameId + '/' + otherPlayerName).emit('skt-chess-opponent-draw-response', {response: drawResponse});
+            res.end();
+        }
+
+    },
+    () => {
+        res.app.get('io').of('/games/' + gameId + '/' + otherPlayerName).emit('skt-chess-opponent-draw-response', {response: false});
+        res.end();
+    });
 });
-*/
+
 module.exports = router;

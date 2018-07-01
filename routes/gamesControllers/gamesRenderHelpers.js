@@ -57,6 +57,12 @@ class GamesRenderHelpers {
         
             chessboard_appendTwoStr: (str1, str2) => {
                 return String(str1) + String(str2);
+            },
+
+            isWhite: (faction) => {
+                if(faction == 'white')
+                    return true;
+                else return false;
             }
         }
 

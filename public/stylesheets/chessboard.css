@@ -1,29 +1,61 @@
-#chessboard {
-    margin-right: auto;
+.chesscell {
+    width: 80px;
+    height: 80px;
+    min-width: 60px;
+    min-height: 60px;
+    max-width: 80px;
+    max-height: 80px;
 }
 
-#chessboard .squareB{
-    width: 80px;
-    height: 70px;
+.chesscell-squareB{
     background: #8b3507;
 }
-#chessboard .squareW{
-    width: 40px;
-    height: 40px;
+
+.chesscell-squareW{
     background: #fff5dd;
 }
-#chessboard .border{
+
+.chessborder {
+    
     width: 10px;
     height: 10px;
-    background: #8b2c03;
+    background: #000000;
+    
     text-align: center;
-    color: white;
+    color: rgb(255, 255, 255);
     font-size: 10px;
 }
 
-#chessboard .chessPiece{
-    width: 70px;
-    height: 60px;
-    margin-left: auto;
-    margin-right: auto;
+.chesspiece:hover {
+    /** background-image: url('/images/green_bg.svg'); */
+    /** javascript is being used to manipulate these colors; */
 }
+
+.chessboard {
+    width: 700px; 
+    min-height: 700px;
+}
+
+.chessactions-card {
+    min-width: 680px;
+}
+
+.chessactions-card-body {
+    overflow-y: scroll;
+}
+
+/*
+div.pawn-upgrade-option > input{
+    visibility: hidden;
+    position: absolute;
+}
+
+div.pawn-upgrade-option > input + img{ 
+    cursor:pointer;
+    border:2px solid transparent;
+}
+
+div.pawn-upgrade-option > input:checked + img{
+    border:2px solid #f00;
+}
+*/
