@@ -62,3 +62,7 @@ typings/
 
 # vuepress build output
 .vuepress/dist
+
+# IDE project files
+.idea
+*.iml
